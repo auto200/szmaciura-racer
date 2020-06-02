@@ -85,7 +85,7 @@ const IndexPage = () => {
   }, [inputValue]);
 
   useEffect(() => {
-    if (wordIndex >= text.length - 1) {
+    if (wordIndex >= text.length) {
       setWordIndex(0);
       return;
     }
