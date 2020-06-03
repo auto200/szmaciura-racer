@@ -2,6 +2,7 @@ import React, { useState, useEffect, ChangeEvent, useRef } from "react";
 import SEO from "../components/seo";
 import styled, { createGlobalStyle, ThemeProvider } from "styled-components";
 import { darkTheme } from "../utils/theme";
+import ProgessIndicator from "../components/ProgessIndicator";
 import Word from "../components/Word";
 
 const szmaciuraText =
@@ -31,6 +32,7 @@ const InnerWrapper = styled.div`
   max-width: 1024px;
   height: 100%;
   border: 2px solid white;
+  padding: 5px 20px;
 `;
 const TextWrapper = styled.div`
   padding: 30px;
@@ -44,7 +46,7 @@ const Input = styled.input<{ error: boolean }>`
     error ? theme.colors.error : "transparent"};
 `;
 
-const getInputMaxLength = (activeWord: string) => {
+const getInputMaxLength = (activeWord: string): number => {
   const length = activeWord.length * 2;
   return length >= 8 ? length : 8;
 };
@@ -52,19 +54,39 @@ const getInputMaxLength = (activeWord: string) => {
 const IndexPage = () => {
   const [text] = useState<string[]>(szmaciuraText.split(" "));
   const [wordIndex, setWordIndex] = useState<number>(0);
-  const [lastValidCharIndex, setLastValidCharIndex] = useState<number>(0);
+  const [lastValidCharIndex, setLastValidCharIndex] = useState<number>(-1);
   const [inputValue, setInputValue] = useState<string>("");
   const [inputMaxLength, setInputMaxLength] = useState<number>(
     getInputMaxLength(text[0])
   );
   const [error, setError] = useState<boolean>(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const startTimestamp = useRef<number>();
+  const [timePassed, setTimePassed] = useState<string>("0");
+  const timerIntervalRef = useRef<number | null>(null);
 
   useEffect(() => {
     inputRef.current?.focus();
+    timerIntervalRef.current = setInterval(() => {
+      if (!startTimestamp.current) return;
+      const msPassed = Date.now() - startTimestamp.current;
+      const seconds = msPassed / 1000;
+      setTimePassed(seconds.toFixed(2));
+    }, 300);
   }, []);
 
   useEffect(() => {
+    //correct final word
+    if (inputValue === text[wordIndex] && wordIndex === text.length - 1) {
+      alert(timePassed + "s");
+      return;
+    }
+    if (inputValue === text[wordIndex] + " ") {
+      setWordIndex(i => i + 1);
+      setInputValue("");
+      setLastValidCharIndex(-1);
+      return;
+    }
     if (!inputValue) {
       setLastValidCharIndex(-1);
       if (error) setError(false);
@@ -75,22 +97,25 @@ const IndexPage = () => {
       if (error) setError(false);
       return;
     }
-    if (inputValue === text[wordIndex] + " ") {
-      setWordIndex(i => i + 1);
-      setInputValue("");
-      setLastValidCharIndex(-1);
-      return;
-    }
     setError(true);
   }, [inputValue]);
 
   useEffect(() => {
     if (wordIndex >= text.length) {
+      if (timerIntervalRef.current) {
+        clearInterval(timerIntervalRef.current);
+      }
       setWordIndex(0);
       return;
     }
     setInputMaxLength(getInputMaxLength(text[wordIndex]));
   }, [wordIndex]);
+
+  useEffect(() => {
+    if (wordIndex === 0 && inputValue) {
+      startTimestamp.current = Date.now();
+    }
+  }, [wordIndex, inputValue]);
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (inputValue.length - 1 >= inputMaxLength) {
@@ -106,6 +131,10 @@ const IndexPage = () => {
         <SEO title="Home" />
         <GlobalStyle />
         <InnerWrapper>
+          <ProgessIndicator
+            progress={wordIndex / text.length}
+            timePassed={timePassed}
+          />
           <TextWrapper>
             {text.map((word, i) => (
               <React.Fragment key={"word" + i}>
