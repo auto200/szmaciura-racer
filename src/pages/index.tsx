@@ -136,18 +136,21 @@ const IndexPage = () => {
             timePassed={timePassed}
           />
           <TextWrapper>
-            {text.map((word, i) => (
-              <React.Fragment key={"word" + i}>
-                <Word
-                  word={word}
-                  active={wordIndex === i}
-                  error={error}
-                  lastValidCharIndex={lastValidCharIndex}
-                  charIndex={wordIndex === i ? inputValue.length : 0}
-                />
-                <span> </span>
-              </React.Fragment>
-            ))}
+            {text.map((word, i) => {
+              const active = wordIndex === i;
+              return (
+                <React.Fragment key={"word" + i}>
+                  <Word
+                    word={word}
+                    active={active}
+                    error={active ? error : false}
+                    lastValidCharIndex={active ? lastValidCharIndex : -1}
+                    charIndex={active ? inputValue.length : 0}
+                  />
+                  <span> </span>
+                </React.Fragment>
+              );
+            })}
           </TextWrapper>
           <Input
             type="text"

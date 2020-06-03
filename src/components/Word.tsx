@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import styled, { css } from "styled-components";
 import cursorGIF from "../assets/cursor.gif";
 
@@ -43,17 +43,15 @@ const Word = ({
   error,
   lastValidCharIndex,
 }: Props) => {
+  console.log("rerender");
   return (
-    <StyledWord
-      active={active}
-      onClick={() => console.log(word, active, charIndex)}
-    >
+    <StyledWord active={active}>
       {word.split("").map((char, i) => (
         <Char
           key={"char" + i}
           cursor={active && i === charIndex}
-          success={active && i <= lastValidCharIndex}
-          error={active && error && i < charIndex && i > lastValidCharIndex}
+          success={i <= lastValidCharIndex}
+          error={error && i < charIndex && i > lastValidCharIndex}
         >
           {char}
         </Char>
@@ -62,4 +60,4 @@ const Word = ({
   );
 };
 
-export default Word;
+export default memo(Word);
