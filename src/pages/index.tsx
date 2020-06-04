@@ -3,6 +3,7 @@ import SEO from "../components/seo";
 import styled, { createGlobalStyle, ThemeProvider } from "styled-components";
 import { darkTheme } from "../utils/theme";
 import ProgessIndicator from "../components/ProgessIndicator";
+import Timer from "../components/Timer";
 import Word from "../components/Word";
 
 const szmaciuraText =
@@ -33,6 +34,11 @@ const InnerWrapper = styled.div`
   height: 100%;
   border: 2px solid white;
   padding: 5px 20px;
+`;
+const ProgressContainer = styled.div`
+  width: 100%;
+  display: flex;
+  align-items: center;
 `;
 const TextWrapper = styled.div`
   padding: 30px;
@@ -131,10 +137,10 @@ const IndexPage = () => {
         <SEO title="Home" />
         <GlobalStyle />
         <InnerWrapper>
-          <ProgessIndicator
-            progress={wordIndex / text.length}
-            timePassed={timePassed}
-          />
+          <ProgressContainer>
+            <ProgessIndicator progress={wordIndex / text.length} />
+            <Timer timePassed={timePassed} />
+          </ProgressContainer>
           <TextWrapper>
             {text.map((word, i) => {
               const active = wordIndex === i;
