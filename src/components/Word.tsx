@@ -43,7 +43,6 @@ const Word = ({
   error,
   lastValidCharIndex,
 }: Props) => {
-  console.log("rerender");
   return (
     <StyledWord active={active}>
       {word.split("").map((char, i) => (
