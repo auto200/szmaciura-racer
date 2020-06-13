@@ -13,7 +13,7 @@ interface ImageProps {
 const Image = styled(Img).attrs<ImageProps>(({ progressInPx }) => ({
   style: { transform: `translateX(${progressInPx})` },
 }))<ImageProps>`
-  width: 100px;
+  width: 20%;
   transition: transform 1s ease;
 `;
 interface ProgressIndicatorProps {
@@ -36,10 +36,10 @@ const ProgressIndicator = ({ progress }: ProgressIndicatorProps) => {
 
   const data = useStaticQuery(graphql`
     query {
-      placeholderImage: file(relativePath: { eq: "rafon.png" }) {
+      progress: file(relativePath: { eq: "progress.png" }) {
         childImageSharp {
-          fixed(width: 100, height: 100) {
-            ...GatsbyImageSharpFixed
+          fluid(maxWidth: 250) {
+            ...GatsbyImageSharpFluid
           }
         }
       }
@@ -51,7 +51,7 @@ const ProgressIndicator = ({ progress }: ProgressIndicatorProps) => {
       <Image
         progressInPx={progressInPx}
         ref={imageRef}
-        fixed={data.placeholderImage.childImageSharp.fixed}
+        fluid={data.progress.childImageSharp.fluid}
       />
     </Wrapper>
   );
