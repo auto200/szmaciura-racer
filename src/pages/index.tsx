@@ -79,11 +79,20 @@ const IndexPage = () => {
       const seconds = msPassed / 1000;
       setTimePassed(seconds.toFixed(2));
     }, 300);
+
+    return () => {
+      if (timerIntervalRef.current) {
+        clearInterval(timerIntervalRef.current);
+      }
+    };
   }, []);
 
   useEffect(() => {
     //correct final word
     if (inputValue === text[wordIndex] && wordIndex === text.length - 1) {
+      if (timerIntervalRef.current) {
+        clearInterval(timerIntervalRef.current);
+      }
       alert(timePassed + "s");
       return;
     }
@@ -108,9 +117,6 @@ const IndexPage = () => {
 
   useEffect(() => {
     if (wordIndex >= text.length) {
-      if (timerIntervalRef.current) {
-        clearInterval(timerIntervalRef.current);
-      }
       setWordIndex(0);
       return;
     }
