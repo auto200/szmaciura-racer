@@ -2,7 +2,7 @@ import React, { useState, useEffect, ChangeEvent, useRef } from "react";
 import SEO from "../components/seo";
 import styled, { createGlobalStyle, ThemeProvider } from "styled-components";
 import { darkTheme } from "../utils/theme";
-import ProgessIndicator from "../components/ProgessIndicator";
+import ProgressIndicator from "../components/ProgressIndicator";
 import Timer from "../components/Timer";
 import Word from "../components/Word";
 
@@ -138,7 +138,7 @@ const IndexPage = () => {
         <GlobalStyle />
         <InnerWrapper>
           <ProgressContainer>
-            <ProgessIndicator progress={wordIndex / text.length} />
+            <ProgressIndicator progress={wordIndex / text.length} />
             <Timer timePassed={timePassed} />
           </ProgressContainer>
           <TextWrapper>
