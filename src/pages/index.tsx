@@ -140,7 +140,7 @@ const IndexPage = () => {
   return (
     <ThemeProvider theme={darkTheme}>
       <>
-        <SEO title="Home" />
+        <SEO title="SzmaciuraRacer - Rafonix szmaciura" />
         <GlobalStyle />
         <InnerWrapper>
           <ProgressContainer>
