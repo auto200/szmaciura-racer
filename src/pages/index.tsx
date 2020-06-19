@@ -159,7 +159,7 @@ const IndexPage = () => {
                     lastValidCharIndex={active ? lastValidCharIndex : -1}
                     charIndex={active ? inputValue.length : 0}
                   />
-                  <span> </span>
+                  {" "}
                 </React.Fragment>
               );
             })}
