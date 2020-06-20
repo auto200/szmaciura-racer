@@ -6,6 +6,8 @@ import ProgressIndicator from "../components/ProgressIndicator";
 import Timer from "../components/Timer";
 import Word from "../components/Word";
 import OnCompleteModal from "../components/OnCompleteModal";
+import { v4 as uuid } from "uuid";
+import History from "../components/History";
 
 const szmaciuraText =
   "ty no nie wiem jak tam twoja szmaciura jebana zrogowaciala niedzwiedzica co sie kurwi pod mostem za wojaka i siada kurwa na butle od vanisha i kurwe w taczce pijana wozili po osiedlu wiesz o co chodzi mnie nie przegadasz bo mi sperme z paly zjadasz frajerze zrogowacialy frajerska chmuro chuj ci na matule i jebac ci starego";
@@ -63,6 +65,14 @@ const getInputMaxLength = (activeWord: string): number => {
   return length >= 8 ? length : 8;
 };
 
+export type historyType = {
+  id: string;
+  timestamp: number;
+  time: string;
+}[];
+// Pomysły:
+// samochody do wybierania odblokowywane za lepszy czas
+
 const IndexPage = () => {
   const [text] = useState<string[]>(szmaciuraText.split(" "));
   const [wordIndex, setWordIndex] = useState<number>(0);
@@ -79,7 +89,9 @@ const IndexPage = () => {
   const [onCompletedModalShown, setOnCompletedModalShown] = useState<boolean>(
     false
   );
-
+  const [history, setHistory] = useState<historyType>([
+    // { id: "xd", time: "23.123", timestamp: Date.now() },
+  ]);
   const closeModalIsCompletedModal = () => setOnCompletedModalShown(false);
 
   useEffect(() => {
@@ -104,7 +116,11 @@ const IndexPage = () => {
       if (timerIntervalRef.current) {
         clearInterval(timerIntervalRef.current);
       }
-      alert(timePassed + "s");
+      setOnCompletedModalShown(true);
+      setHistory(prev => [
+        { id: uuid(), timestamp: Date.now(), time: timePassed },
+        ...prev,
+      ]);
       return;
     }
     if (inputValue === text[wordIndex] + " ") {
@@ -140,6 +156,22 @@ const IndexPage = () => {
     }
   }, [wordIndex, inputValue]);
 
+  useEffect(() => {
+    if (!history.length) {
+      try {
+        const storedHistory = window.localStorage.getItem("history");
+        if (!storedHistory) return;
+        const parsedHistory = JSON.parse(storedHistory);
+        if (Array.isArray(parsedHistory)) setHistory(parsedHistory);
+      } catch (err) {
+        return;
+      }
+    }
+    try {
+      window.localStorage.setItem("history", JSON.stringify(history));
+    } catch (err) {}
+  }, [history]);
+
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (inputValue.length - 1 >= inputMaxLength) {
       //add alert later on with instructions to user how to play
@@ -158,9 +190,6 @@ const IndexPage = () => {
             <ProgressIndicator progress={wordIndex / text.length} />
             <Timer timePassed={timePassed} />
           </ProgressContainer>
-          {/* <button onClick={() => setOnCompletedModalShown(true)}>
-            show modal
-          </button> */}
           <TextWrapper>
             {text.map((word, i) => {
               const active = wordIndex === i;
@@ -185,6 +214,7 @@ const IndexPage = () => {
             onChange={handleInputChange}
             maxLength={inputMaxLength}
           ></Input>
+          <History history={history} />
         </InnerWrapper>
         <OnCompleteModal
           isOpen={onCompletedModalShown}
