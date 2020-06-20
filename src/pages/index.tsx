@@ -5,14 +5,13 @@ import { darkTheme } from "../utils/theme";
 import ProgressIndicator from "../components/ProgressIndicator";
 import Timer from "../components/Timer";
 import Word from "../components/Word";
+import OnCompleteModal from "../components/OnCompleteModal";
 
 const szmaciuraText =
   "ty no nie wiem jak tam twoja szmaciura jebana zrogowaciala niedzwiedzica co sie kurwi pod mostem za wojaka i siada kurwa na butle od vanisha i kurwe w taczce pijana wozili po osiedlu wiesz o co chodzi mnie nie przegadasz bo mi sperme z paly zjadasz frajerze zrogowacialy frajerska chmuro chuj ci na matule i jebac ci starego";
+
 const GlobalStyle = createGlobalStyle<any>`
-  html,body{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
+  html, body {
     background-color:${({ theme }) => theme.colors.primary};
     color:${({ theme }) => theme.colors.secondary};
     display: flex;
@@ -20,6 +19,13 @@ const GlobalStyle = createGlobalStyle<any>`
     min-height:100vh;
     font-size:1.3rem;
   }
+
+  *, *::before, *::after {
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+  }
+
   #gatsby-focus-wrapper{
     height:100%;
   }
@@ -70,6 +76,11 @@ const IndexPage = () => {
   const startTimestamp = useRef<number>();
   const [timePassed, setTimePassed] = useState<string>("0");
   const timerIntervalRef = useRef<number | null>(null);
+  const [onCompletedModalShown, setOnCompletedModalShown] = useState<boolean>(
+    false
+  );
+
+  const closeModalIsCompletedModal = () => setOnCompletedModalShown(false);
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -147,6 +158,9 @@ const IndexPage = () => {
             <ProgressIndicator progress={wordIndex / text.length} />
             <Timer timePassed={timePassed} />
           </ProgressContainer>
+          {/* <button onClick={() => setOnCompletedModalShown(true)}>
+            show modal
+          </button> */}
           <TextWrapper>
             {text.map((word, i) => {
               const active = wordIndex === i;
@@ -158,8 +172,7 @@ const IndexPage = () => {
                     error={active ? error : false}
                     lastValidCharIndex={active ? lastValidCharIndex : -1}
                     charIndex={active ? inputValue.length : 0}
-                  />
-                  {" "}
+                  />{" "}
                 </React.Fragment>
               );
             })}
@@ -173,6 +186,11 @@ const IndexPage = () => {
             maxLength={inputMaxLength}
           ></Input>
         </InnerWrapper>
+        <OnCompleteModal
+          isOpen={onCompletedModalShown}
+          onClose={closeModalIsCompletedModal}
+          time={timePassed}
+        />
       </>
     </ThemeProvider>
   );
