@@ -7,29 +7,32 @@ import Timer from "../components/Timer";
 import Word from "../components/Word";
 import OnCompleteModal from "../components/OnCompleteModal";
 import { v4 as uuid } from "uuid";
-import History from "../components/History";
+import TopRaces from "../components/Tables/TopRaces";
+import History from "../components/Tables/History";
 
 const szmaciuraText =
   "ty no nie wiem jak tam twoja szmaciura jebana zrogowaciala niedzwiedzica co sie kurwi pod mostem za wojaka i siada kurwa na butle od vanisha i kurwe w taczce pijana wozili po osiedlu wiesz o co chodzi mnie nie przegadasz bo mi sperme z paly zjadasz frajerze zrogowacialy frajerska chmuro chuj ci na matule i jebac ci starego";
 
 const GlobalStyle = createGlobalStyle<any>`
   html, body {
-    background-color:${({ theme }) => theme.colors.primary};
-    color:${({ theme }) => theme.colors.secondary};
+    background-color: ${({ theme }) => theme.colors.primary};
+    color: ${({ theme }) => theme.colors.secondary};
     display: flex;
     justify-content: center;
-    min-height:100vh;
-    font-size:1.3rem;
+    min-height: 100vh;
+    font-size: 1.3rem;
   }
 
   *, *::before, *::after {
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
   }
 
   #gatsby-focus-wrapper{
-    height:100%;
+    padding-top: 300px;
+    border: 2px solid white;
+    height: 100%;
   }
 `;
 
@@ -40,7 +43,6 @@ const InnerWrapper = styled.div`
   justify-content: center;
   max-width: 1024px;
   height: 100%;
-  border: 2px solid white;
   padding: 5px 20px;
 `;
 const ProgressContainer = styled.div`
@@ -69,7 +71,7 @@ export type historyType = {
   id: string;
   timestamp: number;
   time: string;
-}[];
+};
 // Pomysły:
 // samochody do wybierania odblokowywane za lepszy czas
 
@@ -89,9 +91,7 @@ const IndexPage = () => {
   const [onCompletedModalShown, setOnCompletedModalShown] = useState<boolean>(
     false
   );
-  const [history, setHistory] = useState<historyType>([
-    // { id: "xd", time: "23.123", timestamp: Date.now() },
-  ]);
+  const [history, setHistory] = useState<historyType[]>([]);
   const closeModalIsCompletedModal = () => setOnCompletedModalShown(false);
 
   useEffect(() => {
@@ -214,6 +214,7 @@ const IndexPage = () => {
             onChange={handleInputChange}
             maxLength={inputMaxLength}
           ></Input>
+          <TopRaces history={history} />
           <History history={history} />
         </InnerWrapper>
         <OnCompleteModal
