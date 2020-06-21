@@ -7,7 +7,7 @@ export const Container = styled.div`
 `;
 
 export const Table = styled.table`
-  width: 100%;
+  max-width: 100vw;
   margin: 0 auto;
   border: 1px solid ${({ theme }) => theme.colors.secondary};
   border-collapse: collapse;
