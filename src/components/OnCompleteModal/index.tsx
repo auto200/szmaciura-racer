@@ -39,7 +39,7 @@ const OnCompleteModal = ({ isOpen, onClose, time }: Props) => {
       onRequestClose={onClose}
     >
       <ExitButton onClick={onClose}>X</ExitButton>
-      <div>Twój czas {time}s</div>
+      <div>Twój czas: {time}s</div>
       {playbackRate && playbackRate.toFixed(2) + " prędkości rafonixa"}
       <Video
         src={szmaciuraVideo}
@@ -48,9 +48,11 @@ const OnCompleteModal = ({ isOpen, onClose, time }: Props) => {
         onCanPlay={() => {
           const timeAsNum = Number(time);
           if (videoRef.current && timeAsNum) {
-            const playbackRate = videoRef.current.duration / timeAsNum;
-            videoRef.current.playbackRate = playbackRate;
-            setPlaybackRate(playbackRate);
+            try {
+              const playbackRate = videoRef.current.duration / timeAsNum;
+              videoRef.current.playbackRate = playbackRate;
+              setPlaybackRate(playbackRate);
+            } catch (err) {}
           }
         }}
       />
