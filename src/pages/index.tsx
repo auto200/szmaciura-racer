@@ -123,6 +123,7 @@ const IndexPage = () => {
       ]);
       return;
     }
+    //word correctly typed
     if (inputValue === text[wordIndex] + " ") {
       setWordIndex(i => i + 1);
       setInputValue("");
@@ -150,6 +151,7 @@ const IndexPage = () => {
     setInputMaxLength(getInputMaxLength(text[wordIndex]));
   }, [wordIndex]);
 
+  //start/restart timer on first keystroke
   useEffect(() => {
     if (wordIndex === 0 && inputValue) {
       startTimestamp.current = Date.now();
