@@ -19,12 +19,15 @@ const History = ({ history }: Props) => {
         </thead>
         <tbody>
           {history.length ? (
-            history.slice(0, 10).map(({ id, timestamp, time }) => (
-              <tr key={id}>
-                <td>{new Date(timestamp).toLocaleString("pl")}</td>
-                <td>{time}s</td>
-              </tr>
-            ))
+            history
+              .slice(0, 10)
+              .sort((a, b) => b.timestamp - a.timestamp)
+              .map(({ id, timestamp, time }) => (
+                <tr key={id}>
+                  <td>{new Date(timestamp).toLocaleString("pl")}</td>
+                  <td>{time}s</td>
+                </tr>
+              ))
           ) : (
             <tr>
               <td colSpan={2}>Nie przystąpiłeś jeszcze do pisania szmaciury</td>
