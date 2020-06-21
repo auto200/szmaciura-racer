@@ -81,7 +81,7 @@ export type historyType = {
 // Pomysły:
 // samochody do wybierania odblokowywane za lepszy czas
 
-const text = szmaciuraText.split(" ").slice(0, 10);
+const text = szmaciuraText.split(" ");
 
 //TODO: fix poor performance of interval, setting state in interval here causes all the components to rerender
 
