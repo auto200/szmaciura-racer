@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useState, useRef } from "react";
 import styled from "styled-components";
 import Modal from "react-modal";
 import * as szmaciuraVideo from "../../assets/szmaciura.mp4";
@@ -30,6 +30,7 @@ interface Props {
 }
 const OnCompleteModal = ({ isOpen, onClose, time }: Props) => {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [playbackRate, setPlaybackRate] = useState<number>(0);
   return (
     <Modal
       isOpen={isOpen}
@@ -38,7 +39,8 @@ const OnCompleteModal = ({ isOpen, onClose, time }: Props) => {
       onRequestClose={onClose}
     >
       <ExitButton onClick={onClose}>X</ExitButton>
-      <div>Twój czas {time}</div>
+      <div>Twój czas {time}s</div>
+      {playbackRate && playbackRate.toFixed(2) + " prędkości rafonixa"}
       <Video
         src={szmaciuraVideo}
         ref={videoRef}
@@ -46,8 +48,9 @@ const OnCompleteModal = ({ isOpen, onClose, time }: Props) => {
         onCanPlay={() => {
           const timeAsNum = Number(time);
           if (videoRef.current && timeAsNum) {
-            videoRef.current.playbackRate =
-              videoRef.current.duration / timeAsNum;
+            const playbackRate = videoRef.current.duration / timeAsNum;
+            videoRef.current.playbackRate = playbackRate;
+            setPlaybackRate(playbackRate);
           }
         }}
       />
