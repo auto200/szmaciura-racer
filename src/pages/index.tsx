@@ -67,6 +67,12 @@ const getInputMaxLength = (activeWord: string): number => {
   return length >= 8 ? length : 8;
 };
 
+const getTimePassedInSec = (startTime: number): string => {
+  const msPassed = Date.now() - startTime;
+  const seconds = msPassed / 1000;
+  return seconds.toFixed(2);
+};
+
 export type historyType = {
   id: string;
   timestamp: number;
@@ -75,8 +81,11 @@ export type historyType = {
 // Pomysły:
 // samochody do wybierania odblokowywane za lepszy czas
 
+const text = szmaciuraText.split(" ").slice(0, 10);
+
+//TODO: fix poor performance of interval, setting state in interval here causes all the components to rerender
+
 const IndexPage = () => {
-  const [text] = useState<string[]>(szmaciuraText.split(" "));
   const [wordIndex, setWordIndex] = useState<number>(0);
   const [lastValidCharIndex, setLastValidCharIndex] = useState<number>(-1);
   const [inputValue, setInputValue] = useState<string>("");
@@ -87,21 +96,25 @@ const IndexPage = () => {
   const inputRef = useRef<HTMLInputElement>(null);
   const startTimestamp = useRef<number>();
   const [timePassed, setTimePassed] = useState<string>("0");
-  const timerIntervalRef = useRef<number | null>(null);
+  const timerIntervalRef = useRef<number>();
   const [onCompletedModalShown, setOnCompletedModalShown] = useState<boolean>(
     false
   );
   const [history, setHistory] = useState<historyType[]>([]);
-  const closeModalIsCompletedModal = () => setOnCompletedModalShown(false);
+
+  //reset
+  const onCompleteModalClose = () => {
+    setWordIndex(0);
+    setLastValidCharIndex(-1);
+    setInputValue("");
+    setTimePassed("0");
+    startTimestamp.current = undefined;
+    timerIntervalRef.current = undefined;
+    setOnCompletedModalShown(false);
+  };
 
   useEffect(() => {
     inputRef.current?.focus();
-    timerIntervalRef.current = setInterval(() => {
-      if (!startTimestamp.current) return;
-      const msPassed = Date.now() - startTimestamp.current;
-      const seconds = msPassed / 1000;
-      setTimePassed(seconds.toFixed(2));
-    }, 300);
 
     return () => {
       if (timerIntervalRef.current) {
@@ -115,6 +128,10 @@ const IndexPage = () => {
     if (inputValue === text[wordIndex] && wordIndex === text.length - 1) {
       if (timerIntervalRef.current) {
         clearInterval(timerIntervalRef.current);
+        if (startTimestamp.current) {
+          const seconds = getTimePassedInSec(startTimestamp.current);
+          setTimePassed(seconds);
+        }
       }
       setOnCompletedModalShown(true);
       setHistory(prev => [
@@ -151,10 +168,18 @@ const IndexPage = () => {
     setInputMaxLength(getInputMaxLength(text[wordIndex]));
   }, [wordIndex]);
 
-  //start/restart timer on first keystroke
+  //start/restart timer on first character of first word
   useEffect(() => {
-    if (wordIndex === 0 && inputValue) {
+    if (wordIndex === 0 && inputValue.length === 1) {
       startTimestamp.current = Date.now();
+      if (!timerIntervalRef.current) {
+        timerIntervalRef.current = setInterval(() => {
+          if (startTimestamp.current) {
+            const seconds = getTimePassedInSec(startTimestamp.current);
+            setTimePassed(seconds);
+          }
+        }, 300);
+      }
     }
   }, [wordIndex, inputValue]);
 
@@ -172,6 +197,7 @@ const IndexPage = () => {
     try {
       window.localStorage.setItem("history", JSON.stringify(history));
     } catch (err) {}
+    console.log("hisotry changed");
   }, [history]);
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -221,7 +247,7 @@ const IndexPage = () => {
         </InnerWrapper>
         <OnCompleteModal
           isOpen={onCompletedModalShown}
-          onClose={closeModalIsCompletedModal}
+          onClose={onCompleteModalClose}
           time={timePassed}
         />
       </>
