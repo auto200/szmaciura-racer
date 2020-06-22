@@ -1,4 +1,4 @@
-import React, { useState, useEffect, ChangeEvent, useRef } from "react";
+import React, { useEffect, ChangeEvent, useRef } from "react";
 import SEO from "../components/Seo";
 import styled, { createGlobalStyle, ThemeProvider } from "styled-components";
 import { darkTheme } from "../utils/theme";
@@ -6,12 +6,9 @@ import ProgressIndicator from "../components/ProgressIndicator";
 import Timer from "../components/Timer";
 import Word from "../components/Word";
 import OnCompleteModal from "../components/OnCompleteModal";
-import { v4 as uuid } from "uuid";
 import TopRaces from "../components/Tables/TopRaces";
 import History from "../components/Tables/History";
-
-const szmaciuraText =
-  "ty no nie wiem jak tam twoja szmaciura jebana zrogowaciala niedzwiedzica co sie kurwi pod mostem za wojaka i siada kurwa na butle od vanisha i kurwe w taczce pijana wozili po osiedlu wiesz o co chodzi mnie nie przegadasz bo mi sperme z paly zjadasz frajerze zrogowacialy frajerska chmuro chuj ci na matule i jebac ci starego";
+import { useStore } from "../contexts/Store";
 
 const GlobalStyle = createGlobalStyle<any>`
   html, body {
@@ -62,55 +59,42 @@ const Input = styled.input<{ error: boolean }>`
     error ? theme.colors.error : "transparent"};
 `;
 
-const getInputMaxLength = (activeWord: string): number => {
-  const length = activeWord.length * 2;
-  return length >= 8 ? length : 8;
-};
-
 const getTimePassedInSec = (startTime: number): string => {
   const msPassed = Date.now() - startTime;
   const seconds = msPassed / 1000;
   return seconds.toFixed(2);
 };
 
-export type historyType = {
-  id: string;
-  timestamp: number;
-  time: string;
-};
 // Pomysły:
 // samochody do wybierania odblokowywane za lepszy czas
-
-const text = szmaciuraText.split(" ");
 
 //TODO: fix poor performance of interval, setting state in interval here causes all the components to rerender
 
 const IndexPage = () => {
-  const [wordIndex, setWordIndex] = useState<number>(0);
-  const [lastValidCharIndex, setLastValidCharIndex] = useState<number>(-1);
-  const [inputValue, setInputValue] = useState<string>("");
-  const [inputMaxLength, setInputMaxLength] = useState<number>(
-    getInputMaxLength(text[0])
-  );
-  const [error, setError] = useState<boolean>(false);
+  const {
+    state: {
+      text,
+      wordIndex,
+      lastValidCharIndex,
+      inputValue,
+      inputMaxLength,
+      error,
+      timePassed,
+      onCompletedModalShown,
+      history,
+    },
+    dispatch,
+  } = useStore();
+
   const inputRef = useRef<HTMLInputElement>(null);
   const startTimestamp = useRef<number>();
-  const [timePassed, setTimePassed] = useState<string>("0");
   const timerIntervalRef = useRef<number>();
-  const [onCompletedModalShown, setOnCompletedModalShown] = useState<boolean>(
-    false
-  );
-  const [history, setHistory] = useState<historyType[]>([]);
 
   //reset
   const onCompleteModalClose = () => {
-    setWordIndex(0);
-    setLastValidCharIndex(-1);
-    setInputValue("");
-    setTimePassed("0");
+    dispatch({ type: "RESET" });
     startTimestamp.current = undefined;
     timerIntervalRef.current = undefined;
-    setOnCompletedModalShown(false);
   };
 
   useEffect(() => {
@@ -130,42 +114,33 @@ const IndexPage = () => {
         clearInterval(timerIntervalRef.current);
         if (startTimestamp.current) {
           const seconds = getTimePassedInSec(startTimestamp.current);
-          setTimePassed(seconds);
+          dispatch({ type: "SET_TIME_PASSED", payload: seconds });
         }
       }
-      setOnCompletedModalShown(true);
-      setHistory(prev => [
-        { id: uuid(), timestamp: Date.now(), time: timePassed },
-        ...prev,
-      ]);
+      dispatch({ type: "RACE_COMPLETED" });
       return;
     }
     //word correctly typed
     if (inputValue === text[wordIndex] + " ") {
-      setWordIndex(i => i + 1);
-      setInputValue("");
-      setLastValidCharIndex(-1);
+      dispatch({ type: "PROCEED_TO_NEXT_WORD" });
       return;
     }
     if (!inputValue) {
-      setLastValidCharIndex(-1);
-      if (error) setError(false);
+      dispatch({ type: "INPUT_EMPTY" });
       return;
     }
     if (text[wordIndex].startsWith(inputValue)) {
-      setLastValidCharIndex(inputValue.length - 1);
-      if (error) setError(false);
+      dispatch({ type: "CORRECT_INPUT_VALUE" });
       return;
     }
-    setError(true);
+    dispatch({ type: "SET_ERROR", payload: true });
   }, [inputValue]);
 
   useEffect(() => {
     if (wordIndex >= text.length) {
-      setWordIndex(0);
+      dispatch({ type: "SET_WORD_INDEX", payload: 0 });
       return;
     }
-    setInputMaxLength(getInputMaxLength(text[wordIndex]));
   }, [wordIndex]);
 
   //start/restart timer on first character of first word
@@ -176,36 +151,19 @@ const IndexPage = () => {
         timerIntervalRef.current = setInterval(() => {
           if (startTimestamp.current) {
             const seconds = getTimePassedInSec(startTimestamp.current);
-            setTimePassed(seconds);
+            dispatch({ type: "SET_TIME_PASSED", payload: seconds });
           }
         }, 300);
       }
     }
   }, [wordIndex, inputValue]);
 
-  useEffect(() => {
-    if (!history.length) {
-      try {
-        const storedHistory = window.localStorage.getItem("history");
-        if (!storedHistory) return;
-        const parsedHistory = JSON.parse(storedHistory);
-        if (Array.isArray(parsedHistory)) setHistory(parsedHistory);
-      } catch (err) {
-        return;
-      }
-    }
-    try {
-      window.localStorage.setItem("history", JSON.stringify(history));
-    } catch (err) {}
-    console.log("hisotry changed");
-  }, [history]);
-
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (inputValue.length - 1 >= inputMaxLength) {
       //add alert later on with instructions to user how to play
       return;
     }
-    setInputValue(e.target.value);
+    dispatch({ type: "SET_INPUT_VALUE", payload: e.target.value });
   };
 
   return (

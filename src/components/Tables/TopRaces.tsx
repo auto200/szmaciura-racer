@@ -1,16 +1,16 @@
 import React from "react";
-// import styled from "styled-components";
 import { useStaticQuery, graphql } from "gatsby";
 import Img from "gatsby-image";
-import { historyType } from "../../pages";
 import { Container, Table } from "./styles";
+import { History } from "../../contexts/Store";
 
 interface Props {
-  history: historyType[];
+  history: History[];
 }
 
 const TopRaces = ({ history }: Props) => {
   const top3 = history
+    .slice()
     .sort((a, b) => Number(a.time) - Number(b.time))
     .slice(0, 3);
 
@@ -51,7 +51,7 @@ const TopRaces = ({ history }: Props) => {
       <Table>
         <thead>
           <tr>
-            <td style={{ width: 25 }}>Miejsce</td>
+            <td>Miejsce</td>
             <td>Data</td>
             <td>Czas</td>
           </tr>
