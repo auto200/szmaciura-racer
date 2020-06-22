@@ -5,15 +5,16 @@
  * See: https://www.gatsbyjs.org/docs/use-static-query/
  */
 
-import React from "react"
-import { Helmet } from "react-helmet"
-import { useStaticQuery, graphql } from "gatsby"
+import React from "react";
+import { Helmet } from "react-helmet";
+import { useStaticQuery, graphql } from "gatsby";
+import ogImage from "../assets/rafonix-szmaciura.jpg";
 
 interface Props {
-  description?: string
-  lang?: string
-  meta?: object[]
-  title: string
+  description?: string;
+  lang?: string;
+  meta?: object[];
+  title: string;
 }
 
 function SEO({ description = "", lang = "en", meta = [], title = "" }: Props) {
@@ -29,9 +30,9 @@ function SEO({ description = "", lang = "en", meta = [], title = "" }: Props) {
         }
       }
     `
-  )
+  );
 
-  const metaDescription = description || site.siteMetadata.description
+  const metaDescription = description || site.siteMetadata.description;
 
   return (
     <Helmet
@@ -72,9 +73,15 @@ function SEO({ description = "", lang = "en", meta = [], title = "" }: Props) {
           name: `twitter:description`,
           content: metaDescription,
         },
+        {
+          name: `og:image`,
+          content: ogImage,
+        },
       ].concat(meta as [])}
-    />
-  )
+    >
+      <link rel="cannonical" href="https://szmaciura.pl/" />
+    </Helmet>
+  );
 }
 
-export default SEO
+export default SEO;

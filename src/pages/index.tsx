@@ -1,5 +1,5 @@
 import React, { useState, useEffect, ChangeEvent, useRef } from "react";
-import SEO from "../components/seo";
+import SEO from "../components/Seo";
 import styled, { createGlobalStyle, ThemeProvider } from "styled-components";
 import { darkTheme } from "../utils/theme";
 import ProgressIndicator from "../components/ProgressIndicator";
