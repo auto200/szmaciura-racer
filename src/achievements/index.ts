@@ -1,33 +1,45 @@
 import { State } from "../contexts/Store";
-
-export interface Achievement {
-  name: string;
+import basicRafon from "../images/rafon.png";
+import bronzeRafon from "../images/bronze_rafon.png";
+import silverRafon from "../images/silver_rafon.png";
+import goldenRafon from "../images/golden_rafon.png";
+interface Achievement {
+  name: AchievementNames;
   status: {
-    done: boolean;
     level: number;
-    doneTimestamp: number[];
+    doneTimestamps: number[];
+    current: number;
   };
+  steps: number[];
   check: (state: State) => number;
 }
 
 const LongRunner: Achievement = {
   name: "egi wymysl nazwe",
   status: {
-    done: false,
     level: 0,
-    doneTimestamp: [0],
+    doneTimestamps: [0],
+    current: 0,
   },
-  check: state => {
-    let level = 0;
-    if (state.history.length >= 300) {
-      level = 3;
-    } else if (state.history.length >= 150) {
-      level = 2;
-    } else if (state.history.length >= 50) {
-      level = 1;
+  steps: [50, 150, 300],
+  check: function (state) {
+    for (let i = this.steps.length; i >= 0; i--) {
+      if (state.history.length >= this.steps[i - 1]) return i;
     }
-    return level;
+    return 0;
   },
 };
+export type AchievementNames = "egi wymysl nazwe";
 
-export const achievements: Achievement[] = [LongRunner];
+export type Achievements = {
+  [name in AchievementNames]?: Achievement;
+};
+export const achievements: Achievements = {
+  "egi wymysl nazwe": LongRunner,
+};
+type AchievementsImgMap = {
+  [name in AchievementNames]: any[];
+};
+export const achievementsImgMap: AchievementsImgMap = {
+  "egi wymysl nazwe": [basicRafon, bronzeRafon, silverRafon, goldenRafon],
+};

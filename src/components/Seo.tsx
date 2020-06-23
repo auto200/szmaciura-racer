@@ -80,11 +80,6 @@ function SEO({ description = "", lang = "en", meta = [], title = "" }: Props) {
       ].concat(meta as [])}
     >
       <link rel="cannonical" href="https://szmaciura.pl/" />
-      <script
-        data-ad-client="ca-pub-7641631314440688"
-        async
-        src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"
-      ></script>
     </Helmet>
   );
 }

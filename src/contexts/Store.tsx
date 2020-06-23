@@ -2,7 +2,7 @@ import React, { createContext, useContext, ReactNode, useEffect } from "react";
 import { useImmerReducer } from "../utils/hooks/useImmerReducer";
 import { v4 as uuid } from "uuid";
 import { getInputMaxLength } from "../utils";
-import { Achievement, achievements } from "../achievements";
+import { achievements, Achievements, AchievementNames } from "../achievements";
 
 const szmaciuraText =
   "ty no nie wiem jak tam twoja szmaciura jebana zrogowaciala niedzwiedzica co sie kurwi pod mostem za wojaka i siada kurwa na butle od vanisha i kurwe w taczce pijana wozili po osiedlu wiesz o co chodzi mnie nie przegadasz bo mi sperme z paly zjadasz frajerze zrogowacialy frajerska chmuro chuj ci na matule i jebac ci starego";
@@ -24,7 +24,7 @@ export interface State {
   timePassed: string;
   onCompletedModalShown: boolean;
   history: History[];
-  achevements: Achievement[];
+  achievements: Achievements;
 }
 
 const initialState: State = {
@@ -37,7 +37,7 @@ const initialState: State = {
   timePassed: "0",
   onCompletedModalShown: false,
   history: [],
-  achevements: [],
+  achievements: {},
 };
 
 const StoreContext = createContext<{
@@ -57,13 +57,16 @@ export type Action =
         | "PROCEED_TO_NEXT_WORD"
         | "INPUT_EMPTY"
         | "CORRECT_INPUT_VALUE";
-      payload: never;
     }
   | { type: "SET_TIME_PASSED"; payload: string }
   | { type: "SET_ERROR"; payload: boolean }
   | { type: "SET_TIME_PASSED"; payload: string }
   | { type: "SET_HISTORY"; payload: History[] }
-  | { type: "SET_ACHIEVEMENTS"; payload: Achievement[] };
+  | { type: "SET_ACHIEVEMENTS"; payload: Achievements }
+  | {
+      type: "UPDATE_ACHIEVEMENT_STATUS";
+      payload: { name: AchievementNames; level: number };
+    };
 
 const reducer = (state: State, action: Action) => {
   switch (action.type) {
@@ -127,7 +130,17 @@ const reducer = (state: State, action: Action) => {
       return;
     }
     case "SET_ACHIEVEMENTS": {
-      state.achevements = action.payload;
+      state.achievements = action.payload;
+      return;
+    }
+    case "UPDATE_ACHIEVEMENT_STATUS": {
+      const { name, level } = action.payload;
+      if (!state.achievements[name]) return;
+      state.achievements[name]!.status.level = level;
+      if (!state.achievements[name]!.status.doneTimestamps[level])
+        state.achievements[name]!.status.doneTimestamps[level] = Date.now();
+      state.achievements[name]!.status.current = state.history.length;
+
       return;
     }
     default:
@@ -140,45 +153,6 @@ const StoreContextProvider = ({ children }: { children: ReactNode }) => {
     reducer,
     initialState
   );
-  useEffect(() => {
-    if (!state.achevements.length) {
-      try {
-        //TODO merge new achievements to the old ones from localStorage // if(storedAchievements.length > 0 && storedAchievements.length !== achievements.length)
-        const storedAchievements = window.localStorage.getItem("achievements");
-        if (!storedAchievements) {
-          dispatch({ type: "SET_ACHIEVEMENTS", payload: achievements });
-          return;
-        }
-        const parsedAchievements = JSON.parse(storedAchievements);
-        if (Array.isArray(parsedAchievements)) {
-          dispatch({ type: "SET_ACHIEVEMENTS", payload: parsedAchievements });
-        } else {
-          throw new Error();
-        }
-      } catch (err) {
-        //data corrupted or smth
-        dispatch({ type: "SET_ACHIEVEMENTS", payload: achievements });
-      }
-    } else {
-      try {
-        window.localStorage.setItem("history", JSON.stringify(state.history));
-      } catch (err) {}
-    }
-
-    // try {
-    //   const storedAchievements = window.localStorage.getItem("achievements");
-    //   if (!storedAchievements) {
-    //     dispatch({ type: "SET_ACHIEVEMENTS", payload: achievements });
-    //     return;
-    //   }
-
-    //   const parsedAchievements = JSON.parse(storedAchievements);
-    //   if (Array.isArray(parsedHistory))
-    //     dispatch({ type: "SET_HISTORY", payload: parsedHistory });
-    // } catch (err) {
-    //   return;
-    // }
-  }, [state.achevements]);
 
   useEffect(() => {
     if (!state.history.length) {
@@ -203,10 +177,43 @@ const StoreContextProvider = ({ children }: { children: ReactNode }) => {
   }, [state.history]);
 
   useEffect(() => {
-    state.achevements.forEach(achiv => {
-      console.log(achiv);
+    if (!Object.keys(state.achievements).length) {
+      try {
+        const storedAchievements = window.localStorage.getItem("achievements");
+        if (!storedAchievements) {
+          throw new Error();
+        }
+        dispatch({
+          type: "SET_ACHIEVEMENTS",
+          payload: JSON.parse(storedAchievements),
+        });
+      } catch (err) {
+        //data corrupted or smth
+        dispatch({ type: "SET_ACHIEVEMENTS", payload: achievements });
+      }
+      //TODO merge new achievements to the old ones from localStorage // else if(Object.keys(storedAchievements).length !== Object.keys(achievements).length)
+    } else {
+      try {
+        window.localStorage.setItem(
+          "achievements",
+          JSON.stringify(state.achievements)
+        );
+      } catch (err) {}
+    }
+  }, [state.achievements]);
+
+  useEffect(() => {
+    if (!state.history.length) return;
+    Object.keys(state.achievements).forEach(achievName => {
+      const name = achievName as AchievementNames;
+      if (achievements[name]?.check) {
+        dispatch({
+          type: "UPDATE_ACHIEVEMENT_STATUS",
+          payload: { name, level: achievements[name]!.check(state) },
+        });
+      }
     });
-  });
+  }, [state.history]);
 
   const values = {
     state,

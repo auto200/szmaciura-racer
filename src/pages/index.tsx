@@ -9,6 +9,7 @@ import OnCompleteModal from "../components/OnCompleteModal";
 import TopRaces from "../components/Tables/TopRaces";
 import History from "../components/Tables/History";
 import { useStore } from "../contexts/Store";
+import Achievements from "../components/Achievements";
 
 const GlobalStyle = createGlobalStyle<any>`
   html, body {
@@ -202,6 +203,7 @@ const IndexPage = () => {
           ></Input>
           <TopRaces history={history} />
           <History history={history} />
+          <Achievements />
         </InnerWrapper>
         <OnCompleteModal
           isOpen={onCompletedModalShown}
