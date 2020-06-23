@@ -2,6 +2,7 @@ import React, { createContext, useContext, ReactNode, useEffect } from "react";
 import { useImmerReducer } from "../utils/hooks/useImmerReducer";
 import { v4 as uuid } from "uuid";
 import { getInputMaxLength } from "../utils";
+import { Achievement, achievements } from "../achievements";
 
 const szmaciuraText =
   "ty no nie wiem jak tam twoja szmaciura jebana zrogowaciala niedzwiedzica co sie kurwi pod mostem za wojaka i siada kurwa na butle od vanisha i kurwe w taczce pijana wozili po osiedlu wiesz o co chodzi mnie nie przegadasz bo mi sperme z paly zjadasz frajerze zrogowacialy frajerska chmuro chuj ci na matule i jebac ci starego";
@@ -13,7 +14,7 @@ export type History = {
   time: string;
 };
 
-interface State {
+export interface State {
   text: string[];
   wordIndex: number;
   lastValidCharIndex: number;
@@ -23,6 +24,7 @@ interface State {
   timePassed: string;
   onCompletedModalShown: boolean;
   history: History[];
+  achevements: Achievement[];
 }
 
 const initialState: State = {
@@ -35,6 +37,7 @@ const initialState: State = {
   timePassed: "0",
   onCompletedModalShown: false,
   history: [],
+  achevements: [],
 };
 
 const StoreContext = createContext<{
@@ -44,7 +47,7 @@ const StoreContext = createContext<{
   state: initialState,
   dispatch: () => null,
 });
-type Action =
+export type Action =
   | { type: "SET_WORD_INDEX"; payload: number }
   | { type: "SET_INPUT_VALUE"; payload: string }
   | {
@@ -54,11 +57,13 @@ type Action =
         | "PROCEED_TO_NEXT_WORD"
         | "INPUT_EMPTY"
         | "CORRECT_INPUT_VALUE";
+      payload: never;
     }
   | { type: "SET_TIME_PASSED"; payload: string }
   | { type: "SET_ERROR"; payload: boolean }
   | { type: "SET_TIME_PASSED"; payload: string }
-  | { type: "SET_HISTORY"; payload: History[] };
+  | { type: "SET_HISTORY"; payload: History[] }
+  | { type: "SET_ACHIEVEMENTS"; payload: Achievement[] };
 
 const reducer = (state: State, action: Action) => {
   switch (action.type) {
@@ -121,6 +126,10 @@ const reducer = (state: State, action: Action) => {
       state.history = action.payload;
       return;
     }
+    case "SET_ACHIEVEMENTS": {
+      state.achevements = action.payload;
+      return;
+    }
     default:
       throw new Error("Invalid action type");
   }
@@ -132,15 +141,59 @@ const StoreContextProvider = ({ children }: { children: ReactNode }) => {
     initialState
   );
   useEffect(() => {
+    if (!state.achevements.length) {
+      try {
+        //TODO merge new achievements to the old ones from localStorage // if(storedAchievements.length > 0 && storedAchievements.length !== achievements.length)
+        const storedAchievements = window.localStorage.getItem("achievements");
+        if (!storedAchievements) {
+          dispatch({ type: "SET_ACHIEVEMENTS", payload: achievements });
+          return;
+        }
+        const parsedAchievements = JSON.parse(storedAchievements);
+        if (Array.isArray(parsedAchievements)) {
+          dispatch({ type: "SET_ACHIEVEMENTS", payload: parsedAchievements });
+        } else {
+          throw new Error();
+        }
+      } catch (err) {
+        //data corrupted or smth
+        dispatch({ type: "SET_ACHIEVEMENTS", payload: achievements });
+      }
+    } else {
+      try {
+        window.localStorage.setItem("history", JSON.stringify(state.history));
+      } catch (err) {}
+    }
+
+    // try {
+    //   const storedAchievements = window.localStorage.getItem("achievements");
+    //   if (!storedAchievements) {
+    //     dispatch({ type: "SET_ACHIEVEMENTS", payload: achievements });
+    //     return;
+    //   }
+
+    //   const parsedAchievements = JSON.parse(storedAchievements);
+    //   if (Array.isArray(parsedHistory))
+    //     dispatch({ type: "SET_HISTORY", payload: parsedHistory });
+    // } catch (err) {
+    //   return;
+    // }
+  }, [state.achevements]);
+
+  useEffect(() => {
     if (!state.history.length) {
       try {
         const storedHistory = window.localStorage.getItem("history");
         if (!storedHistory) return;
         const parsedHistory = JSON.parse(storedHistory);
-        if (Array.isArray(parsedHistory))
+        if (Array.isArray(parsedHistory)) {
           dispatch({ type: "SET_HISTORY", payload: parsedHistory });
+        } else {
+          throw new Error();
+        }
       } catch (err) {
-        return;
+        //data corrupted or smth
+        dispatch({ type: "SET_HISTORY", payload: [] });
       }
     } else {
       try {
@@ -148,6 +201,12 @@ const StoreContextProvider = ({ children }: { children: ReactNode }) => {
       } catch (err) {}
     }
   }, [state.history]);
+
+  useEffect(() => {
+    state.achevements.forEach(achiv => {
+      console.log(achiv);
+    });
+  });
 
   const values = {
     state,
