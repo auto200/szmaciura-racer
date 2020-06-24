@@ -10,6 +10,7 @@ interface Achievement {
     doneTimestamps: number[];
     current: number;
   };
+  description: string;
   steps: number[];
   check: (state: State) => number;
 }
@@ -21,6 +22,7 @@ const LongRunner: Achievement = {
     doneTimestamps: [0],
     current: 0,
   },
+  description: "Napisz szmaciurę odpowiednią ilość razy",
   steps: [50, 150, 300],
   check: function (state) {
     for (let i = this.steps.length; i >= 0; i--) {
