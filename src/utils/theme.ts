@@ -3,6 +3,7 @@ type colors = {
   secondary: string;
   error: string;
   success: string;
+  golden: string;
 };
 interface theme {
   colors: colors;
@@ -14,6 +15,7 @@ export const darkTheme: theme = {
     secondary: "#b2b2b2",
     error: "#c44569",
     success: "#7bed9f",
+    golden: "#a0861a",
   },
 };
 
@@ -23,5 +25,6 @@ export const lightTheme: theme = {
     secondary: "#2b2b2b",
     error: "#c44569",
     success: "#7bed9f",
+    golden: "#a0861a",
   },
 };
