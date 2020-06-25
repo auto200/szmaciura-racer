@@ -7,7 +7,7 @@ const Container = styled.div`
   width: 5%;
 `;
 
-const Timer = ({ timePassed }: { timePassed: string }) => {
+const Timer: React.FC<{ timePassed: string }> = ({ timePassed }) => {
   return <Container>{timePassed}s</Container>;
 };
 

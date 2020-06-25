@@ -71,7 +71,7 @@ const getTimePassedInSec = (startTime: number): string => {
 
 //TODO: fix poor performance of interval, setting state in interval here causes all the components to rerender
 
-const IndexPage = () => {
+const IndexPage: React.FC = () => {
   const {
     state: {
       text,
@@ -81,7 +81,7 @@ const IndexPage = () => {
       inputMaxLength,
       error,
       timePassed,
-      onCompletedModalShown,
+      onCompleteModalShown,
       history,
     },
     dispatch,
@@ -206,7 +206,7 @@ const IndexPage = () => {
           <Achievements />
         </InnerWrapper>
         <OnCompleteModal
-          isOpen={onCompletedModalShown}
+          isOpen={onCompleteModalShown}
           onClose={onCompleteModalClose}
           time={timePassed}
         />

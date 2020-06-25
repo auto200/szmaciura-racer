@@ -28,7 +28,7 @@ interface Props {
   onClose: () => void;
   time: string;
 }
-const OnCompleteModal = ({ isOpen, onClose, time }: Props) => {
+const OnCompleteModal: React.FC<Props> = ({ isOpen, onClose, time }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [playbackRate, setPlaybackRate] = useState<number>(0);
   return (

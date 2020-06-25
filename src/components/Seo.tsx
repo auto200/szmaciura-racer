@@ -17,7 +17,12 @@ interface Props {
   title: string;
 }
 
-function SEO({ description = "", lang = "en", meta = [], title = "" }: Props) {
+const SEO: React.FC<Props> = ({
+  description = "",
+  lang = "en",
+  meta = [],
+  title = "",
+}) => {
   const { site } = useStaticQuery(
     graphql`
       query {
@@ -82,6 +87,6 @@ function SEO({ description = "", lang = "en", meta = [], title = "" }: Props) {
       <link rel="cannonical" href="https://szmaciura.pl/" />
     </Helmet>
   );
-}
+};
 
 export default SEO;

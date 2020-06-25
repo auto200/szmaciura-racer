@@ -1,12 +1,12 @@
 import React from "react";
 // import styled from "styled-components";
-import { historyType } from "../../pages";
+import { History as IHistory } from "../../contexts/Store";
 import { Container, Table } from "./styles";
 
 interface Props {
-  history: historyType[];
+  history: IHistory[];
 }
-const History = ({ history }: Props) => {
+const History: React.FC<Props> = ({ history }) => {
   return (
     <Container>
       <h1>Ostatinie {history.length <= 1 ? "podejście" : "podejścia"}</h1>
@@ -19,15 +19,12 @@ const History = ({ history }: Props) => {
         </thead>
         <tbody>
           {history.length ? (
-            history
-              .slice(0, 10)
-              .sort((a, b) => b.timestamp - a.timestamp)
-              .map(({ id, timestamp, time }) => (
-                <tr key={id}>
-                  <td>{new Date(timestamp).toLocaleString("pl")}</td>
-                  <td>{time}s</td>
-                </tr>
-              ))
+            history.slice(0, 10).map(({ id, timestamp, time }) => (
+              <tr key={id}>
+                <td>{new Date(timestamp).toLocaleString("pl")}</td>
+                <td>{time}s</td>
+              </tr>
+            ))
           ) : (
             <tr>
               <td colSpan={2}>Nie przystąpiłeś jeszcze do pisania szmaciury</td>

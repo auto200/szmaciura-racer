@@ -16,10 +16,8 @@ const Image = styled(Img).attrs<ImageProps>(({ progressInPx }) => ({
   width: 20%;
   transition: transform 1s ease;
 `;
-interface ProgressIndicatorProps {
-  readonly progress: number;
-}
-const ProgressIndicator = ({ progress }: ProgressIndicatorProps) => {
+
+const ProgressIndicator: React.FC<{ progress: number }> = ({ progress }) => {
   const progressWrapperRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<any>(null);
   const [progressInPx, setProgressInPx] = useState<string>("0px");

@@ -36,13 +36,13 @@ interface Props {
   lastValidCharIndex: number;
 }
 
-const Word = ({
+const Word: React.FC<Props> = ({
   word,
   active,
   charIndex,
   error,
   lastValidCharIndex,
-}: Props) => {
+}) => {
   return (
     <StyledWord active={active}>
       {word.split("").map((char, i) => (
