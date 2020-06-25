@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 // import styled from "styled-components";
 import { History as IHistory } from "../../contexts/Store";
 import { Container, Table } from "./styles";
@@ -36,4 +36,4 @@ const History: React.FC<Props> = ({ history }) => {
   );
 };
 
-export default History;
+export default memo(History);

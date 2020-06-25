@@ -24,16 +24,15 @@ const Video = styled.video`
 `;
 
 interface Props {
-  isOpen: boolean;
   onClose: () => void;
   time: string;
 }
-const OnCompleteModal: React.FC<Props> = ({ isOpen, onClose, time }) => {
+const OnCompleteModal: React.FC<Props> = ({ onClose, time }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [playbackRate, setPlaybackRate] = useState<number>(0);
   return (
     <Modal
-      isOpen={isOpen}
+      isOpen={true}
       overlayClassName="on-complete-modal-backdrop"
       className="on-complete-modal-content"
       onRequestClose={onClose}

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import { useStaticQuery, graphql } from "gatsby";
 import Img from "gatsby-image";
 import { Container, Table } from "./styles";
@@ -78,4 +78,4 @@ const TopRaces = ({ history }: Props) => {
   );
 };
 
-export default TopRaces;
+export default memo(TopRaces);

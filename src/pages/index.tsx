@@ -205,11 +205,9 @@ const IndexPage: React.FC = () => {
           <History history={history} />
           <Achievements />
         </InnerWrapper>
-        <OnCompleteModal
-          isOpen={onCompleteModalShown}
-          onClose={onCompleteModalClose}
-          time={timePassed}
-        />
+        {onCompleteModalShown && (
+          <OnCompleteModal onClose={onCompleteModalClose} time={timePassed} />
+        )}
       </>
     </ThemeProvider>
   );
