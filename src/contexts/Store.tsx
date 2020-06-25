@@ -2,11 +2,16 @@ import React, { createContext, useContext, ReactNode, useEffect } from "react";
 import { useImmerReducer } from "../utils/hooks/useImmerReducer";
 import { v4 as uuid } from "uuid";
 import { getInputMaxLength } from "../utils";
-import { achievements, Achievements, AchievementNames } from "../achievements";
+import {
+  achievements,
+  Achievements,
+  AchievementNames,
+  AchievementCheckStatus,
+} from "../achievements";
 
 const szmaciuraText =
   "ty no nie wiem jak tam twoja szmaciura jebana zrogowaciala niedzwiedzica co sie kurwi pod mostem za wojaka i siada kurwa na butle od vanisha i kurwe w taczce pijana wozili po osiedlu wiesz o co chodzi mnie nie przegadasz bo mi sperme z paly zjadasz frajerze zrogowacialy frajerska chmuro chuj ci na matule i jebac ci starego";
-const splittedText = szmaciuraText.split(" ");
+const splittedText = szmaciuraText.split(" ").slice(0, 5);
 
 export type History = {
   id: string;
@@ -22,7 +27,7 @@ export interface State {
   inputMaxLength: number;
   error: boolean;
   timePassed: string;
-  onCompletedModalShown: boolean;
+  onCompleteModalShown: boolean;
   history: History[];
   achievements: Achievements;
 }
@@ -35,7 +40,7 @@ const initialState: State = {
   inputMaxLength: getInputMaxLength(splittedText[0]),
   error: false,
   timePassed: "0",
-  onCompletedModalShown: false,
+  onCompleteModalShown: false,
   history: [],
   achievements: {},
 };
@@ -65,7 +70,10 @@ export type Action =
   | { type: "SET_ACHIEVEMENTS"; payload: Achievements }
   | {
       type: "UPDATE_ACHIEVEMENT_STATUS";
-      payload: { name: AchievementNames; level: number };
+      payload: {
+        name: AchievementNames;
+        status: AchievementCheckStatus;
+      };
     };
 
 const reducer = (state: State, action: Action) => {
@@ -79,7 +87,7 @@ const reducer = (state: State, action: Action) => {
       state.lastValidCharIndex = -1;
       state.inputValue = "";
       state.timePassed = "0";
-      state.onCompletedModalShown = false;
+      state.onCompleteModalShown = false;
       return;
     }
     case "SET_TIME_PASSED": {
@@ -87,7 +95,7 @@ const reducer = (state: State, action: Action) => {
       return;
     }
     case "RACE_COMPLETED": {
-      state.onCompletedModalShown = true;
+      state.onCompleteModalShown = true;
       state.history.unshift({
         id: uuid(),
         timestamp: Date.now(),
@@ -134,11 +142,15 @@ const reducer = (state: State, action: Action) => {
       return;
     }
     case "UPDATE_ACHIEVEMENT_STATUS": {
-      const { name, level } = action.payload;
+      const {
+        name,
+        status: { level, timestamp },
+      } = action.payload;
       if (!state.achievements[name]) return;
       state.achievements[name]!.status.level = level;
-      if (!state.achievements[name]!.status.doneTimestamps[level])
-        state.achievements[name]!.status.doneTimestamps[level] = Date.now();
+      if (timestamp) {
+        state.achievements[name]!.status.doneTimestamps[level] = timestamp;
+      }
       state.achievements[name]!.status.current = state.history.length;
 
       return;
@@ -209,7 +221,7 @@ const StoreContextProvider = ({ children }: { children: ReactNode }) => {
       if (achievements[name]?.check) {
         dispatch({
           type: "UPDATE_ACHIEVEMENT_STATUS",
-          payload: { name, level: achievements[name]!.check(state) },
+          payload: { name, status: achievements[name]!.check(state) },
         });
       }
     });

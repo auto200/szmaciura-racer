@@ -31,12 +31,15 @@ interface TooltipContentProps {
   name: string;
   description: string;
   timestamp?: number;
+  level: number;
 }
 const TooltipContent = forwardRef<HTMLDivElement, TooltipContentProps>(
-  ({ name, description, timestamp }, ref) => {
+  ({ name, description, timestamp, level }, ref) => {
     return (
       <div ref={ref}>
-        <h3>{name}</h3>
+        <h3>
+          {name} - Poziom: {level}
+        </h3>
         <div>{description}</div>
         {timestamp && <div>{new Date(timestamp).toLocaleString("pl")}</div>}
       </div>
@@ -52,31 +55,33 @@ const Achievements = () => {
     <>
       <h1>Osiągnięcia</h1>
       <Wrapper>
-        {Object.values(achievements).map(achiv =>
-          achiv ? (
+        {Object.values(achievements).map(achiv => {
+          if (!achiv) return null;
+          const { name, description, status, steps } = achiv;
+          return (
             <Tooltip
               content={
                 <TooltipContent
-                  name={achiv.name}
-                  description={achiv.description}
-                  timestamp={achiv.status.doneTimestamps[achiv.status.level]}
+                  name={name}
+                  description={description}
+                  timestamp={status.doneTimestamps[status.level]}
+                  level={status.level}
                 />
               }
-              key={achiv.name}
+              key={name}
             >
               <div>
                 <Image
-                  src={achievementsImgMap[achiv.name][achiv.status.level]}
-                  notObtained={!achiv.status.level}
-                  title={`${achiv.status.current}/${
-                    achiv.steps[achiv.status.level] ||
-                    achiv.steps[achiv.status.level - 1]
+                  src={achievementsImgMap[name][status.level]}
+                  notObtained={!status.level}
+                  title={`${status.current}/${
+                    steps[status.level] || steps[status.level - 1]
                   }`}
                 />
               </div>
             </Tooltip>
-          ) : null
-        )}
+          );
+        })}
       </Wrapper>
     </>
   );
