@@ -24,7 +24,7 @@ const Image = styled.img<{ notObtained: boolean }>`
   filter: brightness(${({ notObtained }) => notObtained && "0.02"});
   transition: filter 0.3s ease;
   :hover {
-    filter: brightness(0.2);
+    filter: ${({ notObtained }) => notObtained && "brightness(0.2)"};
   }
 `;
 interface TooltipContentProps {
