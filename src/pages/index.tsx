@@ -203,7 +203,7 @@ const IndexPage: React.FC = () => {
           ></Input>
           <TopRaces history={history} />
           <History history={history} />
-          <Achievements />
+          <Achievements history={history} />
         </InnerWrapper>
         {onCompleteModalShown && (
           <OnCompleteModal onClose={onCompleteModalClose} time={timePassed} />

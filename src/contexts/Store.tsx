@@ -2,12 +2,6 @@ import React, { createContext, useContext, ReactNode, useEffect } from "react";
 import { useImmerReducer } from "../utils/hooks/useImmerReducer";
 import { v4 as uuid } from "uuid";
 import { getInputMaxLength } from "../utils";
-import {
-  achievements,
-  Achievements,
-  AchievementNames,
-  AchievementCheckStatus,
-} from "../achievements";
 
 const szmaciuraText =
   "ty no nie wiem jak tam twoja szmaciura jebana zrogowaciala niedzwiedzica co sie kurwi pod mostem za wojaka i siada kurwa na butle od vanisha i kurwe w taczce pijana wozili po osiedlu wiesz o co chodzi mnie nie przegadasz bo mi sperme z paly zjadasz frajerze zrogowacialy frajerska chmuro chuj ci na matule i jebac ci starego";
@@ -29,7 +23,6 @@ export interface State {
   timePassed: string;
   onCompleteModalShown: boolean;
   history: History[];
-  achievements: Achievements;
 }
 
 const initialState: State = {
@@ -42,7 +35,6 @@ const initialState: State = {
   timePassed: "0",
   onCompleteModalShown: false,
   history: [],
-  achievements: {},
 };
 
 const StoreContext = createContext<{
@@ -66,15 +58,7 @@ export type Action =
   | { type: "SET_TIME_PASSED"; payload: string }
   | { type: "SET_ERROR"; payload: boolean }
   | { type: "SET_TIME_PASSED"; payload: string }
-  | { type: "SET_HISTORY"; payload: History[] }
-  | { type: "SET_ACHIEVEMENTS"; payload: Achievements }
-  | {
-      type: "UPDATE_ACHIEVEMENT_STATUS";
-      payload: {
-        name: AchievementNames;
-        status: AchievementCheckStatus;
-      };
-    };
+  | { type: "SET_HISTORY"; payload: History[] };
 
 const reducer = (state: State, action: Action) => {
   switch (action.type) {
@@ -137,24 +121,6 @@ const reducer = (state: State, action: Action) => {
       state.history = action.payload;
       return;
     }
-    case "SET_ACHIEVEMENTS": {
-      state.achievements = action.payload;
-      return;
-    }
-    case "UPDATE_ACHIEVEMENT_STATUS": {
-      const {
-        name,
-        status: { level, timestamp },
-      } = action.payload;
-      if (!state.achievements[name]) return;
-      state.achievements[name]!.status.level = level;
-      if (timestamp) {
-        state.achievements[name]!.status.doneTimestamps[level] = timestamp;
-      }
-      state.achievements[name]!.status.current = state.history.length;
-
-      return;
-    }
     default:
       throw new Error("Invalid action type");
   }
@@ -186,45 +152,6 @@ const StoreContextProvider = ({ children }: { children: ReactNode }) => {
         window.localStorage.setItem("history", JSON.stringify(state.history));
       } catch (err) {}
     }
-  }, [state.history]);
-
-  useEffect(() => {
-    if (!Object.keys(state.achievements).length) {
-      try {
-        const storedAchievements = window.localStorage.getItem("achievements");
-        if (!storedAchievements) {
-          throw new Error();
-        }
-        dispatch({
-          type: "SET_ACHIEVEMENTS",
-          payload: JSON.parse(storedAchievements),
-        });
-      } catch (err) {
-        //data corrupted or smth
-        dispatch({ type: "SET_ACHIEVEMENTS", payload: achievements });
-      }
-      //TODO merge new achievements to the old ones from localStorage // else if(Object.keys(storedAchievements).length !== Object.keys(achievements).length)
-    } else {
-      try {
-        window.localStorage.setItem(
-          "achievements",
-          JSON.stringify(state.achievements)
-        );
-      } catch (err) {}
-    }
-  }, [state.achievements]);
-
-  useEffect(() => {
-    if (!state.history.length) return;
-    Object.keys(state.achievements).forEach(achievName => {
-      const name = achievName as AchievementNames;
-      if (achievements[name]?.check) {
-        dispatch({
-          type: "UPDATE_ACHIEVEMENT_STATUS",
-          payload: { name, status: achievements[name]!.check(state) },
-        });
-      }
-    });
   }, [state.history]);
 
   const values = {

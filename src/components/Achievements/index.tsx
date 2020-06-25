@@ -1,8 +1,8 @@
-import React, { forwardRef } from "react";
+import React, { forwardRef, memo } from "react";
 import styled from "styled-components";
-import { useStore } from "../../contexts/Store";
-import { achievementsImgMap } from "../../achievements";
+import achievements from "../../achievements";
 import Tippy from "@tippyjs/react";
+import { History } from "../../contexts/Store";
 import "tippy.js/dist/tippy.css";
 
 const Wrapper = styled.div`
@@ -31,52 +31,45 @@ interface TooltipContentProps {
   name: string;
   description: string;
   timestamp?: number;
-  level: number;
 }
 const TooltipContent = forwardRef<HTMLDivElement, TooltipContentProps>(
-  ({ name, description, timestamp, level }, ref) => {
+  ({ name, description, timestamp }, ref) => {
     return (
       <div ref={ref}>
-        <h3>
-          {name} - Poziom: {level}
-        </h3>
+        <h3>{name}</h3>
         <div>{description}</div>
         {timestamp && <div>{new Date(timestamp).toLocaleString("pl")}</div>}
       </div>
     );
   }
 );
-
-const Achievements = () => {
-  const {
-    state: { achievements },
-  } = useStore();
+interface Props {
+  history: History[];
+}
+const Achievements: React.FC<Props> = ({ history }) => {
   return (
     <>
       <h1>Osiągnięcia</h1>
       <Wrapper>
         {Object.values(achievements).map(achiv => {
-          if (!achiv) return null;
-          const { name, description, status, steps } = achiv;
+          const { current, timestamp } = achiv.getStatus(history);
+          const { name, description, image, requiredToComplete } = achiv;
           return (
             <Tooltip
+              key={name}
               content={
                 <TooltipContent
                   name={name}
                   description={description}
-                  timestamp={status.doneTimestamps[status.level]}
-                  level={status.level}
+                  timestamp={timestamp}
                 />
               }
-              key={name}
             >
               <div>
                 <Image
-                  src={achievementsImgMap[name][status.level]}
-                  notObtained={!status.level}
-                  title={`${status.current}/${
-                    steps[status.level] || steps[status.level - 1]
-                  }`}
+                  src={image}
+                  notObtained={timestamp ? false : true}
+                  title={`${current}/${requiredToComplete}`}
                 />
               </div>
             </Tooltip>
@@ -87,4 +80,4 @@ const Achievements = () => {
   );
 };
 
-export default Achievements;
+export default memo(Achievements);
