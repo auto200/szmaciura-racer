@@ -1,5 +1,5 @@
 import { History } from "../contexts/Store";
-import basicRafon from "../images/rafon.png";
+import bronzeRafon from "../images/bronze_rafon.png";
 import silverRafon from "../images/silver_rafon.png";
 import goldenRafon from "../images/golden_rafon.png";
 
@@ -30,7 +30,7 @@ const achievements: Achievements = {
     name: "egi wymysl nazwe",
     requiredToComplete: 50,
     description: "Napisz szmaciurę 50 razy",
-    image: basicRafon,
+    image: bronzeRafon,
     getStatus: function (history) {
       const timestamp = history
         .slice()
