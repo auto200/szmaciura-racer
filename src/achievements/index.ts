@@ -16,18 +16,15 @@ export interface Achievement {
   };
 }
 
-export type AchievementNames =
-  | "egi wymysl nazwe"
-  | "tutaj tez nazwa potrzebana"
-  | "Giga szmaciura";
+export type AchievementNames = "Szmaciurka" | "Szmaciura" | "Szmacisko";
 
 export type Achievements = {
   [name in AchievementNames]: Achievement;
 };
 
 const achievements: Achievements = {
-  "egi wymysl nazwe": {
-    name: "egi wymysl nazwe",
+  Szmaciurka: {
+    name: "Szmaciurka",
     requiredToComplete: 50,
     description: "Napisz szmaciurę 50 razy",
     image: bronzeRafon,
@@ -39,8 +36,8 @@ const achievements: Achievements = {
       return { current: history.length, timestamp };
     },
   },
-  "tutaj tez nazwa potrzebana": {
-    name: "tutaj tez nazwa potrzebana",
+  Szmaciura: {
+    name: "Szmaciura",
     requiredToComplete: 150,
     description: "Napisz szmaciurę 150 razy",
     image: silverRafon,
@@ -52,8 +49,8 @@ const achievements: Achievements = {
       return { current: history.length, timestamp };
     },
   },
-  "Giga szmaciura": {
-    name: "Giga szmaciura",
+  Szmacisko: {
+    name: "Szmacisko",
     requiredToComplete: 300,
     description: "Napisz szmaciurę 300 razy",
     image: goldenRafon,
