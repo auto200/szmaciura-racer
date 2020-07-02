@@ -4,6 +4,7 @@ import achievements from "../../achievements";
 import Tippy from "@tippyjs/react";
 import { History } from "../../contexts/Store";
 import "tippy.js/dist/tippy.css";
+import middleFingerCursor from "../../assets/middleFingerCursor.png";
 
 const Wrapper = styled.div`
   display: flex;
@@ -25,6 +26,7 @@ const Image = styled.img<{ notObtained: boolean }>`
   transition: filter 0.3s ease;
   :hover {
     filter: ${({ notObtained }) => notObtained && "brightness(0.2)"};
+    cursor: url(${middleFingerCursor}), auto;
   }
 `;
 interface TooltipContentProps {
