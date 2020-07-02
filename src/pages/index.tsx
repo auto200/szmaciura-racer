@@ -164,7 +164,10 @@ const IndexPage: React.FC = () => {
       //add alert later on with instructions to user how to play
       return;
     }
-    dispatch({ type: "SET_INPUT_VALUE", payload: e.target.value });
+    dispatch({
+      type: "SET_INPUT_VALUE",
+      payload: e.target.value.toLowerCase(),
+    });
   };
 
   return (
