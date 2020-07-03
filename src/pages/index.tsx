@@ -89,21 +89,21 @@ const IndexPage: React.FC = () => {
 
   const inputRef = useRef<HTMLInputElement>(null);
   const startTimestamp = useRef<number>();
-  const timerIntervalRef = useRef<number>();
+  const timerAnimationFrameRef = useRef<number>();
 
   //reset
-  const onCompleteModalClose = () => {
+  const resetEveryting = () => {
     dispatch({ type: "RESET" });
     startTimestamp.current = undefined;
-    timerIntervalRef.current = undefined;
+    timerAnimationFrameRef.current = undefined;
   };
 
   useEffect(() => {
     inputRef.current?.focus();
 
     return () => {
-      if (timerIntervalRef.current) {
-        clearInterval(timerIntervalRef.current);
+      if (timerAnimationFrameRef.current) {
+        cancelAnimationFrame(timerAnimationFrameRef.current);
       }
     };
   }, []);
@@ -111,8 +111,8 @@ const IndexPage: React.FC = () => {
   useEffect(() => {
     //correct final word
     if (inputValue === text[wordIndex] && wordIndex === text.length - 1) {
-      if (timerIntervalRef.current) {
-        clearInterval(timerIntervalRef.current);
+      if (timerAnimationFrameRef.current) {
+        cancelAnimationFrame(timerAnimationFrameRef.current);
         if (startTimestamp.current) {
           const seconds = getTimePassedInSec(startTimestamp.current);
           dispatch({ type: "SET_TIME_PASSED", payload: seconds });
@@ -146,15 +146,23 @@ const IndexPage: React.FC = () => {
 
   //start/restart timer on first character of first word
   useEffect(() => {
+    if (wordIndex === 0 && inputValue.length === 0) {
+      resetEveryting();
+      return;
+    }
+    const updateTimer = () =>
+      requestAnimationFrame(() => {
+        if (startTimestamp.current) {
+          const seconds = getTimePassedInSec(startTimestamp.current);
+          dispatch({ type: "SET_TIME_PASSED", payload: seconds });
+          timerAnimationFrameRef.current = updateTimer();
+        }
+      });
+
     if (wordIndex === 0 && inputValue.length === 1) {
       startTimestamp.current = Date.now();
-      if (!timerIntervalRef.current) {
-        timerIntervalRef.current = setInterval(() => {
-          if (startTimestamp.current) {
-            const seconds = getTimePassedInSec(startTimestamp.current);
-            dispatch({ type: "SET_TIME_PASSED", payload: seconds });
-          }
-        }, 300);
+      if (!timerAnimationFrameRef.current) {
+        timerAnimationFrameRef.current = updateTimer();
       }
     }
   }, [wordIndex, inputValue]);
@@ -209,7 +217,7 @@ const IndexPage: React.FC = () => {
           <Achievements history={history} />
         </InnerWrapper>
         {onCompleteModalShown && (
-          <OnCompleteModal onClose={onCompleteModalClose} time={timePassed} />
+          <OnCompleteModal onClose={resetEveryting} time={timePassed} />
         )}
       </>
     </ThemeProvider>
