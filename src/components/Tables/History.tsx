@@ -1,5 +1,4 @@
 import React, { memo } from "react";
-// import styled from "styled-components";
 import { History as IHistory } from "../../contexts/Store";
 import { Container, Table } from "./styles";
 
@@ -19,7 +18,7 @@ const History: React.FC<Props> = ({ history }) => {
         </thead>
         <tbody>
           {history.length ? (
-            history.slice(0, 10).map(({ id, timestamp, time }) => (
+            history.slice(0, 5).map(({ id, timestamp, time }) => (
               <tr key={id}>
                 <td>{new Date(timestamp).toLocaleString("pl")}</td>
                 <td>{time}s</td>
