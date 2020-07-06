@@ -18,7 +18,7 @@ module.exports = {
     {
       resolve: `gatsby-plugin-manifest`,
       options: {
-        name: `SzmaciuraRacer`,
+        name: `Szmaciura Racer`,
         short_name: `SzmaciuraRacer`,
         start_url: `/`,
         background_color: `#2b2b2b`,
@@ -38,4 +38,4 @@ module.exports = {
     // To learn more, visit: https://gatsby.dev/offline
     // `gatsby-plugin-offline`,
   ],
-}
+};
