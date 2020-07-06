@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState, memo } from "react";
 import styled from "styled-components";
-import { useStaticQuery, graphql } from "gatsby";
 import Img from "gatsby-image";
+import { useCarsContext } from "../contexts/CarsContext";
 
 const Wrapper = styled.div`
   flex-grow: 1;
@@ -10,14 +10,20 @@ const Wrapper = styled.div`
 interface ImageProps {
   readonly progressInPx: string;
 }
+//IDEA: can make like a easter egg or something and instead of translating on X axis, use scaleX, transform-origin left
+// style: { transform: `scaleX(${1 + progress * (containerWidth / 250)})` },
 const Image = styled(Img).attrs<ImageProps>(({ progressInPx }) => ({
   style: { transform: `translateX(${progressInPx})` },
 }))<ImageProps>`
   width: 20%;
   transition: transform 1s ease;
+  transform-origin: left;
 `;
-
-const ProgressIndicator: React.FC<{ progress: number }> = ({ progress }) => {
+interface Props {
+  progress: number;
+}
+const ProgressIndicator: React.FC<Props> = ({ progress }) => {
+  const { currentImage } = useCarsContext();
   const progressWrapperRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<any>(null);
   const [progressInPx, setProgressInPx] = useState<string>("0px");
@@ -32,25 +38,9 @@ const ProgressIndicator: React.FC<{ progress: number }> = ({ progress }) => {
     setProgressInPx(progress * (containerWidth - imageWidth) + "px");
   }, [progress]);
 
-  const data = useStaticQuery(graphql`
-    query {
-      progress: file(relativePath: { eq: "progress.png" }) {
-        childImageSharp {
-          fluid(maxWidth: 250) {
-            ...GatsbyImageSharpFluid
-          }
-        }
-      }
-    }
-  `);
-
   return (
     <Wrapper ref={progressWrapperRef}>
-      <Image
-        progressInPx={progressInPx}
-        ref={imageRef}
-        fluid={data.progress.childImageSharp.fluid}
-      />
+      <Image progressInPx={progressInPx} ref={imageRef} fluid={currentImage} />
     </Wrapper>
   );
 };

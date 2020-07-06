@@ -10,6 +10,7 @@ import TopRaces from "../components/Tables/TopRaces";
 import History from "../components/Tables/History";
 import { useStore } from "../contexts/Store";
 import Achievements from "../components/Achievements";
+import Cars from "../components/Cars";
 
 const GlobalStyle = createGlobalStyle<any>`
   html, body {
@@ -28,7 +29,7 @@ const GlobalStyle = createGlobalStyle<any>`
   }
 
   #gatsby-focus-wrapper{
-    padding-top: 300px;
+    padding-top: 200px;
     border: 2px solid white;
     height: 100%;
   }
@@ -90,7 +91,6 @@ const IndexPage: React.FC = () => {
   const inputRef = useRef<HTMLInputElement>(null);
   const startTimestamp = useRef<number>();
   const timerAnimationFrameRef = useRef<number>();
-
   //reset
   const resetEveryting = () => {
     dispatch({ type: "RESET" });
@@ -181,7 +181,7 @@ const IndexPage: React.FC = () => {
   return (
     <ThemeProvider theme={darkTheme}>
       <>
-        <SEO title="SzmaciuraRacer - Rafonix szmaciura" />
+        <SEO title="Szmaciura Racer - Rafonix szmaciura" />
         <GlobalStyle />
         <InnerWrapper>
           <ProgressContainer>
@@ -211,10 +211,11 @@ const IndexPage: React.FC = () => {
             error={error}
             onChange={handleInputChange}
             maxLength={inputMaxLength}
-          ></Input>
+          />
           <TopRaces history={history} />
           <History history={history} />
           <Achievements history={history} />
+          <Cars history={history} />
         </InnerWrapper>
         {onCompleteModalShown && (
           <OnCompleteModal onClose={resetEveryting} time={timePassed} />
