@@ -15,9 +15,9 @@ interface ImageProps {
 const Image = styled(Img).attrs<ImageProps>(({ progressInPx }) => ({
   style: { transform: `translateX(${progressInPx})` },
 }))<ImageProps>`
-  width: 20%;
   transition: transform 1s ease;
-  transform-origin: left;
+  width: 100%;
+  height: 100%;
 `;
 interface Props {
   progress: number;
@@ -40,7 +40,14 @@ const ProgressIndicator: React.FC<Props> = ({ progress }) => {
 
   return (
     <Wrapper ref={progressWrapperRef}>
-      <Image progressInPx={progressInPx} ref={imageRef} fluid={currentImage} />
+      <div style={{ width: "20%", height: 150 }}>
+        <Image
+          progressInPx={progressInPx}
+          ref={imageRef}
+          fluid={currentImage}
+          imgStyle={{ objectFit: "contain", objectPosition: "center bottom" }}
+        />
+      </div>
     </Wrapper>
   );
 };

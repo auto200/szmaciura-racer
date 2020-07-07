@@ -1,6 +1,6 @@
 import React from "react";
 import styled from "styled-components";
-import Img from "gatsby-image";
+import Img, { FluidObject } from "gatsby-image";
 import Tippy from "@tippyjs/react";
 
 interface ImageProps {
@@ -31,7 +31,7 @@ const Tooltip = styled(Tippy)`
 interface Props {
   active: boolean;
   available: boolean;
-  image: any;
+  image: FluidObject;
   onClick: () => void;
   description: string;
 }

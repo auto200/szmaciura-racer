@@ -33,21 +33,21 @@ const CarsContextProvider = ({ children }: { children: ReactNode }) => {
       progress: file(relativePath: { eq: "progress.png" }) {
         childImageSharp {
           fluid(maxWidth: 250) {
-            ...GatsbyImageSharpFluid
+            ...GatsbyImageSharpFluid_withWebp
           }
         }
       }
       progress2: file(relativePath: { eq: "progress2.png" }) {
         childImageSharp {
           fluid(maxWidth: 250) {
-            ...GatsbyImageSharpFluid
+            ...GatsbyImageSharpFluid_withWebp
           }
         }
       }
       progress3: file(relativePath: { eq: "progress3.png" }) {
         childImageSharp {
           fluid(maxWidth: 250) {
-            ...GatsbyImageSharpFluid
+            ...GatsbyImageSharpFluid_withWebp
           }
         }
       }
