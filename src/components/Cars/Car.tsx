@@ -3,6 +3,18 @@ import styled from "styled-components";
 import Img, { FluidObject } from "gatsby-image";
 import Tippy from "@tippyjs/react";
 
+const Tooltip = styled(Tippy)`
+  background-color: rgba(0, 0, 0, 0.9);
+  border: 2px solid ${({ theme }) => theme.colors.golden};
+  .tippy-arrow {
+    color: ${({ theme }) => theme.colors.golden};
+  }
+`;
+const ImageWrapper = styled.div<{ active: boolean }>`
+  width: 250px;
+  transform: ${({ active }) => !active && "scale(0.9)"};
+  transition: "transform 0.3s ease";
+`;
 interface ImageProps {
   available: boolean;
   active: boolean;
@@ -20,13 +32,6 @@ const Image = styled(Img)<ImageProps>`
     cursor: ${({ available }) => (available ? "pointer" : "not-allowed")};
   }
 `;
-const Tooltip = styled(Tippy)`
-  background-color: rgba(0, 0, 0, 0.9);
-  border: 2px solid ${({ theme }) => theme.colors.golden};
-  .tippy-arrow {
-    color: ${({ theme }) => theme.colors.golden};
-  }
-`;
 
 interface Props {
   active: boolean;
@@ -35,7 +40,6 @@ interface Props {
   onClick: () => void;
   description: string;
 }
-
 const Car: React.FC<Props> = ({
   active,
   available,
@@ -45,16 +49,9 @@ const Car: React.FC<Props> = ({
 }) => {
   return (
     <Tooltip content={<h2>{description}</h2>}>
-      <div
-        onClick={onClick}
-        style={{
-          width: 250,
-          transform: !active ? "scale(0.9)" : "",
-          transition: "transform 0.3s ease",
-        }}
-      >
+      <ImageWrapper onClick={onClick} active={active}>
         <Image fluid={image} available={available} active={active} />
-      </div>
+      </ImageWrapper>
     </Tooltip>
   );
 };
