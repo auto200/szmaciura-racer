@@ -60,6 +60,16 @@ const Input = styled.input<{ error: boolean }>`
   background-color: ${({ theme, error }) =>
     error ? theme.colors.error : "transparent"};
 `;
+const ResetButton = styled.button`
+  all: unset;
+  align-self: flex-end;
+  padding: 5px;
+  font-size: 1.5rem;
+  :hover {
+    color: ${({ theme }) => theme.colors.error};
+    cursor: pointer;
+  }
+`;
 
 const getTimePassedInSec = (startTime: number): string => {
   const msPassed = Date.now() - startTime;
@@ -184,6 +194,7 @@ const IndexPage: React.FC = () => {
         <SEO title="Szmaciura Racer - Rafonix szmaciura" />
         <GlobalStyle />
         <InnerWrapper>
+          <ResetButton onClick={resetEveryting}>reset</ResetButton>
           <ProgressContainer>
             <ProgressIndicator progress={wordIndex / text.length} />
             <Timer timePassed={timePassed} />
