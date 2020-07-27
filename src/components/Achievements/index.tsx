@@ -54,7 +54,7 @@ const Achievements: React.FC<Props> = ({ history }) => {
       <h1>Osiągnięcia</h1>
       <Wrapper>
         {Object.values(achievements).map(achiv => {
-          const { current, timestamp } = achiv.getStatus(history);
+          const { current, timestamp } = achiv.check(history);
           const { name, description, image, requiredToComplete } = achiv;
           return (
             <Tooltip
