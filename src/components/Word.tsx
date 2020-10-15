@@ -47,7 +47,7 @@ const Word: React.FC<Props> = ({
     <StyledWord active={active}>
       {word.split("").map((char, i) => (
         <Char
-          key={"char" + i}
+          key={i}
           cursor={active && i === charIndex}
           success={i <= lastValidCharIndex}
           error={error && i < charIndex && i > lastValidCharIndex}

@@ -203,7 +203,7 @@ const IndexPage: React.FC = () => {
             {text.map((word, i) => {
               const active = wordIndex === i;
               return (
-                <React.Fragment key={"word" + i}>
+                <React.Fragment key={i}>
                   <Word
                     word={word}
                     active={active}
