@@ -5,6 +5,9 @@ import { useCarsContext } from "../../contexts/CarsContext";
 import Car from "./Car";
 
 const Wrapper = styled.div`
+  text-align: center;
+`;
+const CarsContainer = styled.div`
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
@@ -28,23 +31,26 @@ const Cars: React.FC<Props> = ({ history }) => {
   return (
     <Wrapper>
       <h1>Wybierz sobie furke wariacie</h1>
-      {cars.map((car, i) => {
-        const available =
-          !car.minSecRequired || !!(bestTime && bestTime <= car.minSecRequired);
-        const handleClick = () => {
-          if (available) setCurrentCarIndex(i);
-        };
-        return (
-          <Car
-            key={`car${i}`}
-            active={currentCarIndex === i}
-            available={available}
-            image={car.img}
-            onClick={handleClick}
-            description={car.description}
-          />
-        );
-      })}
+      <CarsContainer>
+        {cars.map((car, i) => {
+          const available =
+            !car.minSecRequired ||
+            !!(bestTime && bestTime <= car.minSecRequired);
+          const handleClick = () => {
+            if (available) setCurrentCarIndex(i);
+          };
+          return (
+            <Car
+              key={i}
+              active={currentCarIndex === i}
+              available={available}
+              image={car.img}
+              onClick={handleClick}
+              description={car.description}
+            />
+          );
+        })}
+      </CarsContainer>
     </Wrapper>
   );
 };
