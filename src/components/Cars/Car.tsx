@@ -6,6 +6,7 @@ import Tippy from "@tippyjs/react";
 const Tooltip = styled(Tippy)`
   background-color: rgba(0, 0, 0, 0.9);
   border: 2px solid ${({ theme }) => theme.colors.golden};
+  text-align: center;
   .tippy-arrow {
     color: ${({ theme }) => theme.colors.golden};
   }
