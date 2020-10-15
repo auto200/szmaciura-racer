@@ -1,7 +1,7 @@
-import { History } from "../contexts/Store";
-import bronzeRafon from "../images/bronze_rafon.png";
-import silverRafon from "../images/silver_rafon.png";
-import goldenRafon from "../images/golden_rafon.png";
+import { History } from "../../contexts/Store";
+import bronzeRafon from "../../images/bronze_rafon.png";
+import silverRafon from "../../images/silver_rafon.png";
+import goldenRafon from "../../images/golden_rafon.png";
 
 export interface Achievement {
   name: AchievementNames;
@@ -28,7 +28,7 @@ const achievements: Achievements = {
     requiredToComplete: 10,
     description: "Napisz szmaciurę 10 razy",
     image: bronzeRafon,
-    check: function (history) {
+    check: function (history:History[]) {
       const timestamp = history
         .slice()
         .sort((a, b) => a.timestamp - b.timestamp)[this.requiredToComplete - 1]

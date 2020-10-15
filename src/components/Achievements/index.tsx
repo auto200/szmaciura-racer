@@ -1,6 +1,6 @@
 import React, { forwardRef, memo } from "react";
 import styled from "styled-components";
-import achievements from "../../achievements";
+import achievements from "./achievements_data";
 import Tippy from "@tippyjs/react";
 import { History } from "../../contexts/Store";
 import "tippy.js/dist/tippy.css";
