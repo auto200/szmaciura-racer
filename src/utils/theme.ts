@@ -1,15 +1,6 @@
-type colors = {
-  primary: string;
-  secondary: string;
-  error: string;
-  success: string;
-  golden: string;
-};
-interface theme {
-  colors: colors;
-}
+import { DefaultTheme } from "styled-components";
 
-export const darkTheme: theme = {
+export const darkTheme: DefaultTheme = {
   colors: {
     primary: "#2b2b2b",
     secondary: "#b2b2b2",
@@ -19,7 +10,7 @@ export const darkTheme: theme = {
   },
 };
 
-export const lightTheme: theme = {
+export const lightTheme: DefaultTheme = {
   colors: {
     primary: "#b2b2b2",
     secondary: "#2b2b2b",
