@@ -2,7 +2,7 @@
 
 Website 👉 https://szmaciura.pl/
 
-<img src="preview.gif" alt="preview" width="350px">
+<img src="preview.gif" alt="preview" width="500px">
 
 Race to be the fastest across all primary schools, get all the fame and the bitches right now!
 
