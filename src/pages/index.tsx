@@ -11,6 +11,7 @@ import History from "../components/Tables/History";
 import { useStore } from "../contexts/Store";
 import Achievements from "../components/Achievements";
 import Cars from "../components/Cars";
+import { FaGithub } from "react-icons/fa";
 
 const GlobalStyle = createGlobalStyle<any>`
   html, body {
@@ -34,7 +35,12 @@ const GlobalStyle = createGlobalStyle<any>`
     height: 100%;
   }
 `;
-
+const GithubIconContainer = styled.a`
+  color: ${({ theme }) => theme.colors.secondary};
+  position: fixed;
+  top: 5px;
+  left: 5px;
+`;
 const InnerWrapper = styled.div`
   display: flex;
   flex-direction: column;
@@ -76,11 +82,6 @@ const getTimePassedInSec = (startTime: number): string => {
   const seconds = msPassed / 1000;
   return seconds.toFixed(2);
 };
-
-// Pomysły:
-// samochody do wybierania odblokowywane za lepszy czas
-
-//TODO: fix poor performance of interval, setting state in interval here causes all the components to rerender
 
 const IndexPage: React.FC = () => {
   const {
@@ -193,6 +194,13 @@ const IndexPage: React.FC = () => {
       <>
         <SEO title="Szmaciura Racer - Rafonix szmaciura" />
         <GlobalStyle />
+        <GithubIconContainer
+          href="https://github.com/auto200/szmaciura-racer"
+          target="_blank"
+          title="Github"
+        >
+          <FaGithub />
+        </GithubIconContainer>
         <InnerWrapper>
           <ResetButton onClick={resetEveryting}>reset</ResetButton>
           <ProgressContainer>
