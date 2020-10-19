@@ -1,7 +1,7 @@
 import { History } from "../../contexts/Store";
-import bronzeRafon from "../../images/bronze_rafon.png";
-import silverRafon from "../../images/silver_rafon.png";
-import goldenRafon from "../../images/golden_rafon.png";
+import bronzeRafon from "../../assets/achievements/bronze_rafon.png";
+import silverRafon from "../../assets/achievements/silver_rafon.png";
+import goldenRafon from "../../assets/achievements/golden_rafon.png";
 
 export interface Achievement {
   name: AchievementNames;

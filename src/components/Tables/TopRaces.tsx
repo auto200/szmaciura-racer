@@ -16,23 +16,24 @@ const TopRaces = ({ history }: Props) => {
 
   //could use just single image and apply filters to it. Helper -- https://codepen.io/sosuke/pen/Pjoqqp
   //filter: invert(4%) sepia(97%) saturate(472%) hue-rotate(3deg) brightness(112%) contrast(101%);
+  //HOWEVER this approach exclude using different images for ex. other type of achievements
   const data = useStaticQuery(graphql`
     query {
-      golden: file(relativePath: { eq: "golden_rafon.png" }) {
+      golden: file(relativePath: { eq: "achievements/golden_rafon.png" }) {
         childImageSharp {
           fixed(width: 100) {
             ...GatsbyImageSharpFixed_withWebp
           }
         }
       }
-      silver: file(relativePath: { eq: "silver_rafon.png" }) {
+      silver: file(relativePath: { eq: "achievements/silver_rafon.png" }) {
         childImageSharp {
           fixed(width: 100) {
             ...GatsbyImageSharpFixed_withWebp
           }
         }
       }
-      bronze: file(relativePath: { eq: "bronze_rafon.png" }) {
+      bronze: file(relativePath: { eq: "achievements/bronze_rafon.png" }) {
         childImageSharp {
           fixed(width: 100) {
             ...GatsbyImageSharpFixed_withWebp

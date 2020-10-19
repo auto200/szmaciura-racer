@@ -30,21 +30,21 @@ export interface CarI {
 const CarsContextProvider = ({ children }: { children: ReactNode }) => {
   const data = useStaticQuery(graphql`
     query {
-      progress: file(relativePath: { eq: "progress.png" }) {
+      progress: file(relativePath: { eq: "cars/progress.png" }) {
         childImageSharp {
           fluid(maxWidth: 250) {
             ...GatsbyImageSharpFluid_withWebp
           }
         }
       }
-      progress2: file(relativePath: { eq: "progress2.png" }) {
+      progress2: file(relativePath: { eq: "cars/progress2.png" }) {
         childImageSharp {
           fluid(maxWidth: 250) {
             ...GatsbyImageSharpFluid_withWebp
           }
         }
       }
-      progress3: file(relativePath: { eq: "progress3.png" }) {
+      progress3: file(relativePath: { eq: "cars/progress3.png" }) {
         childImageSharp {
           fluid(maxWidth: 250) {
             ...GatsbyImageSharpFluid_withWebp
