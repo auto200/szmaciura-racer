@@ -23,6 +23,7 @@ export interface State {
   timePassed: string;
   onCompleteModalShown: boolean;
   history: History[];
+  socket?: SocketIOClient.Socket;
 }
 
 const initialState: State = {
@@ -35,6 +36,7 @@ const initialState: State = {
   timePassed: "0",
   onCompleteModalShown: false,
   history: [],
+  socket: undefined,
 };
 
 const StoreContext = createContext<{
@@ -58,7 +60,10 @@ export type Action =
   | { type: "SET_TIME_PASSED"; payload: string }
   | { type: "SET_ERROR"; payload: boolean }
   | { type: "SET_TIME_PASSED"; payload: string }
-  | { type: "SET_HISTORY"; payload: History[] };
+  | { type: "SET_HISTORY"; payload: History[] }
+  //online
+  | { type: "SET_SOCKET"; payload: SocketIOClient.Socket }
+  | { type: "CLOSE_SOCKET" };
 
 const reducer = (state: State, action: Action) => {
   switch (action.type) {
@@ -119,6 +124,15 @@ const reducer = (state: State, action: Action) => {
     }
     case "SET_HISTORY": {
       state.history = action.payload;
+      return;
+    }
+    //online
+    case "SET_SOCKET": {
+      state.socket = action.payload;
+      return;
+    }
+    case "CLOSE_SOCKET": {
+      state.socket = undefined;
       return;
     }
     default:

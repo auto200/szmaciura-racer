@@ -1,4 +1,4 @@
-import React, { useEffect, ChangeEvent, useRef } from "react";
+import React, { useEffect, ChangeEvent, useRef, useState } from "react";
 import SEO from "../components/Seo";
 import styled, { createGlobalStyle, ThemeProvider } from "styled-components";
 import { darkTheme } from "../utils/theme";
@@ -12,6 +12,7 @@ import { useStore } from "../contexts/Store";
 import Achievements from "../components/Achievements";
 import Cars from "../components/Cars";
 import { FaGithub } from "react-icons/fa";
+import io from "socket.io-client";
 
 const GlobalStyle = createGlobalStyle<any>`
   html, body {
@@ -95,37 +96,51 @@ const IndexPage: React.FC = () => {
       timePassed,
       onCompleteModalShown,
       history,
+      socket,
     },
     dispatch,
   } = useStore();
+  const [online, setOnline] = useState<boolean>(false);
 
   const inputRef = useRef<HTMLInputElement>(null);
-  const startTimestamp = useRef<number>();
+  const startTimestampRef = useRef<number>();
   const timerAnimationFrameRef = useRef<number>();
   //reset
   const resetEveryting = () => {
     dispatch({ type: "RESET" });
-    startTimestamp.current = undefined;
+    startTimestampRef.current = undefined;
     timerAnimationFrameRef.current = undefined;
   };
 
   useEffect(() => {
-    inputRef.current?.focus();
-
+    //cleanup
     return () => {
       if (timerAnimationFrameRef.current) {
         cancelAnimationFrame(timerAnimationFrameRef.current);
       }
     };
   }, []);
+  console.log(online);
+  useEffect(() => {
+    if (online) {
+      const socket = io(process.env.SOCKET_URL!);
+      socket.on("xd", (data: any) => {
+        console.log(data);
+      });
+      dispatch({ type: "SET_SOCKET", payload: socket });
+      console.log(socket);
+    } else {
+      dispatch({ type: "CLOSE_SOCKET" });
+    }
+  }, [online]);
 
   useEffect(() => {
     //correct final word
     if (inputValue === text[wordIndex] && wordIndex === text.length - 1) {
       if (timerAnimationFrameRef.current) {
         cancelAnimationFrame(timerAnimationFrameRef.current);
-        if (startTimestamp.current) {
-          const seconds = getTimePassedInSec(startTimestamp.current);
+        if (startTimestampRef.current) {
+          const seconds = getTimePassedInSec(startTimestampRef.current);
           dispatch({ type: "SET_TIME_PASSED", payload: seconds });
         }
       }
@@ -163,15 +178,15 @@ const IndexPage: React.FC = () => {
     }
     const updateTimer = () =>
       requestAnimationFrame(() => {
-        if (startTimestamp.current) {
-          const seconds = getTimePassedInSec(startTimestamp.current);
+        if (startTimestampRef.current) {
+          const seconds = getTimePassedInSec(startTimestampRef.current);
           dispatch({ type: "SET_TIME_PASSED", payload: seconds });
           timerAnimationFrameRef.current = updateTimer();
         }
       });
 
     if (wordIndex === 0 && inputValue.length === 1) {
-      startTimestamp.current = Date.now();
+      startTimestampRef.current = Date.now();
       if (!timerAnimationFrameRef.current) {
         timerAnimationFrameRef.current = updateTimer();
       }
@@ -201,6 +216,9 @@ const IndexPage: React.FC = () => {
         >
           <FaGithub />
         </GithubIconContainer>
+        <button onClick={() => setOnline(prev => !prev)}>
+          {online ? "Go offline" : "GO online!"}
+        </button>
         <InnerWrapper>
           <ResetButton onClick={resetEveryting}>reset</ResetButton>
           <ProgressContainer>
@@ -230,6 +248,7 @@ const IndexPage: React.FC = () => {
             error={error}
             onChange={handleInputChange}
             maxLength={inputMaxLength}
+            autoFocus
           />
           <TopRaces history={history} />
           <History history={history} />
