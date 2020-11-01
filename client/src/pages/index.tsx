@@ -1,56 +1,17 @@
-import React, { useEffect, ChangeEvent, useRef, useState } from "react";
-import SEO from "../components/Seo";
-import styled, { createGlobalStyle, ThemeProvider } from "styled-components";
-import { darkTheme } from "../utils/theme";
-import ProgressIndicator from "../components/ProgressIndicator";
-import Timer from "../components/Timer";
-import Word from "../components/Word";
-import OnCompleteModal from "../components/OnCompleteModal";
-import TopRaces from "../components/Tables/TopRaces";
-import History from "../components/Tables/History";
-import { useStore } from "../contexts/Store";
+import { Link } from "gatsby";
+import React, { ChangeEvent, useEffect, useRef } from "react";
+import styled from "styled-components";
 import Achievements from "../components/Achievements";
 import Cars from "../components/Cars";
-import { FaGithub } from "react-icons/fa";
-import io from "socket.io-client";
+import Layout from "../components/Layout";
+import OnCompleteModal from "../components/OnCompleteModal";
+import ProgressIndicator from "../components/ProgressIndicator";
+import History from "../components/Tables/History";
+import TopRaces from "../components/Tables/TopRaces";
+import Timer from "../components/Timer";
+import Word from "../components/Word";
+import { useStore } from "../contexts/Store";
 
-const GlobalStyle = createGlobalStyle<any>`
-  html, body {
-    background-color: ${({ theme }) => theme.colors.primary};
-    color: ${({ theme }) => theme.colors.secondary};
-    display: flex;
-    justify-content: center;
-    min-height: 100vh;
-    font-size: 1.3rem;
-  }
-
-  *, *::before, *::after {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
-
-  #gatsby-focus-wrapper{
-    padding-top: 200px;
-    border: 2px solid white;
-    height: 100%;
-  }
-`;
-const GithubIconContainer = styled.a`
-  color: ${({ theme }) => theme.colors.secondary};
-  position: fixed;
-  top: 5px;
-  left: 5px;
-`;
-const InnerWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  max-width: 1024px;
-  height: 100%;
-  padding: 5px 20px;
-`;
 const ProgressContainer = styled.div`
   width: 100%;
   display: flex;
@@ -96,11 +57,9 @@ const IndexPage: React.FC = () => {
       timePassed,
       onCompleteModalShown,
       history,
-      socket,
     },
     dispatch,
   } = useStore();
-  const [online, setOnline] = useState<boolean>(false);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const startTimestampRef = useRef<number>();
@@ -120,19 +79,6 @@ const IndexPage: React.FC = () => {
       }
     };
   }, []);
-  console.log(online);
-  useEffect(() => {
-    if (online) {
-      const socket = io(process.env.SOCKET_URL!);
-      socket.on("xd", (data: any) => {
-        console.log(data);
-      });
-      dispatch({ type: "SET_SOCKET", payload: socket });
-      console.log(socket);
-    } else {
-      dispatch({ type: "CLOSE_SOCKET" });
-    }
-  }, [online]);
 
   useEffect(() => {
     //correct final word
@@ -205,61 +151,48 @@ const IndexPage: React.FC = () => {
   };
 
   return (
-    <ThemeProvider theme={darkTheme}>
-      <>
-        <SEO title="Szmaciura Racer - Rafonix szmaciura" />
-        <GlobalStyle />
-        <GithubIconContainer
-          href="https://github.com/auto200/szmaciura-racer"
-          target="_blank"
-          title="Github"
-        >
-          <FaGithub />
-        </GithubIconContainer>
-        <button onClick={() => setOnline(prev => !prev)}>
-          {online ? "Go offline" : "GO online!"}
-        </button>
-        <InnerWrapper>
-          <ResetButton onClick={resetEveryting}>reset</ResetButton>
-          <ProgressContainer>
-            <ProgressIndicator progress={wordIndex / text.length} />
-            <Timer timePassed={timePassed} />
-          </ProgressContainer>
-          <TextWrapper>
-            {text.map((word, i) => {
-              const active = wordIndex === i;
-              return (
-                <React.Fragment key={i}>
-                  <Word
-                    word={word}
-                    active={active}
-                    error={active ? error : false}
-                    lastValidCharIndex={active ? lastValidCharIndex : -1}
-                    charIndex={active ? inputValue.length : 0}
-                  />{" "}
-                </React.Fragment>
-              );
-            })}
-          </TextWrapper>
-          <Input
-            type="text"
-            ref={inputRef}
-            value={inputValue}
-            error={error}
-            onChange={handleInputChange}
-            maxLength={inputMaxLength}
-            autoFocus
-          />
-          <TopRaces history={history} />
-          <History history={history} />
-          <Achievements history={history} />
-          <Cars history={history} />
-        </InnerWrapper>
-        {onCompleteModalShown && (
-          <OnCompleteModal onClose={resetEveryting} time={timePassed} />
-        )}
-      </>
-    </ThemeProvider>
+    <Layout>
+      <Link to="/online">
+        <button>GO online!</button>
+      </Link>
+      <ResetButton onClick={resetEveryting}>reset</ResetButton>
+      <ProgressContainer>
+        <ProgressIndicator progress={wordIndex / text.length} />
+        <Timer timePassed={timePassed} />
+      </ProgressContainer>
+      <TextWrapper>
+        {text.map((word, i) => {
+          const active = wordIndex === i;
+          return (
+            <React.Fragment key={i}>
+              <Word
+                word={word}
+                active={active}
+                error={active ? error : false}
+                lastValidCharIndex={active ? lastValidCharIndex : -1}
+                charIndex={active ? inputValue.length : 0}
+              />{" "}
+            </React.Fragment>
+          );
+        })}
+      </TextWrapper>
+      <Input
+        type="text"
+        ref={inputRef}
+        value={inputValue}
+        error={error}
+        onChange={handleInputChange}
+        maxLength={inputMaxLength}
+        autoFocus
+      />
+      <TopRaces history={history} />
+      <History history={history} />
+      <Achievements history={history} />
+      <Cars history={history} />
+      {onCompleteModalShown && (
+        <OnCompleteModal onClose={resetEveryting} time={timePassed} />
+      )}
+    </Layout>
   );
 };
 
