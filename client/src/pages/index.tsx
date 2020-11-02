@@ -10,6 +10,7 @@ import History from "../components/Tables/History";
 import TopRaces from "../components/Tables/TopRaces";
 import Timer from "../components/Timer";
 import Word from "../components/Word";
+import { useCarsContext } from "../contexts/CarsContext";
 import { useStore } from "../contexts/Store";
 
 const ProgressContainer = styled.div`
@@ -61,7 +62,8 @@ const IndexPage: React.FC = () => {
     dispatch,
   } = useStore();
 
-  const inputRef = useRef<HTMLInputElement>(null);
+  const { currentImage: progressImage } = useCarsContext();
+
   const startTimestampRef = useRef<number>();
   const timerAnimationFrameRef = useRef<number>();
   //reset
@@ -157,7 +159,10 @@ const IndexPage: React.FC = () => {
       </Link>
       <ResetButton onClick={resetEveryting}>reset</ResetButton>
       <ProgressContainer>
-        <ProgressIndicator progress={wordIndex / text.length} />
+        <ProgressIndicator
+          progress={wordIndex / text.length}
+          progressImage={progressImage}
+        />
         <Timer timePassed={timePassed} />
       </ProgressContainer>
       <TextWrapper>
@@ -178,7 +183,6 @@ const IndexPage: React.FC = () => {
       </TextWrapper>
       <Input
         type="text"
-        ref={inputRef}
         value={inputValue}
         error={error}
         onChange={handleInputChange}

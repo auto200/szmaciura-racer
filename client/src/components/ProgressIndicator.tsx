@@ -1,7 +1,6 @@
 import React, { useRef, useEffect, useState, memo } from "react";
 import styled from "styled-components";
-import Img from "gatsby-image";
-import { useCarsContext } from "../contexts/CarsContext";
+import Img, { FluidObject } from "gatsby-image";
 
 const Wrapper = styled.div`
   flex-grow: 1;
@@ -21,9 +20,9 @@ const Image = styled(Img).attrs<ImageProps>(({ progressInPx }) => ({
 `;
 interface Props {
   progress: number;
+  progressImage: FluidObject;
 }
-const ProgressIndicator: React.FC<Props> = ({ progress }) => {
-  const { currentImage } = useCarsContext();
+const ProgressIndicator: React.FC<Props> = ({ progress, progressImage }) => {
   const progressWrapperRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<any>(null);
   const [progressInPx, setProgressInPx] = useState<string>("0px");
@@ -44,7 +43,8 @@ const ProgressIndicator: React.FC<Props> = ({ progress }) => {
         <Image
           progressInPx={progressInPx}
           ref={imageRef}
-          fluid={currentImage}
+          //@ts-ignore
+          fluid={progressImage}
           imgStyle={{ objectFit: "contain", objectPosition: "center bottom" }}
         />
       </div>
