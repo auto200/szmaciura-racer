@@ -20,19 +20,26 @@ const GlobalStyle = createGlobalStyle<any>`
   }
 
   #gatsby-focus-wrapper{
-    padding-top: 200px;
-    border: 2px solid white;
-    height: 100%;
+   height:100%;
   }
 `;
-const InnerWrapper = styled.div`
+const Wrapper = styled.div`
+  width: 1024px;
+  height: 100%;
+  padding: 5px 20px;
+  border: 2px solid white;
+  height: 100%;
+`;
+const ContentContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 1024px;
-  height: 100%;
-  padding: 5px 20px;
+`;
+const Header = styled.header`
+  height: 150px;
+  text-align: center;
+  font-size: 2rem;
 `;
 
 const Layout: React.FC = ({ children }) => {
@@ -41,7 +48,10 @@ const Layout: React.FC = ({ children }) => {
       <GlobalStyle />
       <SEO title="Szmaciura Racer - Rafonix szmaciura" />
       <GithubLink />
-      <InnerWrapper>{children}</InnerWrapper>
+      <Wrapper>
+        <Header>Szmaciura Racer</Header>
+        <ContentContainer>{children}</ContentContainer>
+      </Wrapper>
     </>
   );
 };
