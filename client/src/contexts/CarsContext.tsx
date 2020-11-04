@@ -12,7 +12,7 @@ interface State {
   currentImage: FluidObject;
   currentCarIndex?: number;
   setCurrentCarIndex: any;
-  cars: CarI[];
+  cars: Car[];
 }
 const CarContext = createContext<State>({
   currentImage: {} as FluidObject,
@@ -21,7 +21,7 @@ const CarContext = createContext<State>({
   cars: [],
 });
 
-export interface CarI {
+export interface Car {
   minSecRequired: number;
   img: FluidObject;
   description: string;
@@ -55,7 +55,7 @@ const CarsContextProvider = ({ children }: { children: ReactNode }) => {
   `);
   const [currentCarIndex, setCurrentCarIndex] = useState<number>();
 
-  const [cars] = useState<CarI[]>([
+  const [cars] = useState<Car[]>([
     {
       minSecRequired: 0,
       img: data.progress.childImageSharp.fluid,
