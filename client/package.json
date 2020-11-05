@@ -22,6 +22,7 @@
     "gatsby-source-filesystem": "^2.3.34",
     "gatsby-transformer-sharp": "^2.5.17",
     "immer": "^7.0.9",
+    "lodash": "^4.17.20",
     "prop-types": "^15.7.2",
     "react": "^16.14.0",
     "react-dom": "^16.14.0",
