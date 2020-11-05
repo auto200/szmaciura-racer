@@ -3,19 +3,18 @@ import React, {
   ReactNode,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from "react";
 import { useStaticQuery, graphql } from "gatsby";
 import { FluidObject } from "gatsby-image";
 
 interface State {
-  currentImage: FluidObject;
-  currentCarIndex?: number;
+  currentCarIndex: number;
   setCurrentCarIndex: any;
   cars: Car[];
 }
 const CarContext = createContext<State>({
-  currentImage: {} as FluidObject,
   currentCarIndex: 0,
   setCurrentCarIndex: () => {},
   cars: [],
@@ -53,8 +52,8 @@ const CarsContextProvider = ({ children }: { children: ReactNode }) => {
       }
     }
   `);
-  const [currentCarIndex, setCurrentCarIndex] = useState<number>();
-
+  const [currentCarIndex, setCurrentCarIndex] = useState<number>(0);
+  const firstRenderRef = useRef(true);
   const [cars] = useState<Car[]>([
     {
       minSecRequired: 0,
@@ -72,12 +71,9 @@ const CarsContextProvider = ({ children }: { children: ReactNode }) => {
       description: "35s i ta fura jest twoja",
     },
   ]);
-  const [currentImage, setCurrentImage] = useState<FluidObject>(
-    cars[currentCarIndex || 0].img
-  );
 
   useEffect(() => {
-    if (currentCarIndex === undefined) {
+    if (firstRenderRef.current) {
       try {
         const storedCarIndex = window.localStorage.getItem("currentCarIndex");
         if (storedCarIndex) {
@@ -86,11 +82,11 @@ const CarsContextProvider = ({ children }: { children: ReactNode }) => {
           throw new Error();
         }
       } catch (err) {
-        //data corrupted or smth
+        //data corrupted or no data stored
         setCurrentCarIndex(0);
       }
+      firstRenderRef.current = false;
     } else {
-      setCurrentImage(cars[currentCarIndex].img);
       try {
         window.localStorage.setItem(
           "currentCarIndex",
@@ -101,7 +97,6 @@ const CarsContextProvider = ({ children }: { children: ReactNode }) => {
   }, [currentCarIndex]);
 
   const values = {
-    currentImage,
     currentCarIndex,
     setCurrentCarIndex,
     cars,

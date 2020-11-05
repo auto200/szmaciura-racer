@@ -21,14 +21,7 @@ const ProgressContainer = styled.div`
 const TextWrapper = styled.div`
   padding: 30px;
 `;
-const Input = styled.input<{ error: boolean }>`
-  width: 50%;
-  height: 30px;
-  font-size: 25px;
-  color: white;
-  background-color: ${({ theme, error }) =>
-    error ? theme.colors.error : "transparent"};
-`;
+
 const ResetButton = styled.button`
   all: unset;
   align-self: flex-end;
@@ -38,6 +31,15 @@ const ResetButton = styled.button`
     color: ${({ theme }) => theme.colors.error};
     cursor: pointer;
   }
+`;
+
+const Input = styled.input<{ error: boolean }>`
+  width: 50%;
+  height: 30px;
+  font-size: 25px;
+  color: white;
+  background-color: ${({ theme, error }) =>
+    error ? theme.colors.error : "transparent"};
 `;
 
 const getTimePassedInSec = (startTime: number): string => {
@@ -62,7 +64,7 @@ const IndexPage: React.FC = () => {
     dispatch,
   } = useStore();
 
-  const { currentImage: progressImage } = useCarsContext();
+  const { currentCarIndex } = useCarsContext();
 
   const startTimestampRef = useRef<number>();
   const timerAnimationFrameRef = useRef<number>();
@@ -154,14 +156,19 @@ const IndexPage: React.FC = () => {
 
   return (
     <Layout>
-      <Link to="/online">
-        <button>GO online!</button>
+      <Link to={"/online"}>
+        <button>GO online</button>
       </Link>
       <ResetButton onClick={resetEveryting}>reset</ResetButton>
       <ProgressContainer>
         <ProgressIndicator
-          progress={wordIndex / text.length}
-          progressImage={progressImage}
+          players={[
+            {
+              id: "player",
+              carIndex: currentCarIndex,
+              progress: wordIndex / text.length,
+            },
+          ]}
         />
         <Timer timePassed={timePassed} />
       </ProgressContainer>
