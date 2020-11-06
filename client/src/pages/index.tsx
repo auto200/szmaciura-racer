@@ -1,8 +1,9 @@
 import { Link } from "gatsby";
-import React, { ChangeEvent, useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import styled from "styled-components";
 import Achievements from "../components/Achievements";
 import Cars from "../components/Cars";
+import Input from "../components/Input";
 import Layout from "../components/Layout";
 import OnCompleteModal from "../components/OnCompleteModal";
 import ProgressIndicator from "../components/ProgressIndicator";
@@ -21,14 +22,7 @@ const ProgressContainer = styled.div`
 const TextWrapper = styled.div`
   padding: 30px;
 `;
-const Input = styled.input<{ error: boolean }>`
-  width: 50%;
-  height: 30px;
-  font-size: 25px;
-  color: white;
-  background-color: ${({ theme, error }) =>
-    error ? theme.colors.error : "transparent"};
-`;
+
 const ResetButton = styled.button`
   all: unset;
   align-self: flex-end;
@@ -51,8 +45,8 @@ const IndexPage: React.FC = () => {
     state: {
       text,
       wordIndex,
+      inputLength,
       lastValidCharIndex,
-      inputValue,
       inputMaxLength,
       error,
       timePassed,
@@ -72,55 +66,19 @@ const IndexPage: React.FC = () => {
     startTimestampRef.current = undefined;
     timerAnimationFrameRef.current = undefined;
   };
+  const resetTimer = () => {
+    if (timerAnimationFrameRef.current) {
+      cancelAnimationFrame(timerAnimationFrameRef.current);
+    }
+  };
 
   useEffect(() => {
     //cleanup
-    return () => {
-      if (timerAnimationFrameRef.current) {
-        cancelAnimationFrame(timerAnimationFrameRef.current);
-      }
-    };
+    return resetTimer;
   }, []);
 
   useEffect(() => {
-    //correct final word
-    if (inputValue === text[wordIndex] && wordIndex === text.length - 1) {
-      if (timerAnimationFrameRef.current) {
-        cancelAnimationFrame(timerAnimationFrameRef.current);
-        if (startTimestampRef.current) {
-          const seconds = getTimePassedInSec(startTimestampRef.current);
-          dispatch({ type: "SET_TIME_PASSED", payload: seconds });
-        }
-      }
-      dispatch({ type: "RACE_COMPLETED" });
-      return;
-    }
-    //word correctly typed
-    if (inputValue === text[wordIndex] + " ") {
-      dispatch({ type: "PROCEED_TO_NEXT_WORD" });
-      return;
-    }
-    if (!inputValue) {
-      dispatch({ type: "INPUT_EMPTY" });
-      return;
-    }
-    if (text[wordIndex].startsWith(inputValue)) {
-      dispatch({ type: "CORRECT_INPUT_VALUE" });
-      return;
-    }
-    dispatch({ type: "SET_ERROR", payload: true });
-  }, [inputValue]);
-
-  useEffect(() => {
-    if (wordIndex >= text.length) {
-      dispatch({ type: "SET_WORD_INDEX", payload: 0 });
-      return;
-    }
-  }, [wordIndex]);
-
-  //start/restart timer on first character of first word
-  useEffect(() => {
-    if (wordIndex === 0 && inputValue.length === 0) {
+    if (wordIndex === 0 && inputLength === 0) {
       resetEveryting();
       return;
     }
@@ -133,24 +91,14 @@ const IndexPage: React.FC = () => {
         }
       });
 
-    if (wordIndex === 0 && inputValue.length === 1) {
+    //first keystroke of first word
+    if (wordIndex === 0 && inputLength === 1) {
       startTimestampRef.current = Date.now();
       if (!timerAnimationFrameRef.current) {
         timerAnimationFrameRef.current = updateTimer();
       }
     }
-  }, [wordIndex, inputValue]);
-
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    if (inputValue.length - 1 >= inputMaxLength) {
-      //add alert later on with instructions to user how to play
-      return;
-    }
-    dispatch({
-      type: "SET_INPUT_VALUE",
-      payload: e.target.value.toLowerCase(),
-    });
-  };
+  }, [wordIndex, inputLength]);
 
   return (
     <Layout>
@@ -180,18 +128,28 @@ const IndexPage: React.FC = () => {
                 active={active}
                 error={active ? error : false}
                 lastValidCharIndex={active ? lastValidCharIndex : -1}
-                charIndex={active ? inputValue.length : 0}
+                charIndex={active ? inputLength : 0}
               />{" "}
             </React.Fragment>
           );
         })}
       </TextWrapper>
       <Input
-        type="text"
-        value={inputValue}
+        word={text[wordIndex]}
         error={error}
-        onChange={handleInputChange}
         maxLength={inputMaxLength}
+        isLastWord={wordIndex === text.length - 1}
+        onChange={value => {
+          dispatch({ type: "SET_INPUT_LENGTH", payload: value.length });
+        }}
+        onWordCompleted={() => dispatch({ type: "PROCEED_TO_NEXT_WORD" })}
+        onLastWordCompleted={() => {
+          dispatch({ type: "RACE_COMPLETED" });
+          resetTimer();
+        }}
+        onEmpty={() => dispatch({ type: "INPUT_EMPTY" })}
+        onCorrectLetter={() => dispatch({ type: "CORRECT_INPUT_VALUE" })}
+        onError={() => dispatch({ type: "SET_ERROR", payload: true })}
         autoFocus
       />
       <TopRaces history={history} />

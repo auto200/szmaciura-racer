@@ -5,7 +5,7 @@ import { getInputMaxLength } from "../utils";
 
 const szmaciuraText =
   "ty no nie wiem jak tam twoja szmaciura jebana zrogowaciala niedzwiedzica co sie kurwi pod mostem za wojaka i siada kurwa na butle od vanisha i kurwe w taczce pijana wozili po osiedlu wiesz o co chodzi mnie nie przegadasz bo mi sperme z paly zjadasz frajerze zrogowacialy frajerska chmuro chuj ci na matule i jebac ci starego";
-const splittedText = szmaciuraText.split(" ");
+const splittedText = szmaciuraText.trim().split(" ");
 
 export type History = {
   id: string;
@@ -16,8 +16,8 @@ export type History = {
 export interface State {
   text: string[];
   wordIndex: number;
+  inputLength: number;
   lastValidCharIndex: number;
-  inputValue: string;
   inputMaxLength: number;
   error: boolean;
   timePassed: string;
@@ -29,8 +29,8 @@ export interface State {
 const initialState: State = {
   text: splittedText,
   wordIndex: 0,
+  inputLength: 0,
   lastValidCharIndex: -1,
-  inputValue: "",
   inputMaxLength: getInputMaxLength(splittedText[0]),
   error: false,
   timePassed: "0",
@@ -47,8 +47,6 @@ const StoreContext = createContext<{
   dispatch: () => null,
 });
 export type Action =
-  | { type: "SET_WORD_INDEX"; payload: number }
-  | { type: "SET_INPUT_VALUE"; payload: string }
   | {
       type:
         | "RESET"
@@ -58,29 +56,26 @@ export type Action =
         | "CORRECT_INPUT_VALUE";
     }
   | { type: "SET_TIME_PASSED"; payload: string }
+  | { type: "SET_INPUT_LENGTH"; payload: number }
   | { type: "SET_ERROR"; payload: boolean }
   | { type: "SET_TIME_PASSED"; payload: string }
-  | { type: "SET_HISTORY"; payload: History[] }
-  //online
-  | { type: "SET_SOCKET"; payload: SocketIOClient.Socket }
-  | { type: "CLOSE_SOCKET" };
+  | { type: "SET_HISTORY"; payload: History[] };
 
 const reducer = (state: State, action: Action) => {
   switch (action.type) {
-    case "SET_WORD_INDEX": {
-      state.wordIndex = action.payload;
-      return;
-    }
     case "RESET": {
       state.wordIndex = 0;
       state.lastValidCharIndex = -1;
-      state.inputValue = "";
       state.timePassed = "0";
       state.onCompleteModalShown = false;
       return;
     }
     case "SET_TIME_PASSED": {
       state.timePassed = action.payload;
+      return;
+    }
+    case "SET_INPUT_LENGTH": {
+      state.inputLength = action.payload;
       return;
     }
     case "RACE_COMPLETED": {
@@ -95,8 +90,8 @@ const reducer = (state: State, action: Action) => {
     case "PROCEED_TO_NEXT_WORD": {
       const nextWordIndex = state.wordIndex + 1;
       state.wordIndex = nextWordIndex;
-      state.inputValue = "";
       state.lastValidCharIndex = -1;
+      state.inputLength = 0;
       state.inputMaxLength = getInputMaxLength(state.text[nextWordIndex]);
       return;
     }
@@ -106,7 +101,7 @@ const reducer = (state: State, action: Action) => {
       return;
     }
     case "CORRECT_INPUT_VALUE": {
-      state.lastValidCharIndex = state.inputValue.length - 1;
+      state.lastValidCharIndex = state.inputLength - 1;
       state.error = false;
       return;
     }
@@ -118,21 +113,8 @@ const reducer = (state: State, action: Action) => {
       state.timePassed = action.payload;
       return;
     }
-    case "SET_INPUT_VALUE": {
-      state.inputValue = action.payload;
-      return;
-    }
     case "SET_HISTORY": {
       state.history = action.payload;
-      return;
-    }
-    //online
-    case "SET_SOCKET": {
-      state.socket = action.payload;
-      return;
-    }
-    case "CLOSE_SOCKET": {
-      state.socket = undefined;
       return;
     }
     default:
