@@ -7,21 +7,13 @@ import Input from "../components/Input";
 import Layout from "../components/Layout";
 import OnCompleteModal from "../components/OnCompleteModal";
 import ProgressIndicator from "../components/ProgressIndicator";
+import { ProgressContainer, TextWrapper } from "../components/sharedStyled";
 import History from "../components/Tables/History";
 import TopRaces from "../components/Tables/TopRaces";
 import Timer, { TimerFunctions } from "../components/Timer";
 import Word from "../components/Word";
 import { useCarsContext } from "../contexts/CarsContext";
 import { useStore } from "../contexts/Store";
-
-const ProgressContainer = styled.div`
-  width: 100%;
-  display: flex;
-  align-items: center;
-`;
-const TextWrapper = styled.div`
-  padding: 30px;
-`;
 
 const ResetButton = styled.button`
   all: unset;
@@ -72,7 +64,7 @@ const IndexPage: React.FC = () => {
     //first keystroke of first word
     if (wordIndex === 0 && inputLength === 1) {
       timerRef.current?.start();
-      }
+    }
   }, [wordIndex, inputLength]);
 
   return (
