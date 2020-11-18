@@ -34,9 +34,8 @@ const io = socketio(server);
 io.of("/game").on("connection", (socket) => {
   console.log("new client connected");
   socket.on("disconnect", (reason) => {
-    if (socket.id === queue[0].id) {
-      queue = [];
-    }
+    queue = queue.filter((player) => player.id !== socket.id);
+
     console.log("client disconnected", reason);
   });
 
@@ -47,13 +46,9 @@ io.of("/game").on("connection", (socket) => {
       //TODO: check if time to start match is greater than threshold
     );
     if (freeRoom && freeRoom.players.length < ROOM_MAX_PLAYERS) {
-      socket.join(freeRoom.id, (err) => {
-        if (err) return;
-        freeRoom.players.push(getNewPlayer(socket.id));
-        io.of("/game")
-          .to(freeRoom.id)
-          .emit(SOCKET_EVENTS.UPDATE_ROOM, freeRoom);
-      });
+      socket.join(freeRoom.id);
+      freeRoom.players.push(getNewPlayer(socket.id));
+      io.of("/game").to(freeRoom.id).emit(SOCKET_EVENTS.UPDATE_ROOM, freeRoom);
       return;
     }
 
