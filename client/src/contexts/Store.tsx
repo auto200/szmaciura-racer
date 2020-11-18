@@ -20,10 +20,8 @@ export interface State {
   lastValidCharIndex: number;
   inputMaxLength: number;
   error: boolean;
-  timePassed: string;
   onCompleteModalShown: boolean;
   history: History[];
-  socket?: SocketIOClient.Socket;
 }
 
 const initialState: State = {
@@ -33,10 +31,8 @@ const initialState: State = {
   lastValidCharIndex: -1,
   inputMaxLength: getInputMaxLength(splittedText[0]),
   error: false,
-  timePassed: "0",
   onCompleteModalShown: false,
   history: [],
-  socket: undefined,
 };
 
 const StoreContext = createContext<{
@@ -50,15 +46,13 @@ export type Action =
   | {
       type:
         | "RESET"
-        | "RACE_COMPLETED"
         | "PROCEED_TO_NEXT_WORD"
         | "INPUT_EMPTY"
         | "CORRECT_INPUT_VALUE";
     }
-  | { type: "SET_TIME_PASSED"; payload: string }
+  | { type: "RACE_COMPLETED"; payload: string }
   | { type: "SET_INPUT_LENGTH"; payload: number }
   | { type: "SET_ERROR"; payload: boolean }
-  | { type: "SET_TIME_PASSED"; payload: string }
   | { type: "SET_HISTORY"; payload: History[] };
 
 const reducer = (state: State, action: Action) => {
@@ -66,12 +60,7 @@ const reducer = (state: State, action: Action) => {
     case "RESET": {
       state.wordIndex = 0;
       state.lastValidCharIndex = -1;
-      state.timePassed = "0";
       state.onCompleteModalShown = false;
-      return;
-    }
-    case "SET_TIME_PASSED": {
-      state.timePassed = action.payload;
       return;
     }
     case "SET_INPUT_LENGTH": {
@@ -83,7 +72,7 @@ const reducer = (state: State, action: Action) => {
       state.history.unshift({
         id: uuid(),
         timestamp: Date.now(),
-        time: state.timePassed,
+        time: action.payload,
       });
       return;
     }
@@ -107,10 +96,6 @@ const reducer = (state: State, action: Action) => {
     }
     case "SET_ERROR": {
       state.error = action.payload;
-      return;
-    }
-    case "SET_TIME_PASSED": {
-      state.timePassed = action.payload;
       return;
     }
     case "SET_HISTORY": {
