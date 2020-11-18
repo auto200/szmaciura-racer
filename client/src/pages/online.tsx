@@ -24,45 +24,50 @@ const ProgressContainer = styled.div`
 enum STATES {
   INITIAL,
   IN_QUE,
+  IN_ROOM,
 }
 
 const Online: React.FC = () => {
   const [socket] = useState<SocketIOClient.Socket>(() => {
     const socket = io(process.env.SOCKET_URL!);
     socket.on(SOCKET_EVENTS.COUNTDOWN_START, () => {});
-    socket.on(SOCKET_EVENTS.UPDATE_ROOM, (room: Room) => setRoom(room));
+    socket.on(SOCKET_EVENTS.UPDATE_ROOM, (room: Room) => {
+      setState(STATES.IN_ROOM);
+      setRoom(room);
+    });
     socket.on(SOCKET_EVENTS.ROOM_EXPIRED, () => {
       setState(STATES.INITIAL);
       setRoom(undefined);
     });
-    socket.on(SOCKET_EVENTS.IN_QUE, () => {});
     return socket;
   });
   const [state, setState] = useState(STATES.INITIAL);
   const [room, setRoom] = useState<Room>();
-  const [timeInQue, setTimeInQue] = useState<string>("00:00");
+  const [timeInQue, setTimeInQue] = useState<string>("0:00");
   const queStartTSRef = useRef<number>(0);
-  console.log(room);
+  const timerIntervalRef = useRef<number>(0);
+
   useEffect(() => {
     return () => {
       socket.disconnect();
     };
   }, [socket]);
+
   useEffect(() => {
-    let interval: number = 0;
     if (state === STATES.IN_QUE && !room) {
       queStartTSRef.current = Date.now();
-      interval = setInterval(() => {
-        const minutes = differenceInMinutes(Date.now(), queStartTSRef.current)
-          .toString()
-          .padStart(2, "0");
+      timerIntervalRef.current = setInterval(() => {
+        const minutes = differenceInMinutes(Date.now(), queStartTSRef.current);
         const seconds = differenceInSeconds(Date.now(), queStartTSRef.current)
           .toString()
           .padStart(2, "0");
         setTimeInQue(`${minutes}:${seconds}`);
       }, 1000);
     }
-    return () => clearInterval(interval);
+    if (state == STATES.IN_ROOM) {
+      clearInterval(timerIntervalRef.current);
+    }
+    return () => clearInterval(timerIntervalRef.current);
   }, [state]);
 
   const joinQue = () => {
@@ -80,8 +85,8 @@ const Online: React.FC = () => {
           Weź udział w wyścigu o złote galoty
         </JoinRace>
       )}
-      {state === STATES.IN_QUE && !room && <div>{timeInQue}</div>}
-      {room && (
+      {state === STATES.IN_QUE && <div>{timeInQue}</div>}
+      {state === STATES.IN_ROOM && room && (
         <ProgressContainer>
           <ProgressIndicator
             players={room.players}
