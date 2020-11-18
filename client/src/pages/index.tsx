@@ -9,7 +9,7 @@ import OnCompleteModal from "../components/OnCompleteModal";
 import ProgressIndicator from "../components/ProgressIndicator";
 import History from "../components/Tables/History";
 import TopRaces from "../components/Tables/TopRaces";
-import Timer from "../components/Timer";
+import Timer, { TimerFunctions } from "../components/Timer";
 import Word from "../components/Word";
 import { useCarsContext } from "../contexts/CarsContext";
 import { useStore } from "../contexts/Store";
@@ -34,12 +34,6 @@ const ResetButton = styled.button`
   }
 `;
 
-const getTimePassedInSec = (startTime: number): string => {
-  const msPassed = Date.now() - startTime;
-  const seconds = msPassed / 1000;
-  return seconds.toFixed(2);
-};
-
 const IndexPage: React.FC = () => {
   const {
     state: {
@@ -49,7 +43,6 @@ const IndexPage: React.FC = () => {
       lastValidCharIndex,
       inputMaxLength,
       error,
-      timePassed,
       onCompleteModalShown,
       history,
     },
@@ -57,24 +50,17 @@ const IndexPage: React.FC = () => {
   } = useStore();
 
   const { currentCarIndex } = useCarsContext();
+  const timerRef = useRef<TimerFunctions>(null);
 
-  const startTimestampRef = useRef<number>();
-  const timerAnimationFrameRef = useRef<number>();
   //reset
   const resetEveryting = () => {
     dispatch({ type: "RESET" });
-    startTimestampRef.current = undefined;
-    timerAnimationFrameRef.current = undefined;
-  };
-  const resetTimer = () => {
-    if (timerAnimationFrameRef.current) {
-      cancelAnimationFrame(timerAnimationFrameRef.current);
-    }
+    timerRef.current?.reset();
   };
 
   useEffect(() => {
     //cleanup
-    return resetTimer;
+    return timerRef.current?.reset;
   }, []);
 
   useEffect(() => {
@@ -82,27 +68,16 @@ const IndexPage: React.FC = () => {
       resetEveryting();
       return;
     }
-    const updateTimer = () =>
-      requestAnimationFrame(() => {
-        if (startTimestampRef.current) {
-          const seconds = getTimePassedInSec(startTimestampRef.current);
-          dispatch({ type: "SET_TIME_PASSED", payload: seconds });
-          timerAnimationFrameRef.current = updateTimer();
-        }
-      });
 
     //first keystroke of first word
     if (wordIndex === 0 && inputLength === 1) {
-      startTimestampRef.current = Date.now();
-      if (!timerAnimationFrameRef.current) {
-        timerAnimationFrameRef.current = updateTimer();
+      timerRef.current?.start();
       }
-    }
   }, [wordIndex, inputLength]);
 
   return (
     <Layout>
-      <Link to={"/online"}>
+      <Link to={"/online"} onClick={() => dispatch({ type: "RESET" })}>
         <button>GO online</button>
       </Link>
       <ResetButton onClick={resetEveryting}>reset</ResetButton>
@@ -116,7 +91,7 @@ const IndexPage: React.FC = () => {
             },
           ]}
         />
-        <Timer timePassed={timePassed} />
+        <Timer ref={timerRef} />
       </ProgressContainer>
       <TextWrapper>
         {text.map((word, i) => {
@@ -144,8 +119,11 @@ const IndexPage: React.FC = () => {
         }}
         onWordCompleted={() => dispatch({ type: "PROCEED_TO_NEXT_WORD" })}
         onLastWordCompleted={() => {
-          dispatch({ type: "RACE_COMPLETED" });
-          resetTimer();
+          timerRef.current?.stop();
+          dispatch({
+            type: "RACE_COMPLETED",
+            payload: timerRef.current?.getTime()!,
+          });
         }}
         onEmpty={() => dispatch({ type: "INPUT_EMPTY" })}
         onCorrectLetter={() => dispatch({ type: "CORRECT_INPUT_VALUE" })}
@@ -157,7 +135,10 @@ const IndexPage: React.FC = () => {
       <Achievements history={history} />
       <Cars history={history} />
       {onCompleteModalShown && (
-        <OnCompleteModal onClose={resetEveryting} time={timePassed} />
+        <OnCompleteModal
+          onClose={resetEveryting}
+          time={timerRef.current?.getTime()!}
+        />
       )}
     </Layout>
   );
