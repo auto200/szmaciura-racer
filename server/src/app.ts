@@ -7,7 +7,7 @@ import socketio from "socket.io";
 import { nanoid } from "nanoid";
 import { SOCKET_EVENTS, ROOM_STATES } from "../../shared";
 import { Player, Room } from "../../shared/interfaces";
-import { ROOM_MAX_PLAYERS, CARS_COUNT } from "./constants";
+import { ROOM_MAX_PLAYERS, CARS_COUNT, ROOM_EXPIRE_TIME } from "./constants";
 
 const app = express();
 
@@ -28,11 +28,15 @@ type RoomsObj = { [key: string]: Room };
 
 const publicRooms: RoomsObj = {};
 // const privateRooms: RoomsObj = {};
+let queue: Player[] = [];
 const io = socketio(server);
 
 io.of("/game").on("connection", (socket) => {
   console.log("new client connected");
   socket.on("disconnect", (reason) => {
+    if (socket.id === queue[0].id) {
+      queue = [];
+    }
     console.log("client disconnected", reason);
   });
 
@@ -40,6 +44,7 @@ io.of("/game").on("connection", (socket) => {
     //Join existing room
     const freeRoom = Object.values(publicRooms).find(
       (room) => room.state === ROOM_STATES.WAITING
+      //TODO: check if time to start match is greater than threshold
     );
     if (freeRoom && freeRoom.players.length < ROOM_MAX_PLAYERS) {
       socket.join(freeRoom.id, (err) => {
@@ -49,30 +54,41 @@ io.of("/game").on("connection", (socket) => {
           .to(freeRoom.id)
           .emit(SOCKET_EVENTS.UPDATE_ROOM, freeRoom);
       });
-    } else {
+      return;
+    }
+
+    queue.push(getNewPlayer(socket.id));
+
+    if (queue.length >= 2) {
       //Create new room
       const roomId = nanoid(6);
       console.log("room id", roomId);
-      const timeToExpire = 1000 * 60 * 3;
-      const newRoom: Room = {
+
+      publicRooms[roomId] = {
         id: roomId,
         state: ROOM_STATES.WAITING,
-        players: [getNewPlayer(socket.id)],
-        expireTS: Date.now() + timeToExpire,
+        players: [...queue],
+        expireTS: Date.now() + ROOM_EXPIRE_TIME,
       };
-      publicRooms[roomId] = newRoom;
+      queue = [];
+
+      publicRooms[roomId].players.forEach(({ id }) => {
+        io.of("/game").connected[id]?.join(roomId);
+      });
+
+      io.of("/game")
+        .to(roomId)
+        .emit(SOCKET_EVENTS.UPDATE_ROOM, publicRooms[roomId]);
 
       setTimeout(() => {
-        delete publicRooms[roomId];
-        io.of("/game").to(roomId).emit(SOCKET_EVENTS.ROOM_EXPIRED);
-        console.log("Room:", roomId, "expired. Closing...");
-      }, timeToExpire);
-
-      socket.join(roomId, (err) => {
-        if (err) return;
-        socket.emit(SOCKET_EVENTS.UPDATE_ROOM, newRoom);
-      });
+        if (publicRooms[roomId]) {
+          delete publicRooms[roomId];
+          io.of("/game").to(roomId).emit(SOCKET_EVENTS.ROOM_EXPIRED);
+          console.log("Room:", roomId, "expired. Closing...");
+        }
+      }, ROOM_EXPIRE_TIME);
     }
+    console.log(queue);
   });
 });
 
