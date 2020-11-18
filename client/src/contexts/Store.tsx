@@ -2,10 +2,9 @@ import React, { createContext, useContext, ReactNode, useEffect } from "react";
 import { useImmerReducer } from "../utils/hooks/useImmerReducer";
 import { v4 as uuid } from "uuid";
 import { getInputMaxLength } from "../utils";
-
-const szmaciuraText =
-  "ty no nie wiem jak tam twoja szmaciura jebana zrogowaciala niedzwiedzica co sie kurwi pod mostem za wojaka i siada kurwa na butle od vanisha i kurwe w taczce pijana wozili po osiedlu wiesz o co chodzi mnie nie przegadasz bo mi sperme z paly zjadasz frajerze zrogowacialy frajerska chmuro chuj ci na matule i jebac ci starego";
-const splittedText = szmaciuraText.trim().split(" ");
+import texts from "../../../shared/texts.json";
+import { TextId } from "../../../shared/interfaces";
+import { parseText } from "../../../shared/utils";
 
 export type History = {
   id: string;
@@ -15,6 +14,7 @@ export type History = {
 
 export interface State {
   text: string[];
+  textId: TextId;
   wordIndex: number;
   inputLength: number;
   lastValidCharIndex: number;
@@ -23,13 +23,15 @@ export interface State {
   onCompleteModalShown: boolean;
   history: History[];
 }
+const initialText = parseText(Object.values(texts)[0]);
 
 const initialState: State = {
-  text: splittedText,
+  text: initialText,
+  textId: Object.keys(texts)[0] as TextId,
   wordIndex: 0,
   inputLength: 0,
   lastValidCharIndex: -1,
-  inputMaxLength: getInputMaxLength(splittedText[0]),
+  inputMaxLength: getInputMaxLength(initialText[0]),
   error: false,
   onCompleteModalShown: false,
   history: [],
@@ -43,6 +45,7 @@ const StoreContext = createContext<{
   dispatch: () => null,
 });
 export type Action =
+  | { type: "SET_TEXT_BY_ID"; payload: TextId }
   | {
       type:
         | "RESET"
@@ -57,6 +60,11 @@ export type Action =
 
 const reducer = (state: State, action: Action) => {
   switch (action.type) {
+    case "SET_TEXT_BY_ID": {
+      state.textId = action.payload;
+      state.text = parseText(texts[action.payload]);
+      return;
+    }
     case "RESET": {
       state.wordIndex = 0;
       state.lastValidCharIndex = -1;

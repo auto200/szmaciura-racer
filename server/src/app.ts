@@ -6,8 +6,10 @@ import path from "path";
 import socketio from "socket.io";
 import { nanoid } from "nanoid";
 import { SOCKET_EVENTS, ROOM_STATES } from "../../shared";
-import { Player, Room } from "../../shared/interfaces";
+import { Player, Room, TextId } from "../../shared/interfaces";
 import { ROOM_MAX_PLAYERS, CARS_COUNT, ROOM_EXPIRE_TIME } from "./constants";
+import texts from "../../shared/texts.json";
+import { parseText } from "../../shared/utils";
 
 const app = express();
 
@@ -64,7 +66,9 @@ io.of("/game").on("connection", (socket) => {
         state: ROOM_STATES.WAITING,
         players: [...queue],
         expireTS: Date.now() + ROOM_EXPIRE_TIME,
+        textId: Object.keys(texts)[0] as TextId,
       };
+      //TODO: textId should come from client or be reandomized from texts.json if requested for now value is hard-coded to be the first entry in file
       queue = [];
 
       publicRooms[roomId].players.forEach(({ id }) => {
