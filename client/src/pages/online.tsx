@@ -81,6 +81,9 @@ const Online: React.FC = () => {
       console.log(time);
       setTimeToStart(time);
     });
+    socket.on(SOCKET_EVENTS.START_MATCH, () => {
+      timerRef.current?.start();
+    });
     return socket;
   });
   const [state, setState] = useState(STATES.INITIAL);
@@ -183,10 +186,11 @@ const Online: React.FC = () => {
               }}
               onLastWordCompleted={() => {
                 timerRef.current?.stop();
-                dispatch({
-                  type: "RACE_COMPLETED",
-                  payload: timerRef.current?.getTime()!,
-                });
+                // dispatch({
+                //   type: "RACE_COMPLETED",
+                //   payload: timerRef.current?.getTime()!,
+                // });
+                // TODO: online match history
               }}
               onEmpty={() => dispatch({ type: "INPUT_EMPTY" })}
               onCorrectLetter={() => dispatch({ type: "CORRECT_INPUT_VALUE" })}
