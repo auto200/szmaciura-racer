@@ -68,6 +68,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     }, [value]);
 
     const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+      if (disabled) return;
       const val = e.target.value.toLowerCase();
       if (val.length - 1 >= maxLength) {
         //TODO add alert later on with instructions to user how to play
