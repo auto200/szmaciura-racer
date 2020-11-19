@@ -83,6 +83,9 @@ io.of("/game").on("connection", (socket) => {
         if (publicRooms[roomId]) {
           delete publicRooms[roomId];
           io.of("/game").to(roomId).emit(SOCKET_EVENTS.ROOM_EXPIRED);
+          Object.values(io.of("/game").in(roomId).sockets).forEach((socket) =>
+            socket.leave(roomId)
+          );
           console.log("Room:", roomId, "expired. Closing...");
         }
       }, ROOM_EXPIRE_TIME);
