@@ -1,7 +1,7 @@
 import React from "react";
 import styled, { createGlobalStyle } from "styled-components";
 import SEO from "../components/Seo";
-import GithubLink from "./GithubLink";
+import GithubLink from "./Links/GithubLink";
 
 const GlobalStyle = createGlobalStyle<any>`
   html, body {
