@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import io from "socket.io-client";
 import Layout from "../components/Layout";
 import styled from "styled-components";
-import { SOCKET_EVENTS } from "../../../shared/";
+import { ROOM_STATES, SOCKET_EVENTS } from "../../../shared/";
 import ProgressIndicator from "../components/ProgressIndicator";
 import { Room } from "../../../shared/interfaces";
 import {
@@ -23,6 +23,14 @@ const JoinRace = styled.div`
   border-radius: 10px;
   padding: 5px;
   cursor: pointer;
+`;
+const StartRaceCountdown = styled.div`
+  position: absolute;
+  top: 0;
+  font-weight: bold;
+  span {
+    color: ${({ theme }) => theme.colors.golden};
+  }
 `;
 const InQueTimer = styled.div`
   font-weight: bold;
@@ -72,13 +80,19 @@ const Online: React.FC = () => {
       setState(STATES.INITIAL);
       setRoom(undefined);
     });
+    socket.on(SOCKET_EVENTS.TIME_TO_START_UPDATE, (time: number) => {
+      console.log(time);
+      setTimeToStart(time);
+    });
     return socket;
   });
   const [state, setState] = useState(STATES.INITIAL);
   const [room, setRoom] = useState<Room>();
   const [timeInQue, setTimeInQue] = useState<string>("0:00");
+  const [timeToStart, setTimeToStart] = useState<number>(0);
   const queStartTSRef = useRef<number>(0);
   const timerIntervalRef = useRef<number>(0);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const timerRef = useRef<TimerFunctions>(null);
 
@@ -101,6 +115,12 @@ const Online: React.FC = () => {
     return () => clearInterval(timerIntervalRef.current);
   }, [state]);
 
+  useEffect(() => {
+    if (room?.state === ROOM_STATES.STARTED) {
+      inputRef.current?.focus();
+    }
+  }, [room]);
+
   const joinQue = () => {
     if (!socket.connected) socket.connect();
 
@@ -113,6 +133,11 @@ const Online: React.FC = () => {
       <GameModeLink to={"/"} onClick={() => dispatch({ type: "RESET" })}>
         <button>Powrót do offline</button>
       </GameModeLink>
+      {!!timeToStart && (
+        <StartRaceCountdown>
+          gra startuje za: <span>{timeToStart}</span>
+        </StartRaceCountdown>
+      )}
       {state == STATES.INITIAL && (
         <JoinRace onClick={joinQue}>
           Weź udział w wyścigu o złote galoty
@@ -170,7 +195,8 @@ const Online: React.FC = () => {
             onEmpty={() => dispatch({ type: "INPUT_EMPTY" })}
             onCorrectLetter={() => dispatch({ type: "CORRECT_INPUT_VALUE" })}
             onError={() => dispatch({ type: "SET_ERROR", payload: true })}
-            autoFocus
+            disabled={room.state === ROOM_STATES.WAITING}
+            ref={inputRef}
           />
         </>
       )}

@@ -31,6 +31,7 @@ const Wrapper = styled.div`
   height: 100%;
 `;
 const ContentContainer = styled.div`
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;

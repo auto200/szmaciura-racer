@@ -7,7 +7,12 @@ import socketio from "socket.io";
 import { nanoid } from "nanoid";
 import { SOCKET_EVENTS, ROOM_STATES } from "../../shared";
 import { Player, Room, TextId } from "../../shared/interfaces";
-import { ROOM_MAX_PLAYERS, CARS_COUNT, ROOM_EXPIRE_TIME } from "./constants";
+import {
+  ROOM_MAX_PLAYERS,
+  CARS_COUNT,
+  ROOM_EXPIRE_TIME,
+  TIME_TO_START_GAME,
+} from "./constants";
 import texts from "../../shared/texts.json";
 import { getParsedTexts } from "../../shared/utils";
 
@@ -81,16 +86,29 @@ io.of("/game").on("connection", (socket) => {
         .to(roomId)
         .emit(SOCKET_EVENTS.UPDATE_ROOM, publicRooms[roomId]);
 
+      let timeToStart = TIME_TO_START_GAME / 1000;
+      const timerInterval = setInterval(() => {
+        if (!timeToStart) {
+          clearInterval(timerInterval);
+          publicRooms[roomId].state = ROOM_STATES.STARTED;
+          io.of("/game")
+            .to(roomId)
+            .emit(SOCKET_EVENTS.UPDATE_ROOM, publicRooms[roomId]);
       setTimeout(() => {
         if (publicRooms[roomId]) {
           delete publicRooms[roomId];
           io.of("/game").to(roomId).emit(SOCKET_EVENTS.ROOM_EXPIRED);
-          Object.values(io.of("/game").in(roomId).sockets).forEach((socket) =>
-            socket.leave(roomId)
-          );
+              Object.values(
+                io.of("/game").in(roomId).sockets
+              ).forEach((socket) => socket.leave(roomId));
           console.log("Room:", roomId, "expired. Closing...");
         }
       }, ROOM_EXPIRE_TIME);
+    }
+        io.of("/game")
+          .to(roomId)
+          .emit(SOCKET_EVENTS.TIME_TO_START_UPDATE, timeToStart--);
+      }, 1000);
     }
     console.log(queue);
   });
