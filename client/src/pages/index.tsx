@@ -1,8 +1,8 @@
-import { Link } from "gatsby";
 import React, { useEffect, useRef } from "react";
 import styled from "styled-components";
 import Achievements from "../components/Achievements";
 import Cars from "../components/Cars";
+import GoOnline from "../components/Links/GoOnline";
 import Input from "../components/Input";
 import Layout from "../components/Layout";
 import OnCompleteModal from "../components/OnCompleteModal";
@@ -68,71 +68,71 @@ const IndexPage: React.FC = () => {
   }, [wordIndex, inputLength]);
 
   return (
-    <Layout>
-      <Link to={"/online"} onClick={() => dispatch({ type: "RESET" })}>
-        <button>GO online</button>
-      </Link>
-      <ResetButton onClick={resetEveryting}>reset</ResetButton>
-      <ProgressContainer>
-        <ProgressIndicator
-          players={[
-            {
-              id: "player",
-              carIndex: currentCarIndex,
-              progress: wordIndex / text.length,
-            },
-          ]}
+    <>
+      <GoOnline to={"/online"} onClick={() => dispatch({ type: "RESET" })} />
+      <Layout>
+        <ResetButton onClick={resetEveryting}>reset</ResetButton>
+        <ProgressContainer>
+          <ProgressIndicator
+            players={[
+              {
+                id: "player",
+                carIndex: currentCarIndex,
+                progress: wordIndex / text.length,
+              },
+            ]}
+          />
+          <Timer ref={timerRef} />
+        </ProgressContainer>
+        <TextWrapper>
+          {text.map((word, i) => {
+            const active = wordIndex === i;
+            return (
+              <React.Fragment key={i}>
+                <Word
+                  word={word}
+                  active={active}
+                  error={active ? error : false}
+                  lastValidCharIndex={active ? lastValidCharIndex : -1}
+                  charIndex={active ? inputLength : 0}
+                />{" "}
+              </React.Fragment>
+            );
+          })}
+        </TextWrapper>
+        <Input
+          word={text[wordIndex]}
+          error={error}
+          maxLength={inputMaxLength}
+          isLastWord={wordIndex === text.length - 1}
+          onChange={value => {
+            dispatch({ type: "SET_INPUT_LENGTH", payload: value.length });
+          }}
+          onWordCompleted={() => dispatch({ type: "PROCEED_TO_NEXT_WORD" })}
+          onLastWordCompleted={() => {
+            timerRef.current?.stop();
+            dispatch({
+              type: "RACE_COMPLETED",
+              payload: timerRef.current?.getTime()!,
+            });
+          }}
+          onEmpty={() => dispatch({ type: "INPUT_EMPTY" })}
+          onCorrectLetter={() => dispatch({ type: "CORRECT_INPUT_VALUE" })}
+          onError={() => dispatch({ type: "SET_ERROR", payload: true })}
+          autoFocus
         />
-        <Timer ref={timerRef} />
-      </ProgressContainer>
-      <TextWrapper>
-        {text.map((word, i) => {
-          const active = wordIndex === i;
-          return (
-            <React.Fragment key={i}>
-              <Word
-                word={word}
-                active={active}
-                error={active ? error : false}
-                lastValidCharIndex={active ? lastValidCharIndex : -1}
-                charIndex={active ? inputLength : 0}
-              />{" "}
-            </React.Fragment>
-          );
-        })}
-      </TextWrapper>
-      <Input
-        word={text[wordIndex]}
-        error={error}
-        maxLength={inputMaxLength}
-        isLastWord={wordIndex === text.length - 1}
-        onChange={value => {
-          dispatch({ type: "SET_INPUT_LENGTH", payload: value.length });
-        }}
-        onWordCompleted={() => dispatch({ type: "PROCEED_TO_NEXT_WORD" })}
-        onLastWordCompleted={() => {
-          timerRef.current?.stop();
-          dispatch({
-            type: "RACE_COMPLETED",
-            payload: timerRef.current?.getTime()!,
-          });
-        }}
-        onEmpty={() => dispatch({ type: "INPUT_EMPTY" })}
-        onCorrectLetter={() => dispatch({ type: "CORRECT_INPUT_VALUE" })}
-        onError={() => dispatch({ type: "SET_ERROR", payload: true })}
-        autoFocus
-      />
-      <TopRaces history={history} />
-      <History history={history} />
-      <Achievements history={history} />
-      <Cars history={history} />
-      {onCompleteModalShown && (
-        <OnCompleteModal
-          onClose={resetEveryting}
-          time={timerRef.current?.getTime()!}
-        />
-      )}
-    </Layout>
+        <TopRaces history={history} />
+        <History history={history} />
+        <Achievements history={history} />
+        <Cars history={history} />
+        {onCompleteModalShown && (
+          <OnCompleteModal
+            onClose={resetEveryting}
+            time={timerRef.current?.getTime()!}
+          />
+        )}
+      </Layout>
+    </>
   );
 };
 

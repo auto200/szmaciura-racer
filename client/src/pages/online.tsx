@@ -5,16 +5,13 @@ import styled from "styled-components";
 import { ROOM_STATES, SOCKET_EVENTS } from "../../../shared/";
 import ProgressIndicator from "../components/ProgressIndicator";
 import { Room } from "../../../shared/interfaces";
-import {
-  GameModeLink,
-  ProgressContainer,
-  TextWrapper,
-} from "../components/sharedStyled";
+import { ProgressContainer, TextWrapper } from "../components/sharedStyled";
 import { differenceInMinutes, differenceInSeconds } from "date-fns";
 import Word from "../components/Word";
 import { useStore } from "../contexts/Store";
 import Input from "../components/Input";
 import Timer, { TimerFunctions } from "../components/Timer";
+import GoOffline from "../components/Links/GoOffline";
 
 const JoinRace = styled.div`
   font-size: 2.3rem;
@@ -129,78 +126,78 @@ const Online: React.FC = () => {
   };
 
   return (
-    <Layout>
-      <GameModeLink to={"/"} onClick={() => dispatch({ type: "RESET" })}>
-        <button>Powrót do offline</button>
-      </GameModeLink>
-      {!!timeToStart && (
-        <StartRaceCountdown>
-          gra startuje za: <span>{timeToStart}</span>
-        </StartRaceCountdown>
-      )}
-      {state == STATES.INITIAL && (
-        <JoinRace onClick={joinQue}>
-          Weź udział w wyścigu o złote galoty
-        </JoinRace>
-      )}
-      {state === STATES.IN_QUE && (
-        <InQueTimer>
-          Czekanie na oponenta <span>{timeInQue}</span>
-        </InQueTimer>
-      )}
-      {state === STATES.IN_ROOM && room && (
-        <>
-          <ProgressContainer>
-            <ProgressIndicator
-              players={room.players}
-              highlightPlayer={socket.id}
+    <>
+      <GoOffline to={"/"} onClick={() => dispatch({ type: "RESET" })} />
+      <Layout>
+        {!!timeToStart && (
+          <StartRaceCountdown>
+            gra startuje za: <span>{timeToStart}</span>
+          </StartRaceCountdown>
+        )}
+        {state == STATES.INITIAL && (
+          <JoinRace onClick={joinQue}>
+            Weź udział w wyścigu o złote galoty
+          </JoinRace>
+        )}
+        {state === STATES.IN_QUE && (
+          <InQueTimer>
+            Czekanie na oponenta <span>{timeInQue}</span>
+          </InQueTimer>
+        )}
+        {state === STATES.IN_ROOM && room && (
+          <>
+            <ProgressContainer>
+              <ProgressIndicator
+                players={room.players}
+                highlightPlayer={socket.id}
+              />
+              <Timer ref={timerRef} />
+            </ProgressContainer>
+            <TextWrapper>
+              {text.map((word, i) => {
+                const active = wordIndex === i;
+                return (
+                  <React.Fragment key={i}>
+                    <Word
+                      word={word}
+                      active={active}
+                      error={active ? error : false}
+                      lastValidCharIndex={active ? lastValidCharIndex : -1}
+                      charIndex={active ? inputLength : 0}
+                    />{" "}
+                  </React.Fragment>
+                );
+              })}
+            </TextWrapper>
+            <Input
+              word={text[wordIndex]}
+              error={error}
+              maxLength={inputMaxLength}
+              isLastWord={wordIndex === text.length - 1}
+              onChange={value => {
+                dispatch({ type: "SET_INPUT_LENGTH", payload: value.length });
+              }}
+              onWordCompleted={() => {
+                dispatch({ type: "PROCEED_TO_NEXT_WORD" });
+                socket.emit(SOCKET_EVENTS.WORD_COMPLETED, room.id, wordIndex);
+              }}
+              onLastWordCompleted={() => {
+                timerRef.current?.stop();
+                dispatch({
+                  type: "RACE_COMPLETED",
+                  payload: timerRef.current?.getTime()!,
+                });
+              }}
+              onEmpty={() => dispatch({ type: "INPUT_EMPTY" })}
+              onCorrectLetter={() => dispatch({ type: "CORRECT_INPUT_VALUE" })}
+              onError={() => dispatch({ type: "SET_ERROR", payload: true })}
+              disabled={room.state === ROOM_STATES.WAITING}
+              ref={inputRef}
             />
-            <Timer ref={timerRef} />
-          </ProgressContainer>
-          <TextWrapper>
-            {text.map((word, i) => {
-              const active = wordIndex === i;
-              return (
-                <React.Fragment key={i}>
-                  <Word
-                    word={word}
-                    active={active}
-                    error={active ? error : false}
-                    lastValidCharIndex={active ? lastValidCharIndex : -1}
-                    charIndex={active ? inputLength : 0}
-                  />{" "}
-                </React.Fragment>
-              );
-            })}
-          </TextWrapper>
-          <Input
-            word={text[wordIndex]}
-            error={error}
-            maxLength={inputMaxLength}
-            isLastWord={wordIndex === text.length - 1}
-            onChange={value => {
-              dispatch({ type: "SET_INPUT_LENGTH", payload: value.length });
-            }}
-            onWordCompleted={() => {
-              dispatch({ type: "PROCEED_TO_NEXT_WORD" });
-              socket.emit(SOCKET_EVENTS.WORD_COMPLETED, room.id, wordIndex);
-            }}
-            onLastWordCompleted={() => {
-              timerRef.current?.stop();
-              dispatch({
-                type: "RACE_COMPLETED",
-                payload: timerRef.current?.getTime()!,
-              });
-            }}
-            onEmpty={() => dispatch({ type: "INPUT_EMPTY" })}
-            onCorrectLetter={() => dispatch({ type: "CORRECT_INPUT_VALUE" })}
-            onError={() => dispatch({ type: "SET_ERROR", payload: true })}
-            disabled={room.state === ROOM_STATES.WAITING}
-            ref={inputRef}
-          />
-        </>
-      )}
-    </Layout>
+          </>
+        )}
+      </Layout>
+    </>
   );
 };
 
