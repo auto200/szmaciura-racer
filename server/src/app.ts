@@ -9,7 +9,9 @@ import { SOCKET_EVENTS, ROOM_STATES } from "../../shared";
 import { Player, Room, TextId } from "../../shared/interfaces";
 import { ROOM_MAX_PLAYERS, CARS_COUNT, ROOM_EXPIRE_TIME } from "./constants";
 import texts from "../../shared/texts.json";
-import { parseText } from "../../shared/utils";
+import { getParsedTexts } from "../../shared/utils";
+
+const parsedTexts = getParsedTexts();
 
 const app = express();
 
@@ -100,7 +102,7 @@ io.of("/game").on("connection", (socket) => {
       );
       if (player) {
         player.progress =
-          wordIndex / parseText(texts[publicRooms[roomId].textId]).length;
+          wordIndex / parsedTexts[publicRooms[roomId].textId].length;
         io.of("/game")
           .to(roomId)
           .emit(SOCKET_EVENTS.UPDATE_ROOM, publicRooms[roomId]);

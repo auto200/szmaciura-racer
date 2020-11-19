@@ -4,7 +4,9 @@ import { v4 as uuid } from "uuid";
 import { getInputMaxLength } from "../utils";
 import texts from "../../../shared/texts.json";
 import { TextId } from "../../../shared/interfaces";
-import { parseText } from "../../../shared/utils";
+import { getParsedTexts } from "../../../shared/utils";
+
+const parsedTexts = getParsedTexts();
 
 export type History = {
   id: string;
@@ -23,7 +25,7 @@ export interface State {
   onCompleteModalShown: boolean;
   history: History[];
 }
-const initialText = parseText(Object.values(texts)[0]);
+const initialText = Object.values(parsedTexts)[0];
 
 const initialState: State = {
   text: initialText,
@@ -62,7 +64,7 @@ const reducer = (state: State, action: Action) => {
   switch (action.type) {
     case "SET_TEXT_BY_ID": {
       state.textId = action.payload;
-      state.text = parseText(texts[action.payload]);
+      state.text = parsedTexts[action.payload];
       return;
     }
     case "RESET": {
