@@ -24,6 +24,12 @@ const JoinRace = styled.div`
   padding: 5px;
   cursor: pointer;
 `;
+const InQueTimer = styled.div`
+  font-weight: bold;
+  span {
+    color: ${({ theme }) => theme.colors.golden};
+  }
+`;
 
 enum STATES {
   INITIAL,
@@ -112,7 +118,11 @@ const Online: React.FC = () => {
           Weź udział w wyścigu o złote galoty
         </JoinRace>
       )}
-      {state === STATES.IN_QUE && <div>{timeInQue}</div>}
+      {state === STATES.IN_QUE && (
+        <InQueTimer>
+          Czekanie na oponenta <span>{timeInQue}</span>
+        </InQueTimer>
+      )}
       {state === STATES.IN_ROOM && room && (
         <>
           <ProgressContainer>
