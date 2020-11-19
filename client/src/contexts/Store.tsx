@@ -69,6 +69,7 @@ const reducer = (state: State, action: Action) => {
       state.wordIndex = 0;
       state.lastValidCharIndex = -1;
       state.onCompleteModalShown = false;
+      state.inputLength = 0;
       return;
     }
     case "SET_INPUT_LENGTH": {
