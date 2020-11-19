@@ -46,7 +46,7 @@ enum STATES {
 }
 const getTimeInQueString = (startTime: number) => {
   const minutes = differenceInMinutes(Date.now(), startTime);
-  const seconds = differenceInSeconds(Date.now(), startTime)
+  const seconds = (differenceInSeconds(Date.now(), startTime) % 60)
     .toString()
     .padStart(2, "0");
   return `${minutes}:${seconds}`;
