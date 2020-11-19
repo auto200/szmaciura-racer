@@ -15,6 +15,7 @@ interface InputProps {
   error: boolean;
   isLastWord: boolean;
   autoFocus?: boolean;
+  disabled?: boolean;
   onError: () => void;
   onCorrectLetter: () => void;
   onEmpty: () => void;
@@ -31,6 +32,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       error,
       isLastWord,
       autoFocus,
+      disabled,
       onError = () => {},
       onCorrectLetter = () => {},
       onEmpty = () => {},
@@ -84,6 +86,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         error={error}
         onChange={handleInputChange}
         autoFocus={autoFocus}
+        disabled={disabled}
       />
     );
   }
