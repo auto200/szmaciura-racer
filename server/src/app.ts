@@ -92,6 +92,21 @@ io.of("/game").on("connection", (socket) => {
     }
     console.log(queue);
   });
+  socket.on(
+    SOCKET_EVENTS.WORD_COMPLETED,
+    (roomId: string, wordIndex: number) => {
+      const player = publicRooms[roomId]?.players.find(
+        ({ id }) => id === socket.id
+      );
+      if (player) {
+        player.progress =
+          wordIndex / parseText(texts[publicRooms[roomId].textId]).length;
+        io.of("/game")
+          .to(roomId)
+          .emit(SOCKET_EVENTS.UPDATE_ROOM, publicRooms[roomId]);
+      }
+    }
+  );
 });
 
 function getNewPlayer(id: string): Player {
