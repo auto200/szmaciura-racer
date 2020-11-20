@@ -94,6 +94,8 @@ io.of("/game").on("connection", (socket) => {
           io.of("/game")
             .to(roomId)
             .emit(SOCKET_EVENTS.UPDATE_ROOM, publicRooms[roomId]);
+          io.of("/game").to(roomId).emit(SOCKET_EVENTS.START_MATCH);
+
       setTimeout(() => {
         if (publicRooms[roomId]) {
           delete publicRooms[roomId];
