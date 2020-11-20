@@ -13,6 +13,14 @@ import Input from "../components/Input";
 import Timer, { TimerFunctions } from "../components/Timer";
 import GoOffline from "../components/Links/GoOffline";
 
+const IN_QUE_GIFS: string[] = [
+  "https://thumbs.gfycat.com/DevotedEasygoingAnnashummingbird-size_restricted.gif",
+  "https://thumbs.gfycat.com/EsteemedAthleticGerbil-size_restricted.gif",
+  "https://thumbs.gfycat.com/ConcernedJovialGrub-size_restricted.gif",
+  "https://thumbs.gfycat.com/GleamingPinkGnu-size_restricted.gif",
+  "https://thumbs.gfycat.com/DelayedImpartialCalf-size_restricted.gif",
+];
+
 const JoinRace = styled.div`
   font-size: 2.3rem;
   color: ${({ theme }) => theme.colors.golden};
@@ -90,6 +98,7 @@ const Online: React.FC = () => {
   const [room, setRoom] = useState<Room>();
   const [timeInQue, setTimeInQue] = useState<string>("0:00");
   const [timeToStart, setTimeToStart] = useState<number>(0);
+  const [inQueGifSrc, setInQueGifSrc] = useState<string>(IN_QUE_GIFS[0]);
   const queStartTSRef = useRef<number>(0);
   const timerIntervalRef = useRef<number>(0);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -103,7 +112,8 @@ const Online: React.FC = () => {
   }, [socket]);
 
   useEffect(() => {
-    if (state === STATES.IN_QUE && !room) {
+    if (state === STATES.IN_QUE) {
+      setInQueGifSrc(IN_QUE_GIFS[(Math.random() * IN_QUE_GIFS.length) | 0]);
       queStartTSRef.current = Date.now();
       timerIntervalRef.current = setInterval(() => {
         setTimeInQue(getTimeInQueString(queStartTSRef.current));
@@ -143,9 +153,12 @@ const Online: React.FC = () => {
           </JoinRace>
         )}
         {state === STATES.IN_QUE && (
-          <InQueTimer>
-            Czekanie na oponenta <span>{timeInQue}</span>
-          </InQueTimer>
+          <>
+            <img src={inQueGifSrc} />
+            <InQueTimer>
+              Czekanie na oponenta <span>{timeInQue}</span>
+            </InQueTimer>
+          </>
         )}
         {state === STATES.IN_ROOM && room && (
           <>
