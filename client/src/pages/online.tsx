@@ -200,6 +200,7 @@ const Online: React.FC = () => {
               }}
               onLastWordCompleted={() => {
                 timerRef.current?.stop();
+                socket.emit(SOCKET_EVENTS.WORD_COMPLETED, room.id, wordIndex);
                 // show scoreboard
                 // dispatch({
                 //   type: "RACE_COMPLETED",
