@@ -1,0 +1,6 @@
+{
+  "roomMaxPlayers": 5,
+  "carsCount": 3,
+  "roomExpireTime": 180000,
+  "timeToStartGame": 15000
+}

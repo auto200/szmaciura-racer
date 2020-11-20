@@ -7,14 +7,9 @@ import socketio from "socket.io";
 import { nanoid } from "nanoid";
 import { SOCKET_EVENTS, ROOM_STATES } from "../../shared";
 import { Player, Room, TextId } from "../../shared/interfaces";
-import {
-  ROOM_MAX_PLAYERS,
-  CARS_COUNT,
-  ROOM_EXPIRE_TIME,
-  TIME_TO_START_GAME,
-} from "./constants";
 import texts from "../../shared/texts.json";
 import { getParsedTexts } from "../../shared/utils";
+import config from "./config.json";
 
 const parsedTexts = getParsedTexts();
 
@@ -54,7 +49,7 @@ io.of("/game").on("connection", (socket) => {
       (room) => room.state === ROOM_STATES.WAITING
       //TODO: check if time to start match is greater than threshold
     );
-    if (freeRoom && freeRoom.players.length < ROOM_MAX_PLAYERS) {
+    if (freeRoom && freeRoom.players.length < config.roomMaxPlayers) {
       socket.join(freeRoom.id);
       freeRoom.players.push(getNewPlayer(socket.id));
       io.of("/game").to(freeRoom.id).emit(SOCKET_EVENTS.UPDATE_ROOM, freeRoom);
@@ -72,7 +67,7 @@ io.of("/game").on("connection", (socket) => {
         id: roomId,
         state: ROOM_STATES.WAITING,
         players: [...queue],
-        expireTS: Date.now() + ROOM_EXPIRE_TIME,
+        expireTS: Date.now() + config.roomExpireTime,
         textId: Object.keys(texts)[0] as TextId,
       };
       //TODO: textId should come from client or be reandomized from texts.json if requested for now value is hard-coded to be the first entry in file
@@ -86,7 +81,7 @@ io.of("/game").on("connection", (socket) => {
         .to(roomId)
         .emit(SOCKET_EVENTS.UPDATE_ROOM, publicRooms[roomId]);
 
-      let timeToStart = TIME_TO_START_GAME / 1000;
+      let timeToStart = config.timeToStartGame / 1000;
       const timerInterval = setInterval(() => {
         if (!timeToStart) {
           clearInterval(timerInterval);
@@ -105,7 +100,7 @@ io.of("/game").on("connection", (socket) => {
               ).forEach((socket) => socket.leave(roomId));
           console.log("Room:", roomId, "expired. Closing...");
         }
-      }, ROOM_EXPIRE_TIME);
+          }, config.roomExpireTime);
     }
         io.of("/game")
           .to(roomId)
@@ -135,6 +130,6 @@ function getNewPlayer(id: string): Player {
   return {
     id,
     progress: 0,
-    carIndex: (Math.random() * CARS_COUNT) | 0,
+    carIndex: (Math.random() * config.carsCount) | 0,
   };
 }
