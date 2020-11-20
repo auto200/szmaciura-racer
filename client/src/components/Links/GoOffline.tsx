@@ -10,25 +10,8 @@ const Wrapper = styled(Link)`
   cursor: pointer;
   text-decoration: none;
   width: 350px;
-`;
-const GoOfflineText = styled.div`
-  font-size: 1.4rem;
+  color: ${({ theme }) => theme.colors.secondary};
   text-align: center;
-  background: linear-gradient(to right, #fff 20%, #ff0 40%, #ff0 60%, #fff 80%);
-  background-size: 200% auto;
-
-  color: #000;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-
-  animation: shine 30s linear infinite;
-  @keyframes shine {
-    to {
-      background-position: 200% center;
-    }
-  }
 `;
 
 interface Props {
@@ -51,7 +34,7 @@ const GoOffline: React.FC<Props> = ({ to, onClick }) => {
   return (
     <Wrapper to={to} onClick={onClick}>
       <Img fluid={data.rafonixOffline.childImageSharp.fluid} />
-      <GoOfflineText>Powrót do zabawy solo</GoOfflineText>
+      <div>Powrót do zabawy solo</div>
     </Wrapper>
   );
 };
