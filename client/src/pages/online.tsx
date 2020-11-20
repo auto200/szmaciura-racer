@@ -86,7 +86,7 @@ const Online: React.FC = () => {
       setState(STATES.INITIAL);
       setRoom(undefined);
     });
-    socket.on(SOCKET_EVENTS.TIME_TO_START_UPDATE, (time: number) => {
+    socket.on(SOCKET_EVENTS.UPDATE_TIME_TO_START, (time: number) => {
       console.log(time);
       setTimeToStart(time);
     });

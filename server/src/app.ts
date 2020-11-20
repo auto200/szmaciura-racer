@@ -186,7 +186,7 @@ function createAndHandleNewRoom(): string {
     }
     io.of("/game")
       .to(roomId)
-      .emit(SOCKET_EVENTS.TIME_TO_START_UPDATE, timeToStart--);
+      .emit(SOCKET_EVENTS.UPDATE_TIME_TO_START, timeToStart--);
   }, 1000);
   return roomId;
 }
