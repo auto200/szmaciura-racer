@@ -3,5 +3,8 @@
   "carsCount": 3,
   "roomExpireTime": 180000,
   "timeToStartGame": 10000,
-  "addFakePlayers": true
+  "fakePlayers": {
+    "enabled": true,
+    "idPrefix": "imFaker"
+  }
 }

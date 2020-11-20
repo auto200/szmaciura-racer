@@ -84,10 +84,12 @@ io.of("/game").on("connection", async (socket) => {
     }
   );
   //add fake players
-  if (config.addFakePlayers) {
+  if (config.fakePlayers.enabled) {
     while (true) {
       await sleep(random(3000, 5000));
-      const fakePlayer: Player = getNewPlayer(`imFaker${nanoid()}`);
+      const fakePlayer: Player = getNewPlayer(
+        `${config.fakePlayers.idPrefix}${nanoid()}`
+      );
       if (_queue.length) {
         _queue.push(fakePlayer);
         const roomId = createAndHandleNewRoom();
@@ -96,7 +98,7 @@ io.of("/game").on("connection", async (socket) => {
         const freeRoom = getFreeRoom();
         if (freeRoom) {
           const fakePlayersInRoom = freeRoom.players.reduce((acc, player) => {
-            if (player.id.includes("imFaker")) return acc + 1;
+            if (player.id.includes(config.fakePlayers.idPrefix)) return acc + 1;
             return acc;
           }, 0);
           if (fakePlayersInRoom >= 2) continue;
