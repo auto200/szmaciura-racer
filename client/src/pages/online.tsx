@@ -12,6 +12,7 @@ import { useStore } from "../contexts/Store";
 import Input from "../components/Input";
 import Timer, { TimerFunctions } from "../components/Timer";
 import GoOffline from "../components/Links/GoOffline";
+import { random } from "lodash";
 
 const IN_QUE_GIFS: string[] = [
   "https://thumbs.gfycat.com/DevotedEasygoingAnnashummingbird-size_restricted.gif",
@@ -113,7 +114,7 @@ const Online: React.FC = () => {
 
   useEffect(() => {
     if (state === STATES.IN_QUE) {
-      setInQueGifSrc(IN_QUE_GIFS[(Math.random() * IN_QUE_GIFS.length) | 0]);
+      setInQueGifSrc(IN_QUE_GIFS[random(0, IN_QUE_GIFS.length - 1)]);
       queStartTSRef.current = Date.now();
       timerIntervalRef.current = setInterval(() => {
         setTimeInQue(getTimeInQueString(queStartTSRef.current));
@@ -199,6 +200,7 @@ const Online: React.FC = () => {
               }}
               onLastWordCompleted={() => {
                 timerRef.current?.stop();
+                // show scoreboard
                 // dispatch({
                 //   type: "RACE_COMPLETED",
                 //   payload: timerRef.current?.getTime()!,
