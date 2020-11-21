@@ -9,7 +9,7 @@ import { SOCKET_EVENTS, ROOM_STATES } from "../../shared";
 import { Player, Room, TextId } from "../../shared/interfaces";
 import texts from "../../shared/texts.json";
 import { getParsedTexts, sleep } from "../../shared/utils";
-import config from "./config.json";
+import config from "./config";
 import { random } from "lodash";
 
 const parsedTexts = getParsedTexts();
@@ -113,6 +113,10 @@ io.of("/game").on("connection", async (socket) => {
   }
   async function handleFakePlayer(roomId: string, fakePlayerId: string) {
     let raceFinished = false;
+    const speed =
+      config.fakePlayers.speeds[
+        random(0, config.fakePlayers.speeds.length - 1)
+      ];
     while (true) {
       const room = _publicRooms[roomId];
       const player = room?.players.find((player) => player.id === fakePlayerId);
@@ -127,11 +131,11 @@ io.of("/game").on("connection", async (socket) => {
         raceFinished = true;
       }
       // pause based on word length?
-      await sleep(random(200, 2000));
+      await sleep(random(...speed));
       io.of("/game")
         .to(roomId)
         .emit(SOCKET_EVENTS.UPDATE_ROOM, _publicRooms[roomId]);
-      if (raceFinished) return;
+      if (raceFinished) break;
     }
   }
 });
