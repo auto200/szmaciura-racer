@@ -120,7 +120,7 @@ io.of("/game").on("connection", async (socket) => {
     while (true) {
       const room = _publicRooms[roomId];
       const player = room?.players.find((player) => player.id === fakePlayerId);
-      if (!room || !player) return;
+      if (!room || !player) break;
       if (room.state === ROOM_STATES.STARTED && player.progress < 1) {
         console.log(fakePlayerId);
         player.progress += random(0.015, 0.025);
