@@ -3,6 +3,7 @@ export interface Player {
   id: string;
   progress: number;
   carIndex: number;
+  disconnected?: boolean;
 }
 
 export interface Room {

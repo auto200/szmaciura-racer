@@ -41,6 +41,25 @@ io.of("/game").on("connection", async (socket) => {
   socket.on("disconnect", (reason) => {
     _queue = _queue.filter((player) => player.id !== socket.id);
 
+    const room = Object.values(_publicRooms).find(({ players }) =>
+      players.find((player) => {
+        if (player.id === socket.id) {
+          player.disconnected = true;
+          return true;
+        }
+        return false;
+      })
+    );
+    if (!room) return;
+    if (
+      room.players.every(
+        (player) =>
+          player.id.startsWith(config.fakePlayers.idPrefix) ||
+          player.disconnected === true
+      )
+    ) {
+      delete _publicRooms[room.id];
+    }
     console.log("client disconnected", reason);
   });
 
@@ -171,6 +190,10 @@ function createAndHandleNewRoom(): string {
 
   let timeToStart = config.timeToStartGame / 1000;
   const timerInterval = setInterval(() => {
+    if (!_publicRooms[roomId]) {
+      clearInterval(timerInterval);
+      return;
+    }
     if (!timeToStart) {
       clearInterval(timerInterval);
       _publicRooms[roomId].state = ROOM_STATES.STARTED;
