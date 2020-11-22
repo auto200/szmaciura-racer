@@ -8,11 +8,9 @@ import { nanoid } from "nanoid";
 import { SOCKET_EVENTS, ROOM_STATES } from "../../shared";
 import { Player, Room, TextId } from "../../shared/interfaces";
 import texts from "../../shared/texts.json";
-import { getParsedTexts, sleep } from "../../shared/utils";
+import { parsedTexts, sleep } from "../../shared/utils";
 import config from "./config";
 import { random } from "lodash";
-
-const parsedTexts = getParsedTexts();
 
 const app = express();
 

@@ -4,9 +4,7 @@ import { v4 as uuid } from "uuid";
 import { getInputMaxLength } from "../utils";
 import texts from "../../../shared/texts.json";
 import { TextId } from "../../../shared/interfaces";
-import { getParsedTexts } from "../../../shared/utils";
-
-const parsedTexts = getParsedTexts();
+import { parsedTexts } from "../../../shared/utils";
 
 export type History = {
   id: string;
