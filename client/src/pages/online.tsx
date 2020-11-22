@@ -196,11 +196,19 @@ const Online: React.FC = () => {
               }}
               onWordCompleted={() => {
                 dispatch({ type: "PROCEED_TO_NEXT_WORD" });
-                socket.emit(SOCKET_EVENTS.WORD_COMPLETED, room.id, wordIndex);
+                socket.emit(
+                  SOCKET_EVENTS.WORD_COMPLETED,
+                  room.id,
+                  wordIndex + 1
+                );
               }}
               onLastWordCompleted={() => {
                 timerRef.current?.stop();
-                socket.emit(SOCKET_EVENTS.WORD_COMPLETED, room.id, wordIndex);
+                socket.emit(
+                  SOCKET_EVENTS.WORD_COMPLETED,
+                  room.id,
+                  wordIndex + 1
+                );
                 // show scoreboard
                 // dispatch({
                 //   type: "RACE_COMPLETED",
