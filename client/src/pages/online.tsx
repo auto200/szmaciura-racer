@@ -13,6 +13,7 @@ import Input from "../components/Input";
 import Timer, { TimerFunctions } from "../components/Timer";
 import GoOffline from "../components/Links/GoOffline";
 import { random } from "lodash";
+import { ImArrowUpLeft2, ImArrowUp2, ImArrowUpRight2 } from "react-icons/im";
 
 const IN_QUE_GIFS: string[] = [
   "https://thumbs.gfycat.com/DevotedEasygoingAnnashummingbird-size_restricted.gif",
@@ -29,6 +30,12 @@ const JoinRace = styled.div`
   border-radius: 10px;
   padding: 5px;
   cursor: pointer;
+`;
+const Arrows = styled.div`
+  width: 500px;
+  display: flex;
+  justify-content: space-around;
+  margin-top: 15px;
 `;
 interface IStartRaceCountdown {
   scaleTime: boolean;
@@ -166,9 +173,16 @@ const Online: React.FC = () => {
           </StartRaceCountdown>
         )}
         {state == STATES.INITIAL && (
-          <JoinRace onClick={joinQue}>
-            Weź udział w wyścigu o złote galoty
-          </JoinRace>
+          <>
+            <JoinRace onClick={joinQue}>
+              Weź udział w wyścigu o złote galoty
+            </JoinRace>
+            <Arrows>
+              <ImArrowUpRight2 />
+              <ImArrowUp2 />
+              <ImArrowUpLeft2 />
+            </Arrows>
+          </>
         )}
         {state === STATES.IN_QUE && (
           <>
