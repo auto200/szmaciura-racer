@@ -6,10 +6,11 @@ interface Config {
   fakePlayers: {
     enabled: boolean;
     idPrefix: string;
+    maxFakePlayersInRoom: number;
     speeds: [number, number][];
   };
 }
-export default <Config>{
+const config: Config = {
   roomMaxPlayers: 5,
   carsCount: 3,
   roomExpireTime: 1000 * 60 * 3,
@@ -17,6 +18,7 @@ export default <Config>{
   fakePlayers: {
     enabled: true,
     idPrefix: "imFaker",
+    maxFakePlayersInRoom: 2,
     speeds: [
       [500, 3000],
       [400, 2700],
@@ -25,3 +27,5 @@ export default <Config>{
     ],
   },
 };
+
+export default config;
