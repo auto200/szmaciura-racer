@@ -34,8 +34,10 @@ const _publicRooms: RoomsObj = {};
 let _queue: Player[] = [];
 const io = socketio(server);
 
-io.of("/game").on("connection", async (socket) => {
+io.of("/game").on("connection", (socket) => {
   console.log("new client connected");
+
+  //cleanup
   socket.on("disconnect", (reason) => {
     _queue = _queue.filter((player) => player.id !== socket.id);
 
@@ -51,9 +53,8 @@ io.of("/game").on("connection", async (socket) => {
     if (!room) return;
     if (
       room.players.every(
-        (player) =>
-          player.id.startsWith(config.fakePlayers.idPrefix) ||
-          player.disconnected === true
+        ({ id, disconnected }) =>
+          id.startsWith(config.fakePlayers.idPrefix) || disconnected === true
       )
     ) {
       delete _publicRooms[room.id];
@@ -62,8 +63,7 @@ io.of("/game").on("connection", async (socket) => {
   });
 
   socket.on(SOCKET_EVENTS.JOIN_QUE, () => {
-    //Join existing room
-    const freeRoom = getFreeRoom();
+    const freeRoom = getFreePublicRoom();
     if (freeRoom) {
       socket.join(freeRoom.id);
       freeRoom.players.push(getNewPlayer(socket.id));
@@ -85,6 +85,7 @@ io.of("/game").on("connection", async (socket) => {
     }
     console.log(_queue);
   });
+
   socket.on(
     SOCKET_EVENTS.WORD_COMPLETED,
     (roomId: string, wordIndex: number) => {
@@ -100,10 +101,14 @@ io.of("/game").on("connection", async (socket) => {
       }
     }
   );
-  //add fake players
+});
+
+//add fake players
+(async () => {
   if (config.fakePlayers.enabled) {
     while (true) {
-      await sleep(random(3000, 5000));
+      await sleep(random(5000, 8000));
+      console.log("trying to create fake player");
       const fakePlayer: Player = getNewPlayer(
         `${config.fakePlayers.idPrefix}${nanoid()}`
       );
@@ -112,22 +117,22 @@ io.of("/game").on("connection", async (socket) => {
         const roomId = createAndHandleNewRoom();
         handleFakePlayer(roomId, fakePlayer.id);
       } else {
-        const freeRoom = getFreeRoom();
-        if (freeRoom) {
-          const fakePlayersInRoom = freeRoom.players.reduce((acc, player) => {
-            if (player.id.includes(config.fakePlayers.idPrefix)) return acc + 1;
-            return acc;
-          }, 0);
-          if (fakePlayersInRoom >= 2) continue;
-          freeRoom.players.push(fakePlayer);
-          io.of("/game")
-            .to(freeRoom.id)
-            .emit(SOCKET_EVENTS.UPDATE_ROOM, freeRoom);
-          handleFakePlayer(freeRoom.id, fakePlayer.id);
-        }
+        const freeRoom = getFreePublicRoom();
+        if (!freeRoom) continue;
+        const fakePlayersInRoom = freeRoom.players.filter(({ id }) =>
+          id.startsWith(config.fakePlayers.idPrefix)
+        ).length;
+        if (fakePlayersInRoom >= config.fakePlayers.maxFakePlayersInRoom)
+          continue;
+        freeRoom.players.push(fakePlayer);
+        io.of("/game")
+          .to(freeRoom.id)
+          .emit(SOCKET_EVENTS.UPDATE_ROOM, freeRoom);
+        handleFakePlayer(freeRoom.id, fakePlayer.id);
       }
     }
   }
+
   async function handleFakePlayer(roomId: string, fakePlayerId: string) {
     let raceFinished = false;
     const speed =
@@ -136,13 +141,13 @@ io.of("/game").on("connection", async (socket) => {
       ];
     while (true) {
       const room = _publicRooms[roomId];
-      const player = room?.players.find((player) => player.id === fakePlayerId);
+      const player = room?.players.find(({ id }) => id === fakePlayerId);
       if (!room || !player) break;
       if (room.state === ROOM_STATES.STARTED && player.progress < 1) {
         console.log(fakePlayerId);
+        // progress based on word length?
         player.progress += random(0.015, 0.025);
         if (player.progress > 1) player.progress = 1;
-        // progress based on word length?
       }
       if (player?.progress === 1) {
         raceFinished = true;
@@ -155,7 +160,8 @@ io.of("/game").on("connection", async (socket) => {
       if (raceFinished) break;
     }
   }
-});
+})();
+
 /**
  * @returns new room id
  */
@@ -217,6 +223,7 @@ function createAndHandleNewRoom(): string {
   }, 1000);
   return roomId;
 }
+
 function getNewPlayer(id: string): Player {
   return {
     id,
@@ -225,7 +232,7 @@ function getNewPlayer(id: string): Player {
   };
 }
 
-function getFreeRoom(): Room | undefined {
+function getFreePublicRoom(): Room | undefined {
   return Object.values(_publicRooms).find(
     (room) =>
       room.state === ROOM_STATES.WAITING &&
