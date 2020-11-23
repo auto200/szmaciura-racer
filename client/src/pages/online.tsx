@@ -30,12 +30,26 @@ const JoinRace = styled.div`
   padding: 5px;
   cursor: pointer;
 `;
-const StartRaceCountdown = styled.div`
+interface IStartRaceCountdown {
+  scaleTime: boolean;
+}
+const StartRaceCountdown = styled.div<IStartRaceCountdown>`
   position: absolute;
   top: 0;
+  font-size: 1.7rem;
   font-weight: bold;
   span {
     color: ${({ theme }) => theme.colors.golden};
+    animation: ${({ scaleTime }) => scaleTime && "anim 1s ease"};
+    display: inline-block;
+  }
+  @keyframes anim {
+    from {
+      transform: scale(2);
+    }
+    to {
+      transform: scale(1.3);
+    }
   }
 `;
 const InQueTimer = styled.div`
@@ -144,7 +158,10 @@ const Online: React.FC = () => {
       <GoOffline to={"/"} onClick={() => dispatch({ type: "RESET" })} />
       <Layout>
         {!!timeToStart && (
-          <StartRaceCountdown>
+          <StartRaceCountdown
+            key={timeToStart <= 3 ? timeToStart : null}
+            scaleTime={timeToStart <= 3}
+          >
             gra startuje za: <span>{timeToStart}</span>
           </StartRaceCountdown>
         )}
