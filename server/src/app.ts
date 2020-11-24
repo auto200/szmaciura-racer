@@ -6,9 +6,13 @@ import path from "path";
 import socketio from "socket.io";
 import { nanoid } from "nanoid";
 import { SOCKET_EVENTS, ROOM_STATES } from "../../shared";
-import { Player, Room, TextId } from "../../shared/interfaces";
+import { Player, Room, TextID } from "../../shared/interfaces";
 import texts from "../../shared/texts.json";
-import { parsedTexts, sleep } from "../../shared/utils";
+import {
+  getTimePassedInSecAndMs,
+  parsedTexts,
+  sleep,
+} from "../../shared/utils";
 import config from "./config";
 import { random } from "lodash";
 
@@ -51,6 +55,7 @@ io.of("/game").on("connection", (socket) => {
       })
     );
     if (!room) return;
+
     if (
       room.players.every(
         ({ id, disconnected }) =>
@@ -67,6 +72,7 @@ io.of("/game").on("connection", (socket) => {
     if (freeRoom) {
       socket.join(freeRoom.id);
       freeRoom.players.push(getNewPlayer(socket.id));
+
       io.of("/game").to(freeRoom.id).emit(SOCKET_EVENTS.UPDATE_ROOM, freeRoom);
       console.log(
         "player found open room and joined, room id:",
@@ -80,21 +86,30 @@ io.of("/game").on("connection", (socket) => {
     _queue.push(getNewPlayer(socket.id));
     console.log("user added to que");
 
-    if (_queue.length >= 2) {
-      createAndHandleNewRoom();
-    }
+    if (_queue.length >= 2) createAndHandleNewRoom();
+
     console.log(_queue);
   });
 
   socket.on(
     SOCKET_EVENTS.WORD_COMPLETED,
     (roomId: string, wordIndex: number) => {
-      const player = _publicRooms[roomId]?.players.find(
+      if (!_publicRooms[roomId]) return;
+
+      const player = _publicRooms[roomId].players.find(
         ({ id }) => id === socket.id
       );
       if (player) {
-        player.progress =
-          wordIndex / parsedTexts[_publicRooms[roomId].textId].length;
+        const progress =
+          wordIndex / parsedTexts[_publicRooms[roomId].textID].length;
+        player.progress = progress;
+
+        if (progress === 1 && _publicRooms[roomId].startTS) {
+          player.completeTime = getTimePassedInSecAndMs(
+            _publicRooms[roomId].startTS!
+          );
+        }
+
         io.of("/game")
           .to(roomId)
           .emit(SOCKET_EVENTS.UPDATE_ROOM, _publicRooms[roomId]);
@@ -112,18 +127,20 @@ io.of("/game").on("connection", (socket) => {
       const fakePlayer: Player = getNewPlayer(
         `${config.fakePlayers.idPrefix}${nanoid()}`
       );
+
       if (_queue.length) {
         _queue.push(fakePlayer);
-        const roomId = createAndHandleNewRoom();
-        handleFakePlayer(roomId, fakePlayer.id);
+        handleFakePlayer(createAndHandleNewRoom(), fakePlayer.id);
       } else {
         const freeRoom = getFreePublicRoom();
         if (!freeRoom) continue;
+
         const fakePlayersInRoom = freeRoom.players.filter(({ id }) =>
           id.startsWith(config.fakePlayers.idPrefix)
         ).length;
         if (fakePlayersInRoom >= config.fakePlayers.maxFakePlayersInRoom)
           continue;
+
         freeRoom.players.push(fakePlayer);
         io.of("/game")
           .to(freeRoom.id)
@@ -134,30 +151,37 @@ io.of("/game").on("connection", (socket) => {
   }
 
   async function handleFakePlayer(roomId: string, fakePlayerId: string) {
-    let raceFinished = false;
-    const speed =
-      config.fakePlayers.speeds[
-        random(0, config.fakePlayers.speeds.length - 1)
-      ];
+    let wordIndex = 0;
+    const [minSpeed, maxSpeed] = config.fakePlayers.speeds[
+      random(0, config.fakePlayers.speeds.length - 1)
+    ];
+
     while (true) {
       const room = _publicRooms[roomId];
       const player = room?.players.find(({ id }) => id === fakePlayerId);
-      if (!room || !player) break;
-      if (room.state === ROOM_STATES.STARTED && player.progress < 1) {
-        console.log(fakePlayerId);
-        // progress based on word length?
-        player.progress += random(0.015, 0.025);
-        if (player.progress > 1) player.progress = 1;
+
+      if (!room || !player || player.completeTime) {
+        break;
       }
-      if (player?.progress === 1) {
-        raceFinished = true;
+      // propbaly should listen for a event that triggers running this loop. event should be emitted when room changes its state to STARTED in createAndHandleNewRoom()
+      if (room.state === ROOM_STATES.WAITING) {
+        await sleep(1000);
+        continue;
       }
-      // pause based on word length?
-      await sleep(random(...speed));
+
+      const textArr = parsedTexts[room.textID];
+      const wordLength = textArr[wordIndex].length;
+      await sleep(random(minSpeed * wordLength, maxSpeed * wordLength));
+      wordIndex++;
+
+      player.progress = wordIndex / textArr.length;
+
+      if (player.progress >= 1)
+        player.completeTime = getTimePassedInSecAndMs(room.startTS!);
+
       io.of("/game")
         .to(roomId)
         .emit(SOCKET_EVENTS.UPDATE_ROOM, _publicRooms[roomId]);
-      if (raceFinished) break;
     }
   }
 })();
@@ -169,13 +193,15 @@ function createAndHandleNewRoom(): string {
   const roomId = nanoid(6);
 
   _publicRooms[roomId] = {
+    createTS: Date.now(),
     id: roomId,
     state: ROOM_STATES.WAITING,
     players: [..._queue],
     expireTS: Date.now() + config.roomExpireTime,
-    textId: Object.keys(texts)[0] as TextId,
-    //TODO: textId should come from client or be reandomized from texts.json if requested for now value is hard-coded to be the first entry in file
+    textID: Object.keys(texts)[0] as TextID,
+    //TODO: textId should come from client or be reandomized from texts.json if requested, for now value is hard-coded to be the first entry in file
   };
+
   _queue = [];
 
   _publicRooms[roomId].players.forEach(({ id }) => {
@@ -198,9 +224,12 @@ function createAndHandleNewRoom(): string {
       clearInterval(timerInterval);
       return;
     }
+
     if (!timeToStart) {
       clearInterval(timerInterval);
       _publicRooms[roomId].state = ROOM_STATES.STARTED;
+      _publicRooms[roomId].startTS = Date.now();
+
       io.of("/game")
         .to(roomId)
         .emit(SOCKET_EVENTS.UPDATE_ROOM, _publicRooms[roomId]);
@@ -217,10 +246,12 @@ function createAndHandleNewRoom(): string {
         }
       }, config.roomExpireTime);
     }
+
     io.of("/game")
       .to(roomId)
       .emit(SOCKET_EVENTS.UPDATE_TIME_TO_START, timeToStart--);
   }, 1000);
+
   return roomId;
 }
 

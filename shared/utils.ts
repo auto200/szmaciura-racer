@@ -15,3 +15,9 @@ export const parsedTexts = getParsedTexts();
 export const sleep = (ms: number) => {
   return new Promise((resolve) => setTimeout(resolve, ms));
 };
+
+export const getTimePassedInSecAndMs = (startTS: number): string => {
+  const msPassed = Date.now() - startTS;
+  const seconds = msPassed / 1000;
+  return seconds.toFixed(2);
+};

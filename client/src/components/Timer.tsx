@@ -1,17 +1,12 @@
 import React, { useEffect, useImperativeHandle, useRef, useState } from "react";
 import styled from "styled-components";
+import { getTimePassedInSecAndMs } from "../../../shared/utils";
 
 const Container = styled.div`
   font-size: 1rem;
   margin-left: 5px;
   width: 5%;
 `;
-
-const getTimePassedInSec = (startTime: number): string => {
-  const msPassed = Date.now() - startTime;
-  const seconds = msPassed / 1000;
-  return seconds.toFixed(2);
-};
 
 export interface TimerFunctions {
   start: () => void;
@@ -36,7 +31,7 @@ const Timer: React.ForwardRefRenderFunction<TimerFunctions> = (
   const updateTimer = () =>
     requestAnimationFrame(() => {
       if (startTimestampRef.current) {
-        const seconds = getTimePassedInSec(startTimestampRef.current);
+        const seconds = getTimePassedInSecAndMs(startTimestampRef.current);
         setTimePassed(seconds);
         timerAnimationFrameRef.current = updateTimer();
       }

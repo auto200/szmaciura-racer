@@ -19,11 +19,12 @@ const config: Config = {
     enabled: true,
     idPrefix: "imFaker",
     maxFakePlayersInRoom: 2,
+    // min/max speed(ms) to type single character -> less = faster
     speeds: [
-      [500, 3000],
-      [400, 2700],
-      [200, 2000], //about 60s
-      [200, 1500],
+      [100, 200],
+      [100, 300],
+      [100, 400],
+      [100, 500],
     ],
   },
 };

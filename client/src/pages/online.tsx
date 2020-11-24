@@ -4,7 +4,7 @@ import Layout from "../components/Layout";
 import styled from "styled-components";
 import { ROOM_STATES, SOCKET_EVENTS } from "../../../shared/";
 import ProgressIndicator from "../components/ProgressIndicator";
-import { Room } from "../../../shared/interfaces";
+import { Player, Room } from "../../../shared/interfaces";
 import { ProgressContainer, TextWrapper } from "../components/sharedStyled";
 import { differenceInMinutes, differenceInSeconds } from "date-fns";
 import Word from "../components/Word";
@@ -71,7 +71,7 @@ enum STATES {
   IN_QUE,
   IN_ROOM,
 }
-const getTimeInQueString = (startTime: number) => {
+const getTimeInQueString = (startTime: number): string => {
   const minutes = differenceInMinutes(Date.now(), startTime);
   const seconds = (differenceInSeconds(Date.now(), startTime) % 60)
     .toString()
@@ -83,7 +83,7 @@ const Online: React.FC = () => {
   const {
     state: {
       text,
-      textId,
+      textID,
       wordIndex,
       inputLength,
       lastValidCharIndex,
@@ -99,8 +99,8 @@ const Online: React.FC = () => {
     socket.on(SOCKET_EVENTS.UPDATE_ROOM, (room: Room) => {
       setState(STATES.IN_ROOM);
       setRoom(room);
-      if (room.textId !== textId) {
-        dispatch({ type: "SET_TEXT_BY_ID", payload: room.textId });
+      if (room.textID !== textID) {
+        dispatch({ type: "SET_TEXT_BY_ID", payload: room.textID });
       }
     });
     socket.on(SOCKET_EVENTS.ROOM_EXPIRED, () => {
@@ -121,12 +121,14 @@ const Online: React.FC = () => {
   const [timeInQue, setTimeInQue] = useState<string>("0:00");
   const [timeToStart, setTimeToStart] = useState<number>(0);
   const [inQueGifSrc, setInQueGifSrc] = useState<string>(IN_QUE_GIFS[0]);
+  const [raceCompleted, setRaceCompleted] = useState<boolean>(false);
+  const [playersThatFinished, setPlayersThatFinished] = useState<Player[]>([]);
   const queStartTSRef = useRef<number>(0);
   const timerIntervalRef = useRef<number>(0);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const timerRef = useRef<TimerFunctions>(null);
-
+  console.log(room);
   useEffect(() => {
     return () => {
       socket.disconnect();
@@ -150,6 +152,16 @@ const Online: React.FC = () => {
   useEffect(() => {
     if (room?.state === ROOM_STATES.STARTED) {
       inputRef.current?.focus();
+    }
+    if (room) {
+      const player = room.players.find(
+        ({ id, completeTime }) =>
+          completeTime &&
+          !playersThatFinished.find(({ id: finId }) => id === finId)
+      );
+      if (player) {
+        setPlayersThatFinished(prev => [...prev, player]);
+      }
     }
   }, [room]);
 
@@ -217,42 +229,55 @@ const Online: React.FC = () => {
                 );
               })}
             </TextWrapper>
-            <Input
-              word={text[wordIndex]}
-              error={error}
-              maxLength={inputMaxLength}
-              isLastWord={wordIndex === text.length - 1}
-              onChange={value => {
-                dispatch({ type: "SET_INPUT_LENGTH", payload: value.length });
-              }}
-              onWordCompleted={() => {
-                dispatch({ type: "PROCEED_TO_NEXT_WORD" });
-                socket.emit(
-                  SOCKET_EVENTS.WORD_COMPLETED,
-                  room.id,
-                  wordIndex + 1
-                );
-              }}
-              onLastWordCompleted={() => {
-                timerRef.current?.stop();
-                socket.emit(
-                  SOCKET_EVENTS.WORD_COMPLETED,
-                  room.id,
-                  wordIndex + 1
-                );
-                // show scoreboard
-                // dispatch({
-                //   type: "RACE_COMPLETED",
-                //   payload: timerRef.current?.getTime()!,
-                // });
-                // TODO: online match history
-              }}
-              onEmpty={() => dispatch({ type: "INPUT_EMPTY" })}
-              onCorrectLetter={() => dispatch({ type: "CORRECT_INPUT_VALUE" })}
-              onError={() => dispatch({ type: "SET_ERROR", payload: true })}
-              disabled={room.state === ROOM_STATES.WAITING}
-              ref={inputRef}
-            />
+            {raceCompleted ? (
+              <div>hey congratz</div>
+            ) : (
+              <Input
+                word={text[wordIndex]}
+                error={error}
+                maxLength={inputMaxLength}
+                isLastWord={wordIndex === text.length - 1}
+                onChange={value => {
+                  dispatch({ type: "SET_INPUT_LENGTH", payload: value.length });
+                }}
+                onWordCompleted={() => {
+                  dispatch({ type: "PROCEED_TO_NEXT_WORD" });
+                  socket.emit(
+                    SOCKET_EVENTS.WORD_COMPLETED,
+                    room.id,
+                    wordIndex + 1
+                  );
+                }}
+                onLastWordCompleted={() => {
+                  timerRef.current?.stop();
+                  socket.emit(
+                    SOCKET_EVENTS.WORD_COMPLETED,
+                    room.id,
+                    wordIndex + 1
+                  );
+                  setRaceCompleted(true);
+                  // show scoreboard
+                  // dispatch({
+                  //   type: "RACE_COMPLETED",
+                  //   payload: timerRef.current?.getTime()!,
+                  // });
+                  // TODO: online match history
+                }}
+                onEmpty={() => dispatch({ type: "INPUT_EMPTY" })}
+                onCorrectLetter={() =>
+                  dispatch({ type: "CORRECT_INPUT_VALUE" })
+                }
+                onError={() => dispatch({ type: "SET_ERROR", payload: true })}
+                disabled={room.state === ROOM_STATES.WAITING}
+                ref={inputRef}
+              />
+            )}
+            {playersThatFinished.map(player => (
+              <div>
+                {player.carIndex} - czas: {player.completeTime}{" "}
+                {player.id === socket.id && "(ty)"}
+              </div>
+            ))}
           </>
         )}
       </Layout>

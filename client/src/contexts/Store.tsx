@@ -3,7 +3,7 @@ import { useImmerReducer } from "../utils/hooks/useImmerReducer";
 import { v4 as uuid } from "uuid";
 import { getInputMaxLength } from "../utils";
 import texts from "../../../shared/texts.json";
-import { TextId } from "../../../shared/interfaces";
+import { TextID } from "../../../shared/interfaces";
 import { parsedTexts } from "../../../shared/utils";
 
 export type History = {
@@ -14,7 +14,7 @@ export type History = {
 
 export interface State {
   text: string[];
-  textId: TextId;
+  textID: TextID;
   wordIndex: number;
   inputLength: number;
   lastValidCharIndex: number;
@@ -27,7 +27,7 @@ const initialText = Object.values(parsedTexts)[0];
 
 const initialState: State = {
   text: initialText,
-  textId: Object.keys(texts)[0] as TextId,
+  textID: Object.keys(texts)[0] as TextID,
   wordIndex: 0,
   inputLength: 0,
   lastValidCharIndex: -1,
@@ -45,7 +45,7 @@ const StoreContext = createContext<{
   dispatch: () => null,
 });
 export type Action =
-  | { type: "SET_TEXT_BY_ID"; payload: TextId }
+  | { type: "SET_TEXT_BY_ID"; payload: TextID }
   | {
       type:
         | "RESET"
@@ -61,7 +61,7 @@ export type Action =
 const reducer = (state: State, action: Action) => {
   switch (action.type) {
     case "SET_TEXT_BY_ID": {
-      state.textId = action.payload;
+      state.textID = action.payload;
       state.text = parsedTexts[action.payload];
       return;
     }
