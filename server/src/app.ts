@@ -94,26 +94,27 @@ io.of("/game").on("connection", (socket) => {
   socket.on(
     SOCKET_EVENTS.WORD_COMPLETED,
     (roomId: string, wordIndex: number) => {
-      if (!_publicRooms[roomId]) return;
+      const room = _publicRooms[roomId];
+      const player = room?.players.find(({ id }) => id === socket.id);
 
-      const player = _publicRooms[roomId].players.find(
-        ({ id }) => id === socket.id
-      );
-      if (player) {
-        const progress =
-          wordIndex / parsedTexts[_publicRooms[roomId].textID].length;
-        player.progress = progress;
-
-        if (progress === 1 && _publicRooms[roomId].startTS) {
-          player.completeTime = getTimePassedInSecAndMs(
-            _publicRooms[roomId].startTS!
-          );
-        }
-
-        io.of("/game")
-          .to(roomId)
-          .emit(SOCKET_EVENTS.UPDATE_ROOM, _publicRooms[roomId]);
+      if (
+        !room ||
+        !player ||
+        player.completeTime ||
+        room.state === ROOM_STATES.WAITING
+      ) {
+        return;
       }
+
+      const progress = wordIndex / parsedTexts[room.textID].length;
+      player.progress = progress;
+
+      if (progress >= 1) {
+        player.completeTime = getTimePassedInSecAndMs(room.startTS!);
+        room.playersThatFinished.push(player);
+      }
+
+      io.of("/game").to(roomId).emit(SOCKET_EVENTS.UPDATE_ROOM, room);
     }
   );
 });
@@ -163,7 +164,9 @@ io.of("/game").on("connection", (socket) => {
       if (!room || !player || player.completeTime) {
         break;
       }
-      // propbaly should listen for a event that triggers running this loop. event should be emitted when room changes its state to STARTED in createAndHandleNewRoom()
+      // Probably should listen for a event that triggers running this loop. Event should be emitted when room changes
+      // its state to STARTED in createAndHandleNewRoom(). Although it creates more randomness coz not all fake players
+      // will start (sleeping) at the same time
       if (room.state === ROOM_STATES.WAITING) {
         await sleep(1000);
         continue;
@@ -176,12 +179,12 @@ io.of("/game").on("connection", (socket) => {
 
       player.progress = wordIndex / textArr.length;
 
-      if (player.progress >= 1)
+      if (player.progress >= 1) {
         player.completeTime = getTimePassedInSecAndMs(room.startTS!);
+        room.playersThatFinished.push(player);
+      }
 
-      io.of("/game")
-        .to(roomId)
-        .emit(SOCKET_EVENTS.UPDATE_ROOM, _publicRooms[roomId]);
+      io.of("/game").to(roomId).emit(SOCKET_EVENTS.UPDATE_ROOM, room);
     }
   }
 })();
@@ -193,15 +196,16 @@ function createAndHandleNewRoom(): string {
   const roomId = nanoid(6);
 
   _publicRooms[roomId] = {
-    createTS: Date.now(),
     id: roomId,
+    createTS: Date.now(),
     state: ROOM_STATES.WAITING,
     players: [..._queue],
+    playersThatFinished: [],
     expireTS: Date.now() + config.roomExpireTime,
     textID: Object.keys(texts)[0] as TextID,
-    //TODO: textId should come from client or be reandomized from texts.json if requested, for now value is hard-coded to be the first entry in file
+    //TODO: textId should come from client or be reandomized from texts.json if requested, for now value is hard-coded
+    //to be the first entry in file
   };
-
   _queue = [];
 
   _publicRooms[roomId].players.forEach(({ id }) => {
@@ -217,7 +221,8 @@ function createAndHandleNewRoom(): string {
     "players:",
     _publicRooms[roomId].players.map(({ id }) => id)
   );
-
+  // start countdown to start. Should handle that better, ex. add startTS to room and handle counting down on frontend.
+  // then just settimeout to change state and emit event
   let timeToStart = config.timeToStartGame / 1000;
   const timerInterval = setInterval(() => {
     if (!_publicRooms[roomId]) {
@@ -238,7 +243,6 @@ function createAndHandleNewRoom(): string {
       setTimeout(() => {
         if (_publicRooms[roomId]) {
           delete _publicRooms[roomId];
-          io.of("/game").to(roomId).emit(SOCKET_EVENTS.ROOM_EXPIRED);
           Object.values(io.of("/game").in(roomId).sockets).forEach((socket) =>
             socket.leave(roomId)
           );

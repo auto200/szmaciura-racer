@@ -4,7 +4,7 @@ import Layout from "../components/Layout";
 import styled from "styled-components";
 import { ROOM_STATES, SOCKET_EVENTS } from "../../../shared/";
 import ProgressIndicator from "../components/ProgressIndicator";
-import { Player, Room } from "../../../shared/interfaces";
+import { Room } from "../../../shared/interfaces";
 import { ProgressContainer, TextWrapper } from "../components/sharedStyled";
 import { differenceInMinutes, differenceInSeconds } from "date-fns";
 import Word from "../components/Word";
@@ -103,10 +103,6 @@ const Online: React.FC = () => {
         dispatch({ type: "SET_TEXT_BY_ID", payload: room.textID });
       }
     });
-    socket.on(SOCKET_EVENTS.ROOM_EXPIRED, () => {
-      setState(STATES.INITIAL);
-      setRoom(undefined);
-    });
     socket.on(SOCKET_EVENTS.UPDATE_TIME_TO_START, (time: number) => {
       console.log(time);
       setTimeToStart(time);
@@ -122,11 +118,9 @@ const Online: React.FC = () => {
   const [timeToStart, setTimeToStart] = useState<number>(0);
   const [inQueGifSrc, setInQueGifSrc] = useState<string>(IN_QUE_GIFS[0]);
   const [raceCompleted, setRaceCompleted] = useState<boolean>(false);
-  const [playersThatFinished, setPlayersThatFinished] = useState<Player[]>([]);
   const queStartTSRef = useRef<number>(0);
   const timerIntervalRef = useRef<number>(0);
   const inputRef = useRef<HTMLInputElement>(null);
-
   const timerRef = useRef<TimerFunctions>(null);
   console.log(room);
   useEffect(() => {
@@ -152,16 +146,6 @@ const Online: React.FC = () => {
   useEffect(() => {
     if (room?.state === ROOM_STATES.STARTED) {
       inputRef.current?.focus();
-    }
-    if (room) {
-      const player = room.players.find(
-        ({ id, completeTime }) =>
-          completeTime &&
-          !playersThatFinished.find(({ id: finId }) => id === finId)
-      );
-      if (player) {
-        setPlayersThatFinished(prev => [...prev, player]);
-      }
     }
   }, [room]);
 
@@ -272,7 +256,7 @@ const Online: React.FC = () => {
                 ref={inputRef}
               />
             )}
-            {playersThatFinished.map(player => (
+            {room.playersThatFinished.map(player => (
               <div>
                 {player.carIndex} - czas: {player.completeTime}{" "}
                 {player.id === socket.id && "(ty)"}
