@@ -36,7 +36,7 @@ const IndexPage: React.FC = () => {
       inputMaxLength,
       error,
       onCompleteModalShown,
-      history,
+      currentTextHistory,
     },
     dispatch,
   } = useStore();
@@ -121,10 +121,10 @@ const IndexPage: React.FC = () => {
           onError={() => dispatch({ type: "SET_ERROR", payload: true })}
           autoFocus
         />
-        <TopRaces history={history} />
-        <History history={history} />
-        <Achievements history={history} />
-        <Cars history={history} />
+        <TopRaces history={currentTextHistory} />
+        <History history={currentTextHistory} />
+        <Achievements history={currentTextHistory} />
+        <Cars history={currentTextHistory} />
         {onCompleteModalShown && (
           <OnCompleteModal
             onClose={resetEveryting}

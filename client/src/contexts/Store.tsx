@@ -1,10 +1,28 @@
-import React, { createContext, useContext, ReactNode, useEffect } from "react";
+import React, {
+  createContext,
+  useContext,
+  ReactNode,
+  useEffect,
+  useState,
+} from "react";
 import { useImmerReducer } from "../utils/hooks/useImmerReducer";
 import { v4 as uuid } from "uuid";
 import { getInputMaxLength } from "../utils";
 import texts from "../../../shared/texts.json";
 import { TextID } from "../../../shared/interfaces";
 import { parsedTexts } from "../../../shared/utils";
+
+const getInitialHistoryObject = () => {
+  const initial: any = {};
+  for (const key in parsedTexts) {
+    initial[key] = [];
+  }
+  return initial as HistoryObject;
+};
+
+type HistoryObject = {
+  [key in TextID]: History[];
+};
 
 export type History = {
   id: string;
@@ -21,7 +39,8 @@ export interface State {
   inputMaxLength: number;
   error: boolean;
   onCompleteModalShown: boolean;
-  history: History[];
+  history: HistoryObject;
+  currentTextHistory: History[];
 }
 const initialText = Object.values(parsedTexts)[0];
 
@@ -34,7 +53,8 @@ const initialState: State = {
   inputMaxLength: getInputMaxLength(initialText[0]),
   error: false,
   onCompleteModalShown: false,
-  history: [],
+  history: getInitialHistoryObject(),
+  currentTextHistory: [],
 };
 
 const StoreContext = createContext<{
@@ -51,12 +71,13 @@ export type Action =
         | "RESET"
         | "PROCEED_TO_NEXT_WORD"
         | "INPUT_EMPTY"
-        | "CORRECT_INPUT_VALUE";
+        | "CORRECT_INPUT_VALUE"
+        | "SET_CURRENT_TEXT_HISTORY";
     }
   | { type: "RACE_COMPLETED"; payload: string }
   | { type: "SET_INPUT_LENGTH"; payload: number }
   | { type: "SET_ERROR"; payload: boolean }
-  | { type: "SET_HISTORY"; payload: History[] };
+  | { type: "SET_HISTORY_OBJECT"; payload: HistoryObject };
 
 const reducer = (state: State, action: Action) => {
   switch (action.type) {
@@ -78,7 +99,7 @@ const reducer = (state: State, action: Action) => {
     }
     case "RACE_COMPLETED": {
       state.onCompleteModalShown = true;
-      state.history.unshift({
+      state.history?.[state.textID]?.unshift({
         id: uuid(),
         timestamp: Date.now(),
         time: action.payload,
@@ -107,8 +128,12 @@ const reducer = (state: State, action: Action) => {
       state.error = action.payload;
       return;
     }
-    case "SET_HISTORY": {
+    case "SET_HISTORY_OBJECT": {
       state.history = action.payload;
+      return;
+    }
+    case "SET_CURRENT_TEXT_HISTORY": {
+      state.currentTextHistory = state.history[state.textID];
       return;
     }
     default:
@@ -121,28 +146,30 @@ const StoreContextProvider = ({ children }: { children: ReactNode }) => {
     reducer,
     initialState
   );
+  const [initialRedner, setInitialRender] = useState<boolean>(true);
 
   useEffect(() => {
-    if (!state.history.length) {
-      try {
+    try {
+      if (initialRedner) {
         const storedHistory = window.localStorage.getItem("history");
-        if (!storedHistory) return;
-        const parsedHistory = JSON.parse(storedHistory);
-        if (Array.isArray(parsedHistory)) {
-          dispatch({ type: "SET_HISTORY", payload: parsedHistory });
-        } else {
-          throw new Error();
+        if (storedHistory) {
+          const parsedHistory = JSON.parse(storedHistory);
+          if (typeof parsedHistory === "object" && parsedHistory !== null) {
+            dispatch({ type: "SET_HISTORY_OBJECT", payload: parsedHistory });
+          } else {
+            throw new Error();
+          }
         }
-      } catch (err) {
-        //data corrupted or smth
-        dispatch({ type: "SET_HISTORY", payload: [] });
-      }
-    } else {
-      try {
+      } else {
         window.localStorage.setItem("history", JSON.stringify(state.history));
-      } catch (err) {}
-    }
+      }
+    } catch (err) {}
+    setInitialRender(false);
   }, [state.history]);
+
+  useEffect(() => {
+    dispatch({ type: "SET_CURRENT_TEXT_HISTORY" });
+  }, [state.textID]);
 
   const values = {
     state,
