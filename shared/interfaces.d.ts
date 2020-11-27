@@ -12,10 +12,10 @@ export interface Room {
   createTS: number;
   id: string;
   state: ROOM_STATES;
-  expireTS?: number;
+  expireTS: number;
   players: Player[];
   playersThatFinished: Player[];
   textID: TextID;
-  startTS?: number;
+  startTS: number;
 }
 export type TextID = "szmaciura";

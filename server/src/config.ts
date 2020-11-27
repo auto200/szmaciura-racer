@@ -3,6 +3,7 @@ interface Config {
   carsCount: number;
   roomExpireTime: number;
   timeToStartGame: number;
+  roomTimeThresholdBeforeStart: number;
   fakePlayers: {
     enabled: boolean;
     idPrefix: string;
@@ -15,6 +16,7 @@ const config: Config = {
   carsCount: 3,
   roomExpireTime: 1000 * 60 * 3,
   timeToStartGame: 1000 * 10,
+  roomTimeThresholdBeforeStart: 4000,
   fakePlayers: {
     enabled: true,
     idPrefix: "imFaker",
