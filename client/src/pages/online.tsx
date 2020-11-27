@@ -13,7 +13,14 @@ import Input from "../components/Input";
 import Timer, { TimerFunctions } from "../components/Timer";
 import GoOffline from "../components/Links/GoOffline";
 import { random } from "lodash";
-import { ImArrowUpLeft2, ImArrowUp2, ImArrowUpRight2 } from "react-icons/im";
+import {
+  ImArrowUpLeft2,
+  ImArrowUp2,
+  ImArrowUpRight2,
+  ImArrowLeft,
+} from "react-icons/im";
+import { useCarsContext } from "../contexts/CarsContext";
+import Image from "gatsby-image";
 
 const IN_QUE_GIFS: string[] = [
   "https://thumbs.gfycat.com/DevotedEasygoingAnnashummingbird-size_restricted.gif",
@@ -65,6 +72,38 @@ const InQueTimer = styled.div`
     color: ${({ theme }) => theme.colors.golden};
   }
 `;
+const RaceComplete = styled.div`
+  display: flex;
+  align-items: center;
+  margin: 15px 0 30px 0;
+  font-size: 30px;
+  text-decoration: underline;
+  cursor: pointer;
+  background: linear-gradient(
+    to right,
+    #fff 20%,
+    ${({ theme }) => theme.colors.golden} 40%,
+    ${({ theme }) => theme.colors.golden} 60%,
+    #fff 80%
+  );
+  background-size: 200% auto;
+  color: ${({ theme }) => theme.colors.secondary};
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+
+  animation: shine 3s linear infinite;
+  @keyframes shine {
+    to {
+      background-position: -200% center;
+    }
+  }
+  svg {
+    margin-left: 5px;
+    color: ${({ theme }) => theme.colors.golden};
+  }
+`;
 
 enum STATES {
   INITIAL,
@@ -93,6 +132,7 @@ const Online: React.FC = () => {
     },
     dispatch,
   } = useStore();
+  const { cars } = useCarsContext();
 
   const [socket] = useState<SocketIOClient.Socket>(() => {
     const socket = io(process.env.SOCKET_URL!);
@@ -122,7 +162,7 @@ const Online: React.FC = () => {
   const timerIntervalRef = useRef<number>(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const timerRef = useRef<TimerFunctions>(null);
-  console.log(room);
+
   useEffect(() => {
     return () => {
       socket.disconnect();
@@ -272,9 +312,16 @@ const Online: React.FC = () => {
               />
             )}
             {room.playersThatFinished.map(player => (
-              <div>
-                {player.carIndex} - czas: {player.completeTime}{" "}
-                {player.id === socket.id && "(ty)"}
+              <div
+                style={{ display: "flex", alignItems: "center", marginTop: 10 }}
+              >
+                <Image
+                  fluid={cars[player.carIndex].img}
+                  style={{
+                    width: 150,
+                  }}
+                />
+                {player.completeTime}s {player.id === socket.id && "(ty)"}
               </div>
             ))}
           </>
