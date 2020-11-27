@@ -117,6 +117,13 @@ io.of("/game").on("connection", (socket) => {
       io.of("/game").to(roomId).emit(SOCKET_EVENTS.UPDATE_ROOM, room);
     }
   );
+
+  socket.on(SOCKET_EVENTS.LEAVE_ROOM, (roomID: string) => {
+    const room = _publicRooms[roomID];
+    if (!room) return;
+    room.players = room.players.filter(({ id }) => id !== socket.id);
+    socket.leave(roomID);
+});
 });
 
 //add fake players

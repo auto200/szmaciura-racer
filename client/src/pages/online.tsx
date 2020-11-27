@@ -144,8 +144,11 @@ const Online: React.FC = () => {
   }, [state]);
 
   useEffect(() => {
-    if (room?.state === ROOM_STATES.STARTED) {
+    if (!room) return;
+    if (room.state === ROOM_STATES.STARTED) {
       inputRef.current?.focus();
+      setTimeInQue("0:00");
+      setTimeToStart(0);
     }
   }, [room]);
 
@@ -214,7 +217,18 @@ const Online: React.FC = () => {
               })}
             </TextWrapper>
             {raceCompleted ? (
-              <div>hey congratz</div>
+              <RaceComplete
+                onClick={() => {
+                  dispatch({ type: "RESET" });
+                  setRoom(undefined);
+                  setRaceCompleted(false);
+                  socket.emit(SOCKET_EVENTS.LEAVE_ROOM, room.id);
+                  joinQue();
+                }}
+              >
+                Dobra robota wariacie, pierdolnij se jeszcze rundkę{" "}
+                <ImArrowLeft />
+              </RaceComplete>
             ) : (
               <Input
                 word={text[wordIndex]}
@@ -240,6 +254,7 @@ const Online: React.FC = () => {
                     wordIndex + 1
                   );
                   setRaceCompleted(true);
+                  dispatch({ type: "RESET" });
                   // show scoreboard
                   // dispatch({
                   //   type: "RACE_COMPLETED",
