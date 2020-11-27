@@ -15,6 +15,7 @@ import {
 } from "../../shared/utils";
 import config from "./config";
 import { random } from "lodash";
+import { differenceInSeconds } from "date-fns";
 
 const app = express();
 
@@ -123,7 +124,7 @@ io.of("/game").on("connection", (socket) => {
     if (!room) return;
     room.players = room.players.filter(({ id }) => id !== socket.id);
     socket.leave(roomID);
-});
+  });
 });
 
 //add fake players
@@ -209,6 +210,7 @@ function createAndHandleNewRoom(): string {
     players: [..._queue],
     playersThatFinished: [],
     expireTS: Date.now() + config.roomExpireTime,
+    startTS: Date.now() + config.timeToStartGame,
     textID: Object.keys(texts)[0] as TextID,
     //TODO: textId should come from client or be reandomized from texts.json if requested, for now value is hard-coded
     //to be the first entry in file
@@ -222,29 +224,30 @@ function createAndHandleNewRoom(): string {
   io.of("/game")
     .to(roomId)
     .emit(SOCKET_EVENTS.UPDATE_ROOM, _publicRooms[roomId]);
+
   console.log(
     "new room has been created, room id:",
     roomId,
     "players:",
     _publicRooms[roomId].players.map(({ id }) => id)
   );
-  // start countdown to start. Should handle that better, ex. add startTS to room and handle counting down on frontend.
-  // then just settimeout to change state and emit event
-  let timeToStart = config.timeToStartGame / 1000;
-  const timerInterval = setInterval(() => {
-    if (!_publicRooms[roomId]) {
-      clearInterval(timerInterval);
+
+  const interval = setInterval(() => {
+    const room = _publicRooms[roomId];
+    if (!room) {
+      clearInterval(interval);
       return;
     }
 
-    if (!timeToStart) {
-      clearInterval(timerInterval);
-      _publicRooms[roomId].state = ROOM_STATES.STARTED;
-      _publicRooms[roomId].startTS = Date.now();
-
+    const timeToStart = differenceInSeconds(room.startTS, Date.now());
+    if (timeToStart >= 1) {
       io.of("/game")
         .to(roomId)
-        .emit(SOCKET_EVENTS.UPDATE_ROOM, _publicRooms[roomId]);
+        .emit(SOCKET_EVENTS.UPDATE_TIME_TO_START, timeToStart);
+    } else {
+      clearInterval(interval);
+      room.state = ROOM_STATES.STARTED;
+      io.of("/game").to(roomId).emit(SOCKET_EVENTS.UPDATE_ROOM, room);
       io.of("/game").to(roomId).emit(SOCKET_EVENTS.START_MATCH);
 
       setTimeout(() => {
@@ -257,10 +260,6 @@ function createAndHandleNewRoom(): string {
         }
       }, config.roomExpireTime);
     }
-
-    io.of("/game")
-      .to(roomId)
-      .emit(SOCKET_EVENTS.UPDATE_TIME_TO_START, timeToStart--);
   }, 1000);
 
   return roomId;
@@ -278,7 +277,8 @@ function getFreePublicRoom(): Room | undefined {
   return Object.values(_publicRooms).find(
     (room) =>
       room.state === ROOM_STATES.WAITING &&
-      room.players.length < config.roomMaxPlayers
-    //TODO: check if time to start match is greater than threshold
+      room.players.length < config.roomMaxPlayers &&
+      differenceInSeconds(room.startTS, Date.now()) >=
+        config.roomTimeThresholdBeforeStart / 1000
   );
 }
