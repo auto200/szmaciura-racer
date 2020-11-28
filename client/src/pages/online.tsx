@@ -177,9 +177,11 @@ const Online: React.FC = () => {
         setTimeInQue(getTimeInQueString(queStartTSRef.current));
       }, 1000);
     }
+
     if (state == STATES.IN_ROOM) {
       clearInterval(timerIntervalRef.current);
     }
+
     return () => clearInterval(timerIntervalRef.current);
   }, [state]);
 
@@ -189,6 +191,9 @@ const Online: React.FC = () => {
       inputRef.current?.focus();
       setTimeInQue("0:00");
       setTimeToStart(0);
+    }
+    if (room.players.length === room.playersThatFinished.length) {
+      timerRef.current?.stop();
     }
   }, [room]);
 
@@ -287,7 +292,6 @@ const Online: React.FC = () => {
                   );
                 }}
                 onLastWordCompleted={() => {
-                  timerRef.current?.stop();
                   socket.emit(
                     SOCKET_EVENTS.WORD_COMPLETED,
                     room.id,
@@ -296,10 +300,12 @@ const Online: React.FC = () => {
                   setRaceCompleted(true);
                   dispatch({ type: "RESET" });
                   // show scoreboard
-                  // dispatch({
-                  //   type: "RACE_COMPLETED",
-                  //   payload: timerRef.current?.getTime()!,
-                  // });
+                  if (textID === "szmaciura") {
+                    dispatch({
+                      type: "RACE_COMPLETED",
+                      payload: timerRef.current?.getTime()!,
+                    });
+                  }
                   // TODO: online match history
                 }}
                 onEmpty={() => dispatch({ type: "INPUT_EMPTY" })}
