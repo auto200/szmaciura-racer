@@ -47,7 +47,7 @@ const Layout: React.FC = ({ children }) => {
   return (
     <>
       <GlobalStyle />
-      <SEO title="Szmaciura Racer - Rafonix szmaciura" />
+      <SEO />
       <GithubLink />
       <Wrapper>
         <Header>Szmaciura Racer</Header>

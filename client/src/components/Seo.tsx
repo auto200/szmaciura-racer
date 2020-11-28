@@ -8,18 +8,17 @@
 import React from "react";
 import { Helmet } from "react-helmet";
 import { useStaticQuery, graphql } from "gatsby";
-import ogImage from "../assets/rafonix-szmaciura.jpg";
 
 interface Props {
   description?: string;
   lang?: string;
   meta?: object[];
-  title: string;
+  title?: string;
 }
 
 const SEO: React.FC<Props> = ({
   description = "",
-  lang = "en",
+  lang = "pl",
   meta = [],
   title = "",
 }) => {
@@ -80,11 +79,11 @@ const SEO: React.FC<Props> = ({
         },
         {
           name: `og:image`,
-          content: ogImage,
+          content: `${process.env.WEBSITE_URL}/rafonix-szmaciura.png`,
         },
       ].concat(meta as [])}
     >
-      <link rel="cannonical" href="https://szmaciura.pl/" />
+      <link rel="cannonical" href={`${process.env.WEBSITE_URL}`} />
     </Helmet>
   );
 };

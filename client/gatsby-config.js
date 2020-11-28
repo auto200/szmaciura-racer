@@ -1,7 +1,7 @@
 module.exports = {
   siteMetadata: {
     title: `SzmaciuraRacer - Rafonix szmaciura`,
-    description: `Zostań najszybszą szmaciurą w mieście`,
+    description: `Gra osadzona w uniwersum patostreamów, weź udział w wyścigu i pokaż kto ma najszybsze palce w mieście!`,
     author: `Zdolny Ale Leniwy`,
   },
   plugins: [
