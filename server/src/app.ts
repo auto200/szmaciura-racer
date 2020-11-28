@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
 dotenv.config();
 import express from "express";
+import helmet from "helmet";
 import cors from "cors";
 import path from "path";
 import socketio from "socket.io";
@@ -19,8 +20,10 @@ import { differenceInSeconds } from "date-fns";
 
 const app = express();
 
+//middlewares
 app.use(cors());
 app.use(express.static(path.join(__dirname, "public")));
+app.use(helmet());
 
 let server = null;
 if (process.env.DEV_PORT) {
