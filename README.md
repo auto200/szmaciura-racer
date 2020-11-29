@@ -29,14 +29,16 @@ Once downloaded, open the terminal in the project directory, and install depende
 npm install:all
 ```
 
-Go to `./server` and create your own `.env` file based on `.env.example`
+Go to `/server` and create your own `.env` file based on `.env.example`
+
+If you changed _DEV_PORT_, you need to update _SOCKET_URL_ value in `/client/.env.development`
 
 ---
 
 # IMPORTANT
 
-If during development you want to test application on other devices in your local network, then change "start" script in `client/package.json` accordingly:
-`"start": "gatsby develop -H HOST_LOCAL_IP -p PORT",`
+If during development you want to test client application on other devices in your local network, then change "start" script in `/client/package.json` accordingly:
+`"start": "gatsby develop -H HOST_LOCAL_IP -p PORT"`
 It defaults to my local ip.
 If you don't care about other devices just change it like so:
 `"start": "gatsby develop",`
@@ -48,4 +50,4 @@ Then start the app in main directory with:
 npm run start
 ```
 
-The app should now be up and running at http://localhost:8000 🚀 _if not specified otherwise_
+The client app should now be up and running at http://localhost:8000 🚀 _if not specified otherwise_
