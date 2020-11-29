@@ -6,7 +6,7 @@ Website 👉 https://szmaciura.pl/
 
 Race to be the fastest across all primary schools, get all the fame and the bitches right now!
 
-Frontend - [Gatsby](https://github.com/gatsbyjs/gatsby/)
+Frontend - [Gatsby](https://github.com/gatsbyjs/gatsby/)  
 Backend - [Express](https://github.com/expressjs/express/) & [Socket.io](https://github.com/socketio/socket.io/)
 
 ## Prerequisites
