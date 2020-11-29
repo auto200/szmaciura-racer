@@ -1,8 +1,8 @@
 This directory placement is a hack for a server build to look as i want. Origianal placement was in the root directory like so:
 
-> /client
-> /server
-> /shared
+> /client  
+> /server  
+> /shared  
 > ...
 
 which caused server build to look like:
