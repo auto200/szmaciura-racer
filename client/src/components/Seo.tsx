@@ -79,7 +79,7 @@ const SEO: React.FC<Props> = ({
         },
         {
           name: `og:image`,
-          content: `${process.env.WEBSITE_URL}/rafonix-szmaciura.png`,
+          content: `${process.env.WEBSITE_URL}/rafonix-szmaciura.jpg`,
         },
       ].concat(meta as [])}
     >
