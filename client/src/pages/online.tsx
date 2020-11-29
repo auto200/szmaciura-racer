@@ -2,9 +2,9 @@ import React, { useEffect, useRef, useState } from "react";
 import io from "socket.io-client";
 import Layout from "../components/Layout";
 import styled from "styled-components";
-import { ROOM_STATES, SOCKET_EVENTS } from "../../../shared/";
+import { ROOM_STATES, SOCKET_EVENTS } from "@shared/enums";
 import ProgressIndicator from "../components/ProgressIndicator";
-import { Room } from "../../../shared/interfaces";
+import { Room } from "@shared/interfaces";
 import { ProgressContainer, TextWrapper } from "../components/sharedStyled";
 import { differenceInMinutes, differenceInSeconds } from "date-fns";
 import Word from "../components/Word";
@@ -144,7 +144,6 @@ const Online: React.FC = () => {
       }
     });
     socket.on(SOCKET_EVENTS.UPDATE_TIME_TO_START, (time: number) => {
-      console.log(time);
       setTimeToStart(time);
     });
     socket.on(SOCKET_EVENTS.START_MATCH, () => {

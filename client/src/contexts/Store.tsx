@@ -8,9 +8,8 @@ import React, {
 import { useImmerReducer } from "../utils/hooks/useImmerReducer";
 import { v4 as uuid } from "uuid";
 import { getInputMaxLength } from "../utils";
-import texts from "../../../shared/texts.json";
-import { TextID } from "../../../shared/interfaces";
-import { parsedTexts } from "../../../shared/utils";
+import { TextID } from "@shared/interfaces";
+import { parsedTexts } from "@shared/utils";
 
 const getInitialHistoryObject = () => {
   const initial: any = {};
@@ -40,13 +39,12 @@ export interface State {
   error: boolean;
   onCompleteModalShown: boolean;
   history: HistoryObject;
-  currentTextHistory: History[];
 }
 const initialText = Object.values(parsedTexts)[0];
 
 const initialState: State = {
   text: initialText,
-  textID: Object.keys(texts)[0] as TextID,
+  textID: Object.keys(parsedTexts)[0] as TextID,
   wordIndex: 0,
   inputLength: 0,
   lastValidCharIndex: -1,
@@ -54,7 +52,6 @@ const initialState: State = {
   error: false,
   onCompleteModalShown: false,
   history: getInitialHistoryObject(),
-  currentTextHistory: [],
 };
 
 const StoreContext = createContext<{
@@ -71,8 +68,7 @@ export type Action =
         | "RESET"
         | "PROCEED_TO_NEXT_WORD"
         | "INPUT_EMPTY"
-        | "CORRECT_INPUT_VALUE"
-        | "SET_CURRENT_TEXT_HISTORY";
+        | "CORRECT_INPUT_VALUE";
     }
   | { type: "RACE_COMPLETED"; payload: string }
   | { type: "SET_INPUT_LENGTH"; payload: number }
@@ -99,11 +95,13 @@ const reducer = (state: State, action: Action) => {
     }
     case "RACE_COMPLETED": {
       state.onCompleteModalShown = true;
-      state.history?.[state.textID]?.unshift({
-        id: uuid(),
-        timestamp: Date.now(),
-        time: action.payload,
-      });
+      if (state.history?.[state.textID]) {
+        state.history[state.textID].unshift({
+          id: uuid(),
+          timestamp: Date.now(),
+          time: action.payload,
+        });
+      }
       return;
     }
     case "PROCEED_TO_NEXT_WORD": {
@@ -130,10 +128,6 @@ const reducer = (state: State, action: Action) => {
     }
     case "SET_HISTORY_OBJECT": {
       state.history = action.payload;
-      return;
-    }
-    case "SET_CURRENT_TEXT_HISTORY": {
-      state.currentTextHistory = state.history[state.textID];
       return;
     }
     default:
@@ -166,10 +160,6 @@ const StoreContextProvider = ({ children }: { children: ReactNode }) => {
     } catch (err) {}
     setInitialRender(false);
   }, [state.history]);
-
-  useEffect(() => {
-    dispatch({ type: "SET_CURRENT_TEXT_HISTORY" });
-  }, [state.textID]);
 
   const values = {
     state,

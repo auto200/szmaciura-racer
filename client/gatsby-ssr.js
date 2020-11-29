@@ -1,7 +1,15 @@
-/**
- * Implement Gatsby's SSR (Server Side Rendering) APIs in this file.
- *
- * See: https://www.gatsbyjs.org/docs/ssr-apis/
- */
+import React from "react";
+import StoreContextProvider from "./src/contexts/Store";
+import CarContextProvider from "./src/contexts/CarsContext";
+import { ThemeProvider } from "styled-components";
+import { darkTheme } from "./src/utils/theme";
 
-// You can delete this file if you're not using it
+export const wrapRootElement = ({ element }) => {
+  return (
+    <StoreContextProvider>
+      <CarContextProvider>
+        <ThemeProvider theme={darkTheme}>{element}</ThemeProvider>
+      </CarContextProvider>
+    </StoreContextProvider>
+  );
+};

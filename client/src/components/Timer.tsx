@@ -1,6 +1,6 @@
 import React, { useEffect, useImperativeHandle, useRef, useState } from "react";
 import styled from "styled-components";
-import { getTimePassedInSecAndMs } from "../../../shared/utils";
+import { getTimePassedInSecAndMs } from "@shared/utils";
 
 const Container = styled.div`
   font-size: 1rem;

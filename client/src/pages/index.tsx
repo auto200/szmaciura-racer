@@ -29,6 +29,7 @@ const ResetButton = styled.button`
 const IndexPage: React.FC = () => {
   const {
     state: {
+      textID,
       text,
       wordIndex,
       inputLength,
@@ -36,13 +37,14 @@ const IndexPage: React.FC = () => {
       inputMaxLength,
       error,
       onCompleteModalShown,
-      currentTextHistory,
+      history,
     },
     dispatch,
   } = useStore();
 
   const { currentCarIndex } = useCarsContext();
   const timerRef = useRef<TimerFunctions>(null);
+  const currentTextHistory = history[textID] || [];
 
   //reset
   const resetEveryting = () => {

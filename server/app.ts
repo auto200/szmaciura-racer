@@ -1,29 +1,19 @@
 import dotenv from "dotenv";
 dotenv.config();
 import express from "express";
-import helmet from "helmet";
-import cors from "cors";
 import path from "path";
 import socketio from "socket.io";
 import { nanoid } from "nanoid";
-import { SOCKET_EVENTS, ROOM_STATES } from "../../shared";
-import { Player, Room, TextID } from "../../shared/interfaces";
-import texts from "../../shared/texts.json";
-import {
-  getTimePassedInSecAndMs,
-  parsedTexts,
-  sleep,
-} from "../../shared/utils";
+import { SOCKET_EVENTS, ROOM_STATES } from "./shared/enums";
+import { Player, Room, TextID } from "./shared/interfaces";
+import { getTimePassedInSecAndMs, parsedTexts, sleep } from "./shared/utils";
 import config from "./config";
 import { random } from "lodash";
 import { differenceInSeconds } from "date-fns";
 
 const app = express();
 
-//middlewares
-app.use(cors());
 app.use(express.static(path.join(__dirname, "public")));
-app.use(helmet());
 
 let server = null;
 if (process.env.DEV_PORT) {
@@ -35,12 +25,22 @@ if (process.env.DEV_PORT) {
     console.log("listening", "no port specified");
   });
 }
+
+let io: socketio.Server;
+if (process.env.DEV_PORT) {
+  io = socketio(server);
+} else {
+  io = socketio(server, {
+    // prevent connections from other origins
+    origins: ["https://szmaciura.pl:443", "https://www.szmaciura.pl:443"],
+  });
+}
+
 type RoomsObj = { [key: string]: Room };
 
 const _publicRooms: RoomsObj = {};
 // const privateRooms: RoomsObj = {};
 let _queue: Player[] = [];
-const io = socketio(server);
 
 io.of("/game").on("connection", (socket) => {
   console.log("new client connected");
@@ -214,7 +214,7 @@ function createAndHandleNewRoom(): string {
     playersThatFinished: [],
     expireTS: Date.now() + config.roomExpireTime,
     startTS: Date.now() + config.timeToStartGame,
-    textID: Object.keys(texts)[0] as TextID,
+    textID: Object.keys(parsedTexts)[0] as TextID,
     //TODO: textId should come from client or be reandomized from texts.json if requested, for now value is hard-coded
     //to be the first entry in file
   };

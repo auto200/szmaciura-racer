@@ -5,7 +5,10 @@
     "client": "cd client && npm start",
     "server": "cd server && npm start",
     "install:all": "cd server && npm ci && cd ../client && npm ci",
-    "start": "npm-run-all --parallel client server"
+    "start": "npm-run-all --parallel client server",
+    "build:client": "cd client && npm run build",
+    "build:server": "cd server && npm run build",
+    "build": "node build.js"
   },
   "repository": {
     "type": "git",
@@ -16,9 +19,10 @@
     "url": "https://github.com/auto200/szmaciura-racer/issues"
   },
   "devDependencies": {
-    "npm-run-all": "4.1.5"
+    "npm-run-all": "4.1.5",
+    "@types/shelljs": "^0.8.8",
+    "dotenv": "^8.2.0",
+    "shelljs": "^0.8.4"
   },
-  "dependencies": {
-    "dotenv": "^8.2.0"
-  }
+  "dependencies": {}
 }

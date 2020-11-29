@@ -1,7 +1,7 @@
 import React, { useRef, memo } from "react";
 import styled, { css } from "styled-components";
 import Img from "gatsby-image";
-import { Player } from "../../../shared/interfaces";
+import { Player } from "@shared/interfaces";
 import { useCarsContext } from "../contexts/CarsContext";
 import { isEqual } from "lodash";
 

@@ -1,4 +1,4 @@
-import { ROOM_STATES } from "./";
+import { ROOM_STATES } from "./enums";
 
 export interface Player {
   id: string;
