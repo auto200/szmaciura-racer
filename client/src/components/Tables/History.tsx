@@ -8,7 +8,7 @@ interface Props {
 const History: React.FC<Props> = ({ history }) => {
   return (
     <Container>
-      <h1>Ostatinie {history.length <= 1 ? "podejście" : "podejścia"}</h1>
+      <h1>Ostatnie {history.length <= 1 ? "podejście" : "podejścia"}</h1>
       <Table>
         <thead>
           <tr>

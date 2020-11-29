@@ -1,11 +1,27 @@
-import React, { createContext, useContext, ReactNode, useEffect } from "react";
+import React, {
+  createContext,
+  useContext,
+  ReactNode,
+  useEffect,
+  useState,
+} from "react";
 import { useImmerReducer } from "../utils/hooks/useImmerReducer";
 import { v4 as uuid } from "uuid";
 import { getInputMaxLength } from "../utils";
+import { TextID } from "@shared/interfaces";
+import { parsedTexts } from "@shared/utils";
 
-const szmaciuraText =
-  "ty no nie wiem jak tam twoja szmaciura jebana zrogowaciala niedzwiedzica co sie kurwi pod mostem za wojaka i siada kurwa na butle od vanisha i kurwe w taczce pijana wozili po osiedlu wiesz o co chodzi mnie nie przegadasz bo mi sperme z paly zjadasz frajerze zrogowacialy frajerska chmuro chuj ci na matule i jebac ci starego";
-const splittedText = szmaciuraText.split(" ");
+const getInitialHistoryObject = () => {
+  const initial: any = {};
+  for (const key in parsedTexts) {
+    initial[key] = [];
+  }
+  return initial as HistoryObject;
+};
+
+type HistoryObject = {
+  [key in TextID]: History[];
+};
 
 export type History = {
   id: string;
@@ -15,26 +31,27 @@ export type History = {
 
 export interface State {
   text: string[];
+  textID: TextID;
   wordIndex: number;
+  inputLength: number;
   lastValidCharIndex: number;
-  inputValue: string;
   inputMaxLength: number;
   error: boolean;
-  timePassed: string;
   onCompleteModalShown: boolean;
-  history: History[];
+  history: HistoryObject;
 }
+const initialText = Object.values(parsedTexts)[0];
 
 const initialState: State = {
-  text: splittedText,
+  text: initialText,
+  textID: Object.keys(parsedTexts)[0] as TextID,
   wordIndex: 0,
+  inputLength: 0,
   lastValidCharIndex: -1,
-  inputValue: "",
-  inputMaxLength: getInputMaxLength(splittedText[0]),
+  inputMaxLength: getInputMaxLength(initialText[0]),
   error: false,
-  timePassed: "0",
   onCompleteModalShown: false,
-  history: [],
+  history: getInitialHistoryObject(),
 };
 
 const StoreContext = createContext<{
@@ -45,53 +62,53 @@ const StoreContext = createContext<{
   dispatch: () => null,
 });
 export type Action =
-  | { type: "SET_WORD_INDEX"; payload: number }
-  | { type: "SET_INPUT_VALUE"; payload: string }
+  | { type: "SET_TEXT_BY_ID"; payload: TextID }
   | {
       type:
         | "RESET"
-        | "RACE_COMPLETED"
         | "PROCEED_TO_NEXT_WORD"
         | "INPUT_EMPTY"
         | "CORRECT_INPUT_VALUE";
     }
-  | { type: "SET_TIME_PASSED"; payload: string }
+  | { type: "RACE_COMPLETED"; payload: string }
+  | { type: "SET_INPUT_LENGTH"; payload: number }
   | { type: "SET_ERROR"; payload: boolean }
-  | { type: "SET_TIME_PASSED"; payload: string }
-  | { type: "SET_HISTORY"; payload: History[] };
+  | { type: "SET_HISTORY_OBJECT"; payload: HistoryObject };
 
 const reducer = (state: State, action: Action) => {
   switch (action.type) {
-    case "SET_WORD_INDEX": {
-      state.wordIndex = action.payload;
+    case "SET_TEXT_BY_ID": {
+      state.textID = action.payload;
+      state.text = parsedTexts[action.payload];
       return;
     }
     case "RESET": {
       state.wordIndex = 0;
       state.lastValidCharIndex = -1;
-      state.inputValue = "";
-      state.timePassed = "0";
       state.onCompleteModalShown = false;
+      state.inputLength = 0;
       return;
     }
-    case "SET_TIME_PASSED": {
-      state.timePassed = action.payload;
+    case "SET_INPUT_LENGTH": {
+      state.inputLength = action.payload;
       return;
     }
     case "RACE_COMPLETED": {
       state.onCompleteModalShown = true;
-      state.history.unshift({
-        id: uuid(),
-        timestamp: Date.now(),
-        time: state.timePassed,
-      });
+      if (state.history?.[state.textID]) {
+        state.history[state.textID].unshift({
+          id: uuid(),
+          timestamp: Date.now(),
+          time: action.payload,
+        });
+      }
       return;
     }
     case "PROCEED_TO_NEXT_WORD": {
       const nextWordIndex = state.wordIndex + 1;
       state.wordIndex = nextWordIndex;
-      state.inputValue = "";
       state.lastValidCharIndex = -1;
+      state.inputLength = 0;
       state.inputMaxLength = getInputMaxLength(state.text[nextWordIndex]);
       return;
     }
@@ -101,7 +118,7 @@ const reducer = (state: State, action: Action) => {
       return;
     }
     case "CORRECT_INPUT_VALUE": {
-      state.lastValidCharIndex = state.inputValue.length - 1;
+      state.lastValidCharIndex = state.inputLength - 1;
       state.error = false;
       return;
     }
@@ -109,15 +126,7 @@ const reducer = (state: State, action: Action) => {
       state.error = action.payload;
       return;
     }
-    case "SET_TIME_PASSED": {
-      state.timePassed = action.payload;
-      return;
-    }
-    case "SET_INPUT_VALUE": {
-      state.inputValue = action.payload;
-      return;
-    }
-    case "SET_HISTORY": {
+    case "SET_HISTORY_OBJECT": {
       state.history = action.payload;
       return;
     }
@@ -131,27 +140,25 @@ const StoreContextProvider = ({ children }: { children: ReactNode }) => {
     reducer,
     initialState
   );
+  const [initialRedner, setInitialRender] = useState<boolean>(true);
 
   useEffect(() => {
-    if (!state.history.length) {
-      try {
+    try {
+      if (initialRedner) {
         const storedHistory = window.localStorage.getItem("history");
-        if (!storedHistory) return;
-        const parsedHistory = JSON.parse(storedHistory);
-        if (Array.isArray(parsedHistory)) {
-          dispatch({ type: "SET_HISTORY", payload: parsedHistory });
-        } else {
-          throw new Error();
+        if (storedHistory) {
+          const parsedHistory = JSON.parse(storedHistory);
+          if (typeof parsedHistory === "object" && parsedHistory !== null) {
+            dispatch({ type: "SET_HISTORY_OBJECT", payload: parsedHistory });
+          } else {
+            throw new Error();
+          }
         }
-      } catch (err) {
-        //data corrupted or smth
-        dispatch({ type: "SET_HISTORY", payload: [] });
-      }
-    } else {
-      try {
+      } else {
         window.localStorage.setItem("history", JSON.stringify(state.history));
-      } catch (err) {}
-    }
+      }
+    } catch (err) {}
+    setInitialRender(false);
   }, [state.history]);
 
   const values = {
