@@ -26,7 +26,7 @@ git clone https://github.com/auto200/szmaciura-racer.git
 Once downloaded, open the terminal in the project directory, and install dependencies with:
 
 ```
-npm install:all
+npm run install:all
 ```
 
 Go to `/server` and create your own `.env` file based on `.env.example`
