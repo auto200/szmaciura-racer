@@ -4,7 +4,7 @@
   "scripts": {
     "client": "cd client && npm start",
     "server": "cd server && npm start",
-    "install:all": "cd server && npm ci && cd ../client && npm ci",
+    "install:all": "npm ci && cd server && npm ci && cd ../client && npm ci",
     "start": "npm-run-all --parallel client server",
     "build:client": "cd client && npm run build",
     "build:server": "cd server && npm run build",
