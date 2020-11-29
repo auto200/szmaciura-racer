@@ -51,7 +51,7 @@ const SEO: React.FC<Props> = ({
         },
         {
           property: `og:title`,
-          content: title,
+          content: site.siteMetadata.title,
         },
         {
           property: `og:description`,
