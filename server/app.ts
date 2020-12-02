@@ -60,6 +60,7 @@ io.of("/game").on("connection", (socket) => {
     );
     if (!room) return;
 
+    //delete zombie room
     if (
       room.players.every(
         ({ id, disconnected }) =>
@@ -90,7 +91,7 @@ io.of("/game").on("connection", (socket) => {
     _queue.push(getNewPlayer(socket.id));
     console.log("user added to que");
 
-    if (_queue.length >= 2) createAndHandleNewRoom();
+    if (_queue.length >= config.queue.maxLength) createAndHandleNewRoom();
 
     console.log(_queue);
   });
@@ -212,8 +213,8 @@ function createAndHandleNewRoom(): string {
     state: ROOM_STATES.WAITING,
     players: [..._queue],
     playersThatFinished: [],
-    expireTS: Date.now() + config.roomExpireTime,
-    startTS: Date.now() + config.timeToStartGame,
+    expireTS: Date.now() + config.room.expireTime,
+    startTS: Date.now() + config.room.timeToStartGame,
     textID: Object.keys(parsedTexts)[0],
     //TODO: textId should come from client or be reandomized from texts.json if requested, for now value is hard-coded
   };
@@ -260,7 +261,7 @@ function createAndHandleNewRoom(): string {
           );
           console.log("Room:", roomId, "expired. Closing...");
         }
-      }, config.roomExpireTime);
+      }, config.room.expireTime);
     }
   }, 1000);
 
@@ -271,7 +272,7 @@ function getNewPlayer(id: string): Player {
   return {
     id,
     progress: 0,
-    carIndex: random(0, config.carsCount - 1),
+    carIndex: random(0, config.player.carsCount - 1),
   };
 }
 
@@ -279,8 +280,8 @@ function getFreePublicRoom(): Room | undefined {
   return Object.values(_publicRooms).find(
     (room) =>
       room.state === ROOM_STATES.WAITING &&
-      room.players.length < config.roomMaxPlayers &&
+      room.players.length < config.room.maxPlayers &&
       differenceInSeconds(room.startTS, Date.now()) >=
-        config.roomTimeThresholdBeforeStart / 1000
+        config.room.thresholdToJoinBeforeStart / 1000
   );
 }

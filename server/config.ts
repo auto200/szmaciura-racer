@@ -1,9 +1,16 @@
 interface Config {
-  roomMaxPlayers: number;
-  carsCount: number;
-  roomExpireTime: number;
-  timeToStartGame: number;
-  roomTimeThresholdBeforeStart: number;
+  player: {
+    carsCount: number;
+  };
+  queue: {
+    maxLength: number;
+  };
+  room: {
+    maxPlayers: number;
+    expireTime: number;
+    timeToStartGame: number;
+    thresholdToJoinBeforeStart: number;
+  };
   fakePlayers: {
     enabled: boolean;
     idPrefix: string;
@@ -12,11 +19,18 @@ interface Config {
   };
 }
 const config: Config = {
-  roomMaxPlayers: 5,
-  carsCount: 3,
-  roomExpireTime: 1000 * 60 * 3,
-  timeToStartGame: 1000 * 10,
-  roomTimeThresholdBeforeStart: 4000,
+  player: {
+    carsCount: 3,
+  },
+  queue: {
+    maxLength: 2,
+  },
+  room: {
+    maxPlayers: 5,
+    expireTime: 1000 * 60 * 3,
+    timeToStartGame: 1000 * 10,
+    thresholdToJoinBeforeStart: 4000,
+  },
   fakePlayers: {
     enabled: true,
     idPrefix: "imFaker",
