@@ -110,7 +110,7 @@ enum STATES {
   IN_QUE,
   IN_ROOM,
 }
-const getTimeInQueString = (startTime: number): string => {
+const getTimeInQue = (startTime: number): string => {
   const minutes = differenceInMinutes(Date.now(), startTime);
   const seconds = (differenceInSeconds(Date.now(), startTime) % 60)
     .toString()
@@ -172,7 +172,7 @@ const Online: React.FC = () => {
       setInQueGifSrc(IN_QUE_GIFS[random(0, IN_QUE_GIFS.length - 1)]);
       queStartTSRef.current = Date.now();
       timerIntervalRef.current = setInterval(() => {
-        setTimeInQue(getTimeInQueString(queStartTSRef.current));
+        setTimeInQue(getTimeInQue(queStartTSRef.current));
       }, 1000);
     }
 
