@@ -31,8 +31,7 @@ if (process.env.DEV_PORT) {
   io = socketio(server);
 } else {
   io = socketio(server, {
-    // prevent connections from other origins
-    origins: ["https://szmaciura.pl:443", "https://www.szmaciura.pl:443"],
+    origins: `${process.env.HTTPS_SERVER_URL}:443`,
   });
 }
 
