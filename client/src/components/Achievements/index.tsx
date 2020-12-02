@@ -1,8 +1,8 @@
-import React, { forwardRef, memo } from "react";
+import React, { memo } from "react";
 import styled from "styled-components";
-import achievements from "./achievements_data";
+import achievements from "./achievements";
 import Tippy from "@tippyjs/react";
-import { History } from "../../contexts/Store";
+import { HistoryEntry } from "../../contexts/Store";
 import "tippy.js/dist/tippy.css";
 import middleFingerCursor from "../../assets/middleFingerCursor.png";
 
@@ -20,12 +20,12 @@ const Tooltip = styled(Tippy)`
   }
 `;
 
-const Image = styled.img<{ notObtained: boolean }>`
+const Image = styled.img<{ obtained: boolean }>`
   width: 100px;
-  filter: brightness(${({ notObtained }) => notObtained && "0.02"});
+  filter: brightness(${({ obtained }) => (obtained ? "1" : "0.02")});
   transition: filter 0.3s ease;
   :hover {
-    filter: ${({ notObtained }) => notObtained && "brightness(0.2)"};
+    filter: brightness(${({ obtained }) => (obtained ? "1" : "0.2")});
     cursor: url(${middleFingerCursor}), auto;
   }
 `;
@@ -34,28 +34,37 @@ interface TooltipContentProps {
   description: string;
   timestamp?: number;
 }
-const TooltipContent = forwardRef<HTMLDivElement, TooltipContentProps>(
-  ({ name, description, timestamp }, ref) => {
-    return (
-      <div ref={ref}>
-        <h3>{name}</h3>
-        <div>{description}</div>
-        {timestamp && <div>{new Date(timestamp).toLocaleString("pl")}</div>}
-      </div>
-    );
-  }
-);
+const TooltipContent: React.FC<TooltipContentProps> = ({
+  name,
+  description,
+  timestamp,
+}) => {
+  return (
+    <div>
+      <h3>{name}</h3>
+      <div>{description}</div>
+      {timestamp && <div>{new Date(timestamp).toLocaleString("pl")}</div>}
+    </div>
+  );
+};
 interface Props {
-  history: History[];
+  history: HistoryEntry[];
 }
+//TODO: figure out if i want to have separate achievements for each text or keep them all together or some global and
+//some text specific. The thing is, if i want to use staticquery => gatsby image, i need to fetch images in react
+//component
 const Achievements: React.FC<Props> = ({ history }) => {
   return (
     <>
       <h1>Osiągnięcia</h1>
       <Wrapper>
-        {Object.values(achievements).map(achiv => {
-          const { current, timestamp } = achiv.check(history);
-          const { name, description, image, requiredToComplete } = achiv;
+        {achievements.map(achiv => {
+          const { name, description, image, valueToComplete } = achiv;
+          const {
+            currentTimesCompleted,
+            completeTimestamp: timestamp,
+          } = achiv.check(history.slice());
+
           return (
             <Tooltip
               key={name}
@@ -70,8 +79,8 @@ const Achievements: React.FC<Props> = ({ history }) => {
               <div>
                 <Image
                   src={image}
-                  notObtained={timestamp ? false : true}
-                  title={`${current}/${requiredToComplete}`}
+                  obtained={timestamp ? true : false}
+                  title={`${currentTimesCompleted}/${valueToComplete}`}
                 />
               </div>
             </Tooltip>
