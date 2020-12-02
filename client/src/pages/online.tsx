@@ -5,9 +5,9 @@ import styled from "styled-components";
 import { ROOM_STATES, SOCKET_EVENTS } from "@shared/enums";
 import ProgressIndicator from "../components/ProgressIndicator";
 import { Room } from "@shared/interfaces";
-import { ProgressContainer, TextWrapper } from "../components/sharedStyled";
+import { ProgressContainer } from "../components/sharedStyledComponents";
 import { differenceInMinutes, differenceInSeconds } from "date-fns";
-import Word from "../components/Word";
+import Text from "../components/Text";
 import { useStore } from "../contexts/Store";
 import Input from "../components/Input";
 import Timer, { TimerFunctions } from "../components/Timer";
@@ -72,7 +72,7 @@ const InQueTimer = styled.div`
     color: ${({ theme }) => theme.colors.golden};
   }
 `;
-const RaceComplete = styled.div`
+const PlayAgainButton = styled.div`
   display: flex;
   align-items: center;
   margin: 15px 0 30px 0;
@@ -128,7 +128,6 @@ const Online: React.FC = () => {
       lastValidCharIndex,
       inputMaxLength,
       error,
-      // onCompleteModalShown,
     },
     dispatch,
   } = useStore();
@@ -244,24 +243,15 @@ const Online: React.FC = () => {
               />
               <Timer ref={timerRef} />
             </ProgressContainer>
-            <TextWrapper>
-              {text.map((word, i) => {
-                const active = wordIndex === i;
-                return (
-                  <React.Fragment key={i}>
-                    <Word
-                      word={word}
-                      active={active}
-                      error={active ? error : false}
-                      lastValidCharIndex={active ? lastValidCharIndex : -1}
-                      charIndex={active ? inputLength : 0}
-                    />{" "}
-                  </React.Fragment>
-                );
-              })}
-            </TextWrapper>
+            <Text
+              text={text}
+              wordIndex={wordIndex}
+              error={error}
+              lastValidCharIndex={lastValidCharIndex}
+              inputLength={inputLength}
+            />
             {raceCompleted ? (
-              <RaceComplete
+              <PlayAgainButton
                 onClick={() => {
                   dispatch({ type: "RESET" });
                   setRoom(undefined);
@@ -272,9 +262,10 @@ const Online: React.FC = () => {
               >
                 Dobra robota wariacie, pierdolnij se jeszcze rundkę{" "}
                 <ImArrowLeft />
-              </RaceComplete>
+              </PlayAgainButton>
             ) : (
               <Input
+                ref={inputRef}
                 word={text[wordIndex]}
                 error={error}
                 maxLength={inputMaxLength}
@@ -284,6 +275,7 @@ const Online: React.FC = () => {
                 }}
                 onWordCompleted={() => {
                   dispatch({ type: "PROCEED_TO_NEXT_WORD" });
+                  //TODO: handle incrementing word index on server
                   socket.emit(
                     SOCKET_EVENTS.WORD_COMPLETED,
                     room.id,
@@ -291,6 +283,7 @@ const Online: React.FC = () => {
                   );
                 }}
                 onLastWordCompleted={() => {
+                  //TODO: handle incrementing word index on server
                   socket.emit(
                     SOCKET_EVENTS.WORD_COMPLETED,
                     room.id,
@@ -298,14 +291,10 @@ const Online: React.FC = () => {
                   );
                   setRaceCompleted(true);
                   dispatch({ type: "RESET" });
-                  // show scoreboard
-                  if (textID === "szmaciura") {
-                    dispatch({
-                      type: "RACE_COMPLETED",
-                      payload: timerRef.current?.getTime()!,
-                    });
-                  }
-                  // TODO: online match history
+                  dispatch({
+                    type: "RACE_COMPLETED",
+                    payload: timerRef.current?.getTime()!,
+                  });
                 }}
                 onEmpty={() => dispatch({ type: "INPUT_EMPTY" })}
                 onCorrectLetter={() =>
@@ -313,7 +302,6 @@ const Online: React.FC = () => {
                 }
                 onError={() => dispatch({ type: "SET_ERROR", payload: true })}
                 disabled={room.state === ROOM_STATES.WAITING}
-                ref={inputRef}
               />
             )}
             {room.playersThatFinished.map(player => (

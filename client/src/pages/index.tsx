@@ -7,11 +7,11 @@ import Input from "../components/Input";
 import Layout from "../components/Layout";
 import OnCompleteModal from "../components/OnCompleteModal";
 import ProgressIndicator from "../components/ProgressIndicator";
-import { ProgressContainer, TextWrapper } from "../components/sharedStyled";
+import { ProgressContainer } from "../components/sharedStyledComponents";
 import History from "../components/Tables/History";
 import TopRaces from "../components/Tables/TopRaces";
 import Timer, { TimerFunctions } from "../components/Timer";
-import Word from "../components/Word";
+import Text from "../components/Text/";
 import { useCarsContext } from "../contexts/CarsContext";
 import { useStore } from "../contexts/Store";
 
@@ -86,22 +86,13 @@ const IndexPage: React.FC = () => {
           />
           <Timer ref={timerRef} />
         </ProgressContainer>
-        <TextWrapper>
-          {text.map((word, i) => {
-            const active = wordIndex === i;
-            return (
-              <React.Fragment key={i}>
-                <Word
-                  word={word}
-                  active={active}
-                  error={active ? error : false}
-                  lastValidCharIndex={active ? lastValidCharIndex : -1}
-                  charIndex={active ? inputLength : 0}
-                />{" "}
-              </React.Fragment>
-            );
-          })}
-        </TextWrapper>
+        <Text
+          text={text}
+          wordIndex={wordIndex}
+          error={error}
+          lastValidCharIndex={lastValidCharIndex}
+          inputLength={inputLength}
+        />
         <Input
           word={text[wordIndex]}
           error={error}

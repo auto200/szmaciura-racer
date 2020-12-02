@@ -70,7 +70,7 @@ interface Props {
   players: Player[];
   highlightPlayer?: string;
 }
-//TODO: allow multiple cars racing in the same axis for online mode
+
 const ProgressIndicator: React.FC<Props> = ({ players, highlightPlayer }) => {
   const progressWrapperRef = useRef<HTMLDivElement>(null);
   const imageRefs = useRef<any>({});

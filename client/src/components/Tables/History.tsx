@@ -1,9 +1,9 @@
 import React, { memo } from "react";
-import { History as IHistory } from "../../contexts/Store";
+import { HistoryEntry } from "../../contexts/Store";
 import { Container, Table } from "./styles";
 
 interface Props {
-  history: IHistory[];
+  history: HistoryEntry[];
 }
 const History: React.FC<Props> = ({ history }) => {
   return (

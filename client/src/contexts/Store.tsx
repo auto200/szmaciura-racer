@@ -1,29 +1,26 @@
-import React, {
-  createContext,
-  useContext,
-  ReactNode,
-  useEffect,
-  useState,
-} from "react";
+import React, { createContext, useContext, useEffect, useRef } from "react";
 import { useImmerReducer } from "../utils/hooks/useImmerReducer";
 import { v4 as uuid } from "uuid";
-import { getInputMaxLength } from "../utils";
-import { TextID } from "@shared/interfaces";
 import { parsedTexts } from "@shared/utils";
+
+const getInputMaxLength = (activeWord: string): number => {
+  const length = activeWord.length * 2;
+  return length >= 8 ? length : 8;
+};
 
 const getInitialHistoryObject = () => {
   const initial: any = {};
   for (const key in parsedTexts) {
     initial[key] = [];
   }
-  return initial as HistoryObject;
+  return initial as GamesHistory;
 };
 
-type HistoryObject = {
-  [key in TextID]: History[];
+type GamesHistory = {
+  [key: string]: HistoryEntry[];
 };
 
-export type History = {
+export type HistoryEntry = {
   id: string;
   timestamp: number;
   time: string;
@@ -31,20 +28,20 @@ export type History = {
 
 export interface State {
   text: string[];
-  textID: TextID;
+  textID: string;
   wordIndex: number;
   inputLength: number;
   lastValidCharIndex: number;
   inputMaxLength: number;
   error: boolean;
   onCompleteModalShown: boolean;
-  history: HistoryObject;
+  history: GamesHistory;
 }
 const initialText = Object.values(parsedTexts)[0];
 
 const initialState: State = {
   text: initialText,
-  textID: Object.keys(parsedTexts)[0] as TextID,
+  textID: Object.keys(parsedTexts)[0],
   wordIndex: 0,
   inputLength: 0,
   lastValidCharIndex: -1,
@@ -62,7 +59,7 @@ const StoreContext = createContext<{
   dispatch: () => null,
 });
 export type Action =
-  | { type: "SET_TEXT_BY_ID"; payload: TextID }
+  | { type: "SET_TEXT_BY_ID"; payload: string }
   | {
       type:
         | "RESET"
@@ -73,7 +70,7 @@ export type Action =
   | { type: "RACE_COMPLETED"; payload: string }
   | { type: "SET_INPUT_LENGTH"; payload: number }
   | { type: "SET_ERROR"; payload: boolean }
-  | { type: "SET_HISTORY_OBJECT"; payload: HistoryObject };
+  | { type: "SET_HISTORY_OBJECT"; payload: GamesHistory };
 
 const reducer = (state: State, action: Action) => {
   switch (action.type) {
@@ -135,16 +132,16 @@ const reducer = (state: State, action: Action) => {
   }
 };
 
-const StoreContextProvider = ({ children }: { children: ReactNode }) => {
+const StoreContextProvider: React.FC = ({ children }) => {
   const [state, dispatch] = useImmerReducer<State, Action>(
     reducer,
     initialState
   );
-  const [initialRedner, setInitialRender] = useState<boolean>(true);
+  const initialRednerRef = useRef<boolean>(true);
 
   useEffect(() => {
     try {
-      if (initialRedner) {
+      if (initialRednerRef.current) {
         const storedHistory = window.localStorage.getItem("history");
         if (storedHistory) {
           const parsedHistory = JSON.parse(storedHistory);
@@ -158,7 +155,7 @@ const StoreContextProvider = ({ children }: { children: ReactNode }) => {
         window.localStorage.setItem("history", JSON.stringify(state.history));
       }
     } catch (err) {}
-    setInitialRender(false);
+    initialRednerRef.current = false;
   }, [state.history]);
 
   const values = {

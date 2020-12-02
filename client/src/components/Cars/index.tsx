@@ -1,12 +1,9 @@
 import React, { useState, useEffect, memo } from "react";
 import styled from "styled-components";
-import { History } from "../../contexts/Store";
+import { HistoryEntry } from "../../contexts/Store";
 import { useCarsContext } from "../../contexts/CarsContext";
 import Car from "./Car";
 
-const Wrapper = styled.div`
-  text-align: center;
-`;
 const CarsContainer = styled.div`
   display: flex;
   flex-wrap: wrap;
@@ -14,7 +11,7 @@ const CarsContainer = styled.div`
 `;
 
 interface Props {
-  history: History[];
+  history: HistoryEntry[];
 }
 const Cars: React.FC<Props> = ({ history }) => {
   const { cars, setCurrentCarIndex, currentCarIndex } = useCarsContext();
@@ -22,14 +19,14 @@ const Cars: React.FC<Props> = ({ history }) => {
 
   useEffect(() => {
     if (!history.length) return;
-    const shortestTime = Number(
+    const fastestTime = Number(
       history.slice().sort((a, b) => Number(a.time) - Number(b.time))[0].time
     );
-    setBestTime(shortestTime);
+    setBestTime(fastestTime);
   }, [history]);
 
   return (
-    <Wrapper>
+    <>
       <h1>Wybierz sobie furke wariacie</h1>
       <CarsContainer>
         {cars.map((car, i) => {
@@ -51,7 +48,7 @@ const Cars: React.FC<Props> = ({ history }) => {
           );
         })}
       </CarsContainer>
-    </Wrapper>
+    </>
   );
 };
 

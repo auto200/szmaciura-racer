@@ -37,7 +37,7 @@ interface Props {
 }
 
 const GoOnline: React.FC<Props> = ({ to, onClick }) => {
-  const data = useStaticQuery(graphql`
+  const { rafonixOnline } = useStaticQuery(graphql`
     query {
       rafonixOnline: file(relativePath: { eq: "rafonix_online.jpg" }) {
         childImageSharp {
@@ -50,7 +50,7 @@ const GoOnline: React.FC<Props> = ({ to, onClick }) => {
   `);
   return (
     <Wrapper to={to} onClick={onClick}>
-      <Img fluid={data.rafonixOnline.childImageSharp.fluid} />
+      <Img fluid={rafonixOnline.childImageSharp.fluid} />
       <GoOnlineText>Wypróbuj tryb online!</GoOnlineText>
     </Wrapper>
   );

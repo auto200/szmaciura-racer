@@ -20,7 +20,7 @@ interface Props {
 }
 
 const GoOffline: React.FC<Props> = ({ to, onClick }) => {
-  const data = useStaticQuery(graphql`
+  const { rafonixOffline } = useStaticQuery(graphql`
     query {
       rafonixOffline: file(relativePath: { eq: "rafonix_offline.jpg" }) {
         childImageSharp {
@@ -33,7 +33,7 @@ const GoOffline: React.FC<Props> = ({ to, onClick }) => {
   `);
   return (
     <Wrapper to={to} onClick={onClick}>
-      <Img fluid={data.rafonixOffline.childImageSharp.fluid} />
+      <Img fluid={rafonixOffline.childImageSharp.fluid} />
       <div>Powrót do zabawy solo</div>
     </Wrapper>
   );

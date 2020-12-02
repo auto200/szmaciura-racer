@@ -15,7 +15,6 @@ export interface Room {
   expireTS: number;
   players: Player[];
   playersThatFinished: Player[];
-  textID: TextID;
+  textID: string;
   startTS: number;
 }
-export type TextID = "szmaciura";

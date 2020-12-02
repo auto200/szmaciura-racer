@@ -1,6 +1,6 @@
 import React, { memo } from "react";
 import styled, { css } from "styled-components";
-import cursorGIF from "../assets/cursor.gif";
+import cursorGIF from "../../assets/cursor.gif";
 
 const StyledWord = styled.span<{ readonly active: boolean }>`
   text-decoration: ${({ active }) => active && "underline"};

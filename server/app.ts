@@ -5,7 +5,7 @@ import path from "path";
 import socketio from "socket.io";
 import { nanoid } from "nanoid";
 import { SOCKET_EVENTS, ROOM_STATES } from "./shared/enums";
-import { Player, Room, TextID } from "./shared/interfaces";
+import { Player, Room } from "./shared/interfaces";
 import { getTimePassedInSecAndMs, parsedTexts, sleep } from "./shared/utils";
 import config from "./config";
 import { random } from "lodash";
@@ -214,9 +214,8 @@ function createAndHandleNewRoom(): string {
     playersThatFinished: [],
     expireTS: Date.now() + config.roomExpireTime,
     startTS: Date.now() + config.timeToStartGame,
-    textID: Object.keys(parsedTexts)[0] as TextID,
+    textID: Object.keys(parsedTexts)[0],
     //TODO: textId should come from client or be reandomized from texts.json if requested, for now value is hard-coded
-    //to be the first entry in file
   };
   _queue = [];
 

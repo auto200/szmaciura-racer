@@ -1,11 +1,11 @@
 import React, { memo } from "react";
 import { useStaticQuery, graphql } from "gatsby";
-import Img from "gatsby-image";
+import Img, { FixedObject } from "gatsby-image";
 import { Container, Table } from "./styles";
-import { History } from "../../contexts/Store";
+import { HistoryEntry } from "../../contexts/Store";
 
 interface Props {
-  history: History[];
+  history: HistoryEntry[];
 }
 
 const TopRaces = ({ history }: Props) => {
@@ -16,7 +16,7 @@ const TopRaces = ({ history }: Props) => {
 
   //could use just single image and apply filters to it. Helper -- https://codepen.io/sosuke/pen/Pjoqqp
   //filter: invert(4%) sepia(97%) saturate(472%) hue-rotate(3deg) brightness(112%) contrast(101%);
-  //HOWEVER this approach exclude using different images for ex. other type of achievements
+  //HOWEVER this approach makes it impossible to use different images for ex. other type of achievements
   const data = useStaticQuery(graphql`
     query {
       golden: file(relativePath: { eq: "achievements/golden_rafon.png" }) {
@@ -42,7 +42,7 @@ const TopRaces = ({ history }: Props) => {
       }
     }
   `);
-  const prizes = [
+  const prizes: FixedObject[] = [
     data.golden.childImageSharp.fixed,
     data.silver.childImageSharp.fixed,
     data.bronze.childImageSharp.fixed,

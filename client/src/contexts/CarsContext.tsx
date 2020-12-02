@@ -11,7 +11,7 @@ import { FluidObject } from "gatsby-image";
 
 interface State {
   currentCarIndex: number;
-  setCurrentCarIndex: any;
+  setCurrentCarIndex: React.Dispatch<React.SetStateAction<number>>;
   cars: Car[];
 }
 const CarContext = createContext<State>({
@@ -20,16 +20,23 @@ const CarContext = createContext<State>({
   cars: [],
 });
 
-export interface Car {
+interface Car {
   minSecRequired: number;
   img: FluidObject;
   description: string;
 }
 
 const CarsContextProvider = ({ children }: { children: ReactNode }) => {
-  const data = useStaticQuery(graphql`
+  const { progress, progress1, progress2 } = useStaticQuery(graphql`
     query {
       progress: file(relativePath: { eq: "cars/progress.png" }) {
+        childImageSharp {
+          fluid(maxWidth: 250) {
+            ...GatsbyImageSharpFluid_withWebp
+          }
+        }
+      }
+      progress1: file(relativePath: { eq: "cars/progress1.png" }) {
         childImageSharp {
           fluid(maxWidth: 250) {
             ...GatsbyImageSharpFluid_withWebp
@@ -43,13 +50,6 @@ const CarsContextProvider = ({ children }: { children: ReactNode }) => {
           }
         }
       }
-      progress3: file(relativePath: { eq: "cars/progress3.png" }) {
-        childImageSharp {
-          fluid(maxWidth: 250) {
-            ...GatsbyImageSharpFluid_withWebp
-          }
-        }
-      }
     }
   `);
   const [currentCarIndex, setCurrentCarIndex] = useState<number>(0);
@@ -57,17 +57,17 @@ const CarsContextProvider = ({ children }: { children: ReactNode }) => {
   const [cars] = useState<Car[]>([
     {
       minSecRequired: 0,
-      img: data.progress.childImageSharp.fluid,
+      img: progress.childImageSharp.fluid,
       description: "Standardowa gablota każdego pozytywnego świra",
     },
     {
       minSecRequired: 50,
-      img: data.progress2.childImageSharp.fluid,
+      img: progress1.childImageSharp.fluid,
       description: "Bejca za ukończenie szmaciury w co najmniej 50s",
     },
     {
       minSecRequired: 35,
-      img: data.progress3.childImageSharp.fluid,
+      img: progress2.childImageSharp.fluid,
       description: "35s i ta fura jest twoja",
     },
   ]);

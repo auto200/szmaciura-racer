@@ -51,6 +51,7 @@ const Car: React.FC<Props> = ({
   return (
     <Tooltip content={<h2>{description}</h2>}>
       <ImageWrapper onClick={onClick} active={active}>
+        {/*@ts-ignore*/}
         <Image fluid={image} available={available} active={active} />
       </ImageWrapper>
     </Tooltip>
