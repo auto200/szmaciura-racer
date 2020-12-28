@@ -256,7 +256,7 @@ const Online: React.FC = () => {
                   dispatch({ type: "RESET" });
                   setRoom(undefined);
                   setRaceCompleted(false);
-                  socket.emit(SOCKET_EVENTS.LEAVE_ROOM, room.id);
+                  socket.emit(SOCKET_EVENTS.LEAVE_ROOM);
                   joinQue();
                 }}
               >
@@ -275,20 +275,10 @@ const Online: React.FC = () => {
                 }}
                 onWordCompleted={() => {
                   dispatch({ type: "PROCEED_TO_NEXT_WORD" });
-                  //TODO: handle incrementing word index on server
-                  socket.emit(
-                    SOCKET_EVENTS.WORD_COMPLETED,
-                    room.id,
-                    wordIndex + 1
-                  );
+                  socket.emit(SOCKET_EVENTS.WORD_COMPLETED);
                 }}
                 onLastWordCompleted={() => {
-                  //TODO: handle incrementing word index on server
-                  socket.emit(
-                    SOCKET_EVENTS.WORD_COMPLETED,
-                    room.id,
-                    wordIndex + 1
-                  );
+                  socket.emit(SOCKET_EVENTS.WORD_COMPLETED);
                   setRaceCompleted(true);
                   dispatch({ type: "RESET" });
                   dispatch({

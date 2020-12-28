@@ -6,6 +6,7 @@ interface Config {
     maxLength: number;
   };
   room: {
+    idLength: number;
     maxPlayers: number;
     expireTime: number;
     timeToStartGame: number;
@@ -26,6 +27,7 @@ const config: Config = {
     maxLength: 2,
   },
   room: {
+    idLength: 6,
     maxPlayers: 5,
     expireTime: 1000 * 60 * 3,
     timeToStartGame: 1000 * 10,
@@ -33,7 +35,7 @@ const config: Config = {
   },
   fakePlayers: {
     enabled: true,
-    idPrefix: "imFaker",
+    idPrefix: "elfbotNG",
     maxFakePlayersInRoom: 2,
     // min/max speed(ms) to type single character -> less = faster
     speeds: [
