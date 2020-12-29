@@ -8,9 +8,8 @@ import { SOCKET_EVENTS, ROOM_STATES } from "./shared/enums";
 import { parsedTexts, sleep } from "./shared/utils";
 import config from "./config";
 import { random, sample } from "lodash";
-import { differenceInSeconds } from "date-fns";
-import Queue from "./classes/Queue";
-import { FakePlayer, RealPlayer } from "./classes/Players";
+import { Queue } from "./classes/Queue";
+import { Player } from "./classes/Players";
 import { PubilcRooms, Room } from "./classes/Rooms";
 
 const app = express();
@@ -33,7 +32,7 @@ if (process.env.DEV_PORT) {
   io = socketio(server);
 } else {
   io = socketio(server, {
-    origins: `${process.env.HTTPS_SERVER_URL}:443`,
+    origins: `${process.env.SERVER_URL_WITH_PORT}`,
   });
 }
 
@@ -42,7 +41,7 @@ const _queue = new Queue();
 
 io.of("/game").on("connection", (socket) => {
   console.log("new client connected");
-  const player = new RealPlayer(socket);
+  const player = new Player(socket.id);
 
   //cleanup
   socket.on("disconnect", (reason) => {
@@ -50,26 +49,24 @@ io.of("/game").on("connection", (socket) => {
     _queue.remove(player.id);
     player.disconnected = true;
     _publicRooms.playerDisconnected(player.roomId);
+
     console.log("client disconnected", reason);
   });
 
   socket.on(SOCKET_EVENTS.JOIN_QUE, () => {
     const room = _publicRooms.getFree();
     if (room) {
+      socket.join(room.id);
       room.add(player);
-      player.joinRoom(room.id);
-
       updateRoom(room);
 
       logRoom(room.id, room);
       return;
     }
-
     _queue.add(player);
     console.log("user added to que");
 
     if (_queue.length >= config.queue.maxLength) createAndHandleNewRoom();
-    // if (_queue.length >= 1) createAndHandleNewRoom();
 
     console.log(
       "queue:",
@@ -79,15 +76,20 @@ io.of("/game").on("connection", (socket) => {
 
   socket.on(SOCKET_EVENTS.WORD_COMPLETED, () => {
     const room = _publicRooms.get(player.roomId);
-    if (!room) return;
-
-    player.wordCompleted(room);
-
+    if (!room || !room.startTS || player.completeTime) {
+      return;
+    }
+    const progress = player.wordCompleted(
+      parsedTexts[room.textID].length,
+      room.startTS
+    );
+    if (progress === 1) room.playerFinished(player);
     updateRoom(room);
   });
 
   socket.on(SOCKET_EVENTS.LEAVE_ROOM, () => {
-    player.leaveRoom();
+    socket.leave(player.roomId);
+    player.roomId = "";
   });
 });
 
@@ -97,49 +99,40 @@ io.of("/game").on("connection", (socket) => {
     while (true) {
       await sleep(random(5000, 8000));
       console.log("trying to create fake player");
-      const fakePlayer = new FakePlayer(
-        `${config.fakePlayers.idPrefix}${nanoid()}`
+      const fakePlayer = new Player(
+        `${config.fakePlayers.idPrefix}${nanoid()}`,
+        true
       );
 
       if (_queue.length) {
         _queue.add(fakePlayer);
-        handleFakePlayer(createAndHandleNewRoom(), fakePlayer.id);
+        handleFakePlayer(createAndHandleNewRoom(), fakePlayer);
       } else {
         const room = _publicRooms.getFree();
-        if (!room) continue;
-
-        if (room.fakePlayersCount >= config.fakePlayers.maxFakePlayersInRoom)
-          continue;
-
-        room.add(fakePlayer);
+        if (!room || !room.add(fakePlayer)) continue;
         updateRoom(room);
-        handleFakePlayer(room.id, fakePlayer.id);
+        handleFakePlayer(room, fakePlayer);
       }
     }
   }
 
-  async function handleFakePlayer(roomId: string, fakePlayerId: string) {
+  async function handleFakePlayer(room: Room, fakePlayer: Player) {
     const [minSpeed, maxSpeed] = sample(config.fakePlayers.speeds)!;
 
     while (true) {
-      const room = _publicRooms.get(roomId);
-      const player = room?.players.find(({ id }) => id === fakePlayerId);
-
-      if (!room || !player || player.completeTime) {
+      if (fakePlayer.completeTime) {
         break;
       }
-      // Probably should listen for a event that triggers running this loop. Event should be emitted when room changes
-      // its state to STARTED in createAndHandleNewRoom(). Although it creates more randomness coz not all fake players
-      // will start (sleeping) at the same time
-      if (room.state === ROOM_STATES.WAITING) {
+
+      if (!room.startTS) {
         await sleep(1000);
         continue;
       }
-
-      const wordLength = parsedTexts[room.textID][player.wordIndex].length;
+      const textArr = parsedTexts[room.textID];
+      const wordLength = textArr[fakePlayer.wordIndex].length;
       await sleep(random(minSpeed * wordLength, maxSpeed * wordLength));
 
-      player.wordCompleted(room);
+      fakePlayer.wordCompleted(textArr.length, room.startTS);
 
       updateRoom(room);
     }
@@ -147,21 +140,27 @@ io.of("/game").on("connection", (socket) => {
 })();
 
 /**
- * @returns new room id
+ * @returns new room
  */
-function createAndHandleNewRoom(): string {
+function createAndHandleNewRoom(): Room {
   const roomId = nanoid(config.room.idLength);
-  // TODO: pass textID
-  const newRoom = new Room(roomId, _queue.takeAll());
+  // TODO: pass proper textID
+  const newRoom = new Room(
+    roomId,
+    _queue.takeAll(),
+    Object.keys(parsedTexts)[0],
+    config
+  );
   _publicRooms.add(newRoom);
-  newRoom.players.forEach((player) => player.joinRoom(roomId));
+  newRoom.players.forEach((player) => {
+    io.of("/game").connected[player.id]?.join(roomId);
+  });
 
-  console.log("handling new room");
   updateRoom(newRoom);
 
   logRoom(roomId, newRoom);
 
-  const startTime = Date.now();
+  //countdown
   const interval = setInterval(() => {
     const room = _publicRooms.get(roomId);
     if (!room) {
@@ -169,32 +168,31 @@ function createAndHandleNewRoom(): string {
       return;
     }
 
-    const timeToStart = differenceInSeconds(
-      startTime + config.room.timeToStartGame,
-      Date.now()
-    );
-    if (timeToStart >= 1) {
-      emit(roomId, SOCKET_EVENTS.UPDATE_TIME_TO_START, timeToStart);
+    room.msToStart = room.msToStart - 1000;
+    if (room.msToStart >= 1000) {
+      updateRoom(room);
     } else {
       clearInterval(interval);
       room.state = ROOM_STATES.STARTED;
       room.startTS = Date.now();
       updateRoom(room);
       emit(roomId, SOCKET_EVENTS.START_MATCH);
-
+      //cleanup
       setTimeout(() => {
         const room = _publicRooms.get(roomId);
         if (room) {
-          room.players.forEach((player) => player.leaveRoom());
+          room.players.forEach((player) => {
+            io.of("/game").connected[player.id]?.leave(roomId);
+            player.roomId = "";
+          });
           _publicRooms.remove(roomId);
-
           console.log("Room:", roomId, "expired. Closing...");
         }
       }, config.room.expireTime);
     }
   }, 1000);
 
-  return roomId;
+  return newRoom;
 }
 
 function emit(roomId: string, eventName: SOCKET_EVENTS, ...data: any) {

@@ -1,4 +1,4 @@
-interface Config {
+export interface Config {
   player: {
     carsCount: number;
   };
@@ -9,7 +9,7 @@ interface Config {
     idLength: number;
     maxPlayers: number;
     expireTime: number;
-    timeToStartGame: number;
+    msToStartGame: number;
     thresholdToJoinBeforeStart: number;
   };
   fakePlayers: {
@@ -30,7 +30,7 @@ const config: Config = {
     idLength: 6,
     maxPlayers: 5,
     expireTime: 1000 * 60 * 3,
-    timeToStartGame: 1000 * 10,
+    msToStartGame: 1000 * 8,
     thresholdToJoinBeforeStart: 4000,
   },
   fakePlayers: {

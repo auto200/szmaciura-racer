@@ -1,41 +1,50 @@
-import { differenceInSeconds } from "date-fns";
-import config from "../config";
+import { Config } from "../config";
 import { ROOM_STATES } from "../shared/enums";
 import { Room as RoomI } from "../shared/interfaces";
-import { parsedTexts } from "../shared/utils";
-import { FakePlayer, RealPlayer } from "./Players";
+import { Player } from "./Players";
 
 export class Room implements RoomI {
   id: string;
   createTS: number;
   state: ROOM_STATES;
-  players: (RealPlayer | FakePlayer)[];
-  playersThatFinished: (RealPlayer | FakePlayer)[];
+  players: Player[];
+  playersThatFinished: Player[];
   expireTS: number;
   startTS: number;
   textID: string;
+  msToStart: number;
+  config: Config;
 
-  constructor(
-    id: string,
-    players: (RealPlayer | FakePlayer)[],
-    textID: string = Object.keys(parsedTexts)[0]
-  ) {
+  constructor(id: string, players: Player[], textID: string, config: Config) {
+    this.config = config;
     this.id = id;
     this.createTS = Date.now();
     this.state = ROOM_STATES.WAITING;
-    this.players = players;
+    this.players = [];
     this.playersThatFinished = [];
-    this.expireTS = Date.now() + config.room.expireTime;
+    this.expireTS = Date.now() + this.config.room.expireTime;
     this.startTS = 0;
     this.textID = textID;
+    this.msToStart = this.config.room.msToStartGame;
+    players.forEach((player) => this.add(player));
   }
 
-  add(player: RealPlayer | FakePlayer) {
+  /**
+   *
+   * @returns succeeded
+   */
+  add(player: Player): boolean {
+    if (
+      this.isFull ||
+      (player.isFake &&
+        this.fakePlayersCount >= this.config.fakePlayers.maxFakePlayersInRoom)
+    ) {
+      return false;
+    }
     this.players.push(player);
-  }
-
-  remove(playerId: string) {
-    this.players = this.players.filter(({ id }) => id !== playerId);
+    player.roomId = this.id;
+    player.reset();
+    return true;
   }
 
   toTransport(): RoomI {
@@ -43,30 +52,32 @@ export class Room implements RoomI {
       id: this.id,
       createTS: this.createTS,
       state: this.state,
-      players: this.players.map((player) => player.toTransport()),
-      playersThatFinished: this.playersThatFinished.map((player) =>
-        player.toTransport()
+      players: this.players.map(({ toTransport }) => toTransport),
+      playersThatFinished: this.playersThatFinished.map(
+        ({ toTransport }) => toTransport
       ),
       expireTS: this.expireTS,
       startTS: this.startTS,
       textID: this.textID,
+      msToStart: this.msToStart,
     };
   }
 
-  playerFinished(player: RealPlayer | FakePlayer) {
+  playerFinished(player: Player) {
     this.playersThatFinished.push(player);
   }
+
   get fakePlayersCount() {
-    return this.players.filter(({ id }) =>
-      id.startsWith(config.fakePlayers.idPrefix)
-    ).length;
+    return this.players.filter(({ isFake }) => isFake).length;
+  }
+
+  get isFull() {
+    return this.players.length >= this.config.room.maxPlayers;
   }
 }
 
-type Rooms = { [key: string]: Room };
-
 export class PubilcRooms {
-  rooms: Rooms;
+  rooms: { [key: string]: Room };
 
   constructor() {
     this.rooms = {};
@@ -91,21 +102,18 @@ export class PubilcRooms {
     //delete zombie room
     if (
       room.players.every(
-        ({ id, disconnected }) =>
-          id.startsWith(config.fakePlayers.idPrefix) || disconnected === true
+        ({ isFake, disconnected }) => isFake || disconnected === true
       )
     ) {
       this.remove(room.id);
     }
   }
-
   getFree(): Room | undefined {
     return Object.values(this.rooms).find(
       (room) =>
         room.state === ROOM_STATES.WAITING &&
-        room.players.length < config.room.maxPlayers &&
-        differenceInSeconds(room.startTS, Date.now()) >=
-          config.room.thresholdToJoinBeforeStart / 1000
+        room.players.length < room.config.room.maxPlayers &&
+        room.msToStart >= room.config.room.thresholdToJoinBeforeStart
     );
   }
 }

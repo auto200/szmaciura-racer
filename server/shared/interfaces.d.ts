@@ -17,4 +17,5 @@ export interface Room {
   playersThatFinished: Player[];
   textID: string;
   startTS: number;
+  msToStart: number;
 }

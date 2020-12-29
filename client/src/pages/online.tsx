@@ -142,9 +142,6 @@ const Online: React.FC = () => {
         dispatch({ type: "SET_TEXT_BY_ID", payload: room.textID });
       }
     });
-    socket.on(SOCKET_EVENTS.UPDATE_TIME_TO_START, (time: number) => {
-      setTimeToStart(time);
-    });
     socket.on(SOCKET_EVENTS.START_MATCH, () => {
       timerRef.current?.start();
     });
@@ -153,7 +150,6 @@ const Online: React.FC = () => {
   const [state, setState] = useState(STATES.INITIAL);
   const [room, setRoom] = useState<Room>();
   const [timeInQue, setTimeInQue] = useState<string>("0:00");
-  const [timeToStart, setTimeToStart] = useState<number>(0);
   const [inQueGifSrc, setInQueGifSrc] = useState<string>(IN_QUE_GIFS[0]);
   const [raceCompleted, setRaceCompleted] = useState<boolean>(false);
   const queStartTSRef = useRef<number>(0);
@@ -188,7 +184,6 @@ const Online: React.FC = () => {
     if (room.state === ROOM_STATES.STARTED) {
       inputRef.current?.focus();
       setTimeInQue("0:00");
-      setTimeToStart(0);
     }
     if (room.players.length === room.playersThatFinished.length) {
       timerRef.current?.stop();
@@ -206,12 +201,12 @@ const Online: React.FC = () => {
     <>
       <GoOffline to={"/"} onClick={() => dispatch({ type: "RESET" })} />
       <Layout>
-        {!!timeToStart && (
+        {room && !!room.msToStart && (
           <StartRaceCountdown
-            key={timeToStart <= 3 ? timeToStart : null}
-            scaleTime={timeToStart <= 3}
+            key={room.msToStart <= 3000 ? room.msToStart : null}
+            scaleTime={room.msToStart <= 3000}
           >
-            gra startuje za: <span>{timeToStart}</span>
+            gra startuje za: <span>{room.msToStart / 1000}</span>
           </StartRaceCountdown>
         )}
         {state == STATES.INITIAL && (
