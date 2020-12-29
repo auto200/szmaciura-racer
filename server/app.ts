@@ -9,7 +9,7 @@ import { parsedTexts, sleep } from "./shared/utils";
 import config from "./config";
 import { random, sample } from "lodash";
 import { Queue } from "./classes/Queue";
-import { Player } from "./classes/Players";
+import { Player } from "./classes/Player";
 import { PubilcRooms, Room } from "./classes/Rooms";
 
 const app = express();

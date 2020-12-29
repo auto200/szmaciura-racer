@@ -1,7 +1,7 @@
 import { Config } from "../config";
 import { ROOM_STATES } from "../shared/enums";
 import { Room as RoomI } from "../shared/interfaces";
-import { Player } from "./Players";
+import { Player } from "./Player";
 
 export class Room implements RoomI {
   id: string;

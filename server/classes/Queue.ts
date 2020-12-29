@@ -1,4 +1,4 @@
-import { Player } from "./Players";
+import { Player } from "./Player";
 
 export class Queue {
   players: Player[];
