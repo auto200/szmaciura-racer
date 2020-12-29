@@ -46,7 +46,7 @@ io.of("/game").on("connection", (socket) => {
   //cleanup
   socket.on("disconnect", (reason) => {
     //actions based on player.state?
-    _queue.remove(player.id);
+    _queue.remove(player);
     player.disconnected = true;
     _publicRooms.playerDisconnected(player.roomId);
 
@@ -70,7 +70,7 @@ io.of("/game").on("connection", (socket) => {
 
     console.log(
       "queue:",
-      _queue.players.map(({ id }) => id)
+      [..._queue.players].map(({ id }) => id)
     );
   });
 
@@ -132,7 +132,11 @@ io.of("/game").on("connection", (socket) => {
       const wordLength = textArr[fakePlayer.wordIndex].length;
       await sleep(random(minSpeed * wordLength, maxSpeed * wordLength));
 
-      fakePlayer.wordCompleted(textArr.length, room.startTS);
+      const progress = fakePlayer.wordCompleted(
+        parsedTexts[room.textID].length,
+        room.startTS
+      );
+      if (progress === 1) room.playerFinished(fakePlayer);
 
       updateRoom(room);
     }
@@ -185,7 +189,7 @@ function createAndHandleNewRoom(): Room {
             io.of("/game").connected[player.id]?.leave(roomId);
             player.roomId = "";
           });
-          _publicRooms.remove(roomId);
+          _publicRooms.remove(room);
           console.log("Room:", roomId, "expired. Closing...");
         }
       }, config.room.expireTime);
@@ -210,6 +214,6 @@ function logRoom(roomId: string, room: Room) {
     "new room has been created, room id:",
     roomId,
     "players:",
-    room.players.map(({ id }) => id)
+    [...room.players].map(({ id }) => id)
   );
 }

@@ -1,25 +1,27 @@
 import { Player } from "./Player";
 
 export class Queue {
-  players: Player[];
+  players: Set<Player>;
 
   constructor() {
-    this.players = [];
+    this.players = new Set();
   }
 
   add(player: Player) {
-    this.players.push(player);
+    this.players.add(player);
   }
 
   get length() {
-    return this.players.length;
+    return this.players.size;
   }
 
   takeAll() {
-    return this.players.splice(0, this.length);
+    const players = new Set(this.players);
+    this.players.clear();
+    return players;
   }
 
-  remove(playerId: string) {
-    this.players = this.players.filter(({ id }) => id !== playerId);
+  remove(player: Player) {
+    this.players.delete(player);
   }
 }

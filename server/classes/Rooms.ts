@@ -3,25 +3,35 @@ import { ROOM_STATES } from "../shared/enums";
 import { Room as RoomI } from "../shared/interfaces";
 import { Player } from "./Player";
 
-export class Room implements RoomI {
+interface ServerRoom extends Omit<RoomI, "players" | "playersThatFinished"> {
+  players: Set<Player>;
+  playersThatFinished: Set<Player>;
+}
+
+export class Room implements ServerRoom {
   id: string;
   createTS: number;
   state: ROOM_STATES;
-  players: Player[];
-  playersThatFinished: Player[];
+  players: Set<Player>;
+  playersThatFinished: Set<Player>;
   expireTS: number;
   startTS: number;
   textID: string;
   msToStart: number;
   config: Config;
 
-  constructor(id: string, players: Player[], textID: string, config: Config) {
+  constructor(
+    id: string,
+    players: Set<Player>,
+    textID: string,
+    config: Config
+  ) {
     this.config = config;
     this.id = id;
     this.createTS = Date.now();
     this.state = ROOM_STATES.WAITING;
-    this.players = [];
-    this.playersThatFinished = [];
+    this.players = new Set();
+    this.playersThatFinished = new Set();
     this.expireTS = Date.now() + this.config.room.expireTime;
     this.startTS = 0;
     this.textID = textID;
@@ -41,7 +51,7 @@ export class Room implements RoomI {
     ) {
       return false;
     }
-    this.players.push(player);
+    this.players.add(player);
     player.roomId = this.id;
     player.reset();
     return true;
@@ -52,10 +62,8 @@ export class Room implements RoomI {
       id: this.id,
       createTS: this.createTS,
       state: this.state,
-      players: this.players.map(({ toTransport }) => toTransport),
-      playersThatFinished: this.playersThatFinished.map(
-        ({ toTransport }) => toTransport
-      ),
+      players: this.prepareToTransport(this.players),
+      playersThatFinished: this.prepareToTransport(this.playersThatFinished),
       expireTS: this.expireTS,
       startTS: this.startTS,
       textID: this.textID,
@@ -63,36 +71,40 @@ export class Room implements RoomI {
     };
   }
 
+  private prepareToTransport(set: Set<Player>) {
+    return [...set].map(({ toTransport }) => toTransport);
+  }
+
   playerFinished(player: Player) {
-    this.playersThatFinished.push(player);
+    this.playersThatFinished.add(player);
   }
 
   get fakePlayersCount() {
-    return this.players.filter(({ isFake }) => isFake).length;
+    return [...this.players].filter(({ isFake }) => isFake).length;
   }
 
   get isFull() {
-    return this.players.length >= this.config.room.maxPlayers;
+    return this.players.size >= this.config.room.maxPlayers;
   }
 }
 
 export class PubilcRooms {
-  rooms: { [key: string]: Room };
+  rooms: Set<Room>;
 
   constructor() {
-    this.rooms = {};
+    this.rooms = new Set();
   }
 
-  get(roomId: string): Room | undefined {
-    return this.rooms[roomId];
+  get(roomId: string) {
+    return [...this.rooms].find((room) => room.id === roomId);
   }
 
   add(room: Room) {
-    this.rooms[room.id] = room;
+    this.rooms.add(room);
   }
 
-  remove(roomId: string) {
-    delete this.rooms[roomId];
+  remove(room: Room) {
+    this.rooms.delete(room);
   }
 
   playerDisconnected(roomId: string) {
@@ -101,18 +113,18 @@ export class PubilcRooms {
 
     //delete zombie room
     if (
-      room.players.every(
+      [...room.players].every(
         ({ isFake, disconnected }) => isFake || disconnected === true
       )
     ) {
-      this.remove(room.id);
+      this.remove(room);
     }
   }
   getFree(): Room | undefined {
-    return Object.values(this.rooms).find(
+    return [...this.rooms].find(
       (room) =>
         room.state === ROOM_STATES.WAITING &&
-        room.players.length < room.config.room.maxPlayers &&
+        room.players.size < room.config.room.maxPlayers &&
         room.msToStart >= room.config.room.thresholdToJoinBeforeStart
     );
   }
