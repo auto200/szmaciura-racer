@@ -1,4 +1,4 @@
-import { Config } from "../config";
+import { RoomConfig } from "../config";
 import { ROOM_STATES } from "../shared/enums";
 import { Room as RoomI } from "../shared/interfaces";
 import { Player } from "./Player";
@@ -16,23 +16,23 @@ export class Room implements ServerRoom {
   startTS: number;
   textID: string;
   msToStart: number;
-  config: Config;
+  config: RoomConfig;
 
   constructor(
     id: string,
     players: Set<Player>,
     textID: string,
-    config: Config
+    config: RoomConfig
   ) {
     this.config = config;
     this.id = id;
     this.createTS = Date.now();
     this.state = ROOM_STATES.WAITING;
     this.players = new Set();
-    this.expireTS = Date.now() + this.config.room.expireTime;
+    this.expireTS = Date.now() + this.config.expireTime;
     this.startTS = 0;
     this.textID = textID;
-    this.msToStart = this.config.room.msToStartGame;
+    this.msToStart = this.config.msToStartGame;
     players.forEach((player) => this.add(player));
   }
 
@@ -43,8 +43,7 @@ export class Room implements ServerRoom {
   add(player: Player): boolean {
     if (
       this.isFull ||
-      (player.isFake &&
-        this.fakePlayersCount >= this.config.fakePlayers.maxFakePlayersInRoom)
+      (player.isFake && this.fakePlayersCount >= this.config.maxFakePlayersIn)
     ) {
       return false;
     }
@@ -72,7 +71,7 @@ export class Room implements ServerRoom {
   }
 
   get isFull() {
-    return this.players.size >= this.config.room.maxPlayers;
+    return this.players.size >= this.config.maxPlayers;
   }
 }
 
@@ -112,8 +111,8 @@ export class PubilcRooms {
     return [...this.rooms].find(
       (room) =>
         room.state === ROOM_STATES.WAITING &&
-        room.players.size < room.config.room.maxPlayers &&
-        room.msToStart >= room.config.room.thresholdToJoinBeforeStart
+        room.players.size < room.config.maxPlayers &&
+        room.msToStart >= room.config.thresholdToJoinBeforeStart
     );
   }
 }

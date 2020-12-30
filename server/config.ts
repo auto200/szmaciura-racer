@@ -1,3 +1,12 @@
+export interface RoomConfig {
+  idLength: number;
+  maxPlayers: number;
+  expireTime: number;
+  msToStartGame: number;
+  thresholdToJoinBeforeStart: number;
+  maxFakePlayersIn: number;
+}
+
 export interface Config {
   player: {
     carsCount: number;
@@ -5,25 +14,20 @@ export interface Config {
   queue: {
     maxLength: number;
   };
-  room: {
-    idLength: number;
-    maxPlayers: number;
-    expireTime: number;
-    msToStartGame: number;
-    thresholdToJoinBeforeStart: number;
-  };
+  room: RoomConfig;
   fakePlayers: {
     enabled: boolean;
     idPrefix: string;
-    maxFakePlayersInRoom: number;
     speeds: [number, number][];
   };
 }
+
 const config: Config = {
   player: {
     carsCount: 3,
   },
   queue: {
+    //must be less or equal room.maxPlayers
     maxLength: 2,
   },
   room: {
@@ -32,11 +36,11 @@ const config: Config = {
     expireTime: 1000 * 60 * 3,
     msToStartGame: 1000 * 8,
     thresholdToJoinBeforeStart: 4000,
+    maxFakePlayersIn: 2,
   },
   fakePlayers: {
     enabled: true,
     idPrefix: "elfbotNG",
-    maxFakePlayersInRoom: 2,
     // min/max speed(ms) to type single character -> less = faster
     speeds: [
       [100, 200],

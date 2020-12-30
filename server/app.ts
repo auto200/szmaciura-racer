@@ -145,7 +145,7 @@ function createAndHandleNewRoom(): Room {
     roomId,
     _queue.takeAll(),
     Object.keys(parsedTexts)[0],
-    config
+    config.room
   );
   _publicRooms.add(newRoom);
   newRoom.players.forEach((player) => {
