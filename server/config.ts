@@ -1,4 +1,4 @@
-interface Config {
+export interface Config {
   player: {
     carsCount: number;
   };
@@ -6,9 +6,10 @@ interface Config {
     maxLength: number;
   };
   room: {
+    idLength: number;
     maxPlayers: number;
     expireTime: number;
-    timeToStartGame: number;
+    msToStartGame: number;
     thresholdToJoinBeforeStart: number;
   };
   fakePlayers: {
@@ -26,14 +27,15 @@ const config: Config = {
     maxLength: 2,
   },
   room: {
+    idLength: 6,
     maxPlayers: 5,
     expireTime: 1000 * 60 * 3,
-    timeToStartGame: 1000 * 10,
+    msToStartGame: 1000 * 8,
     thresholdToJoinBeforeStart: 4000,
   },
   fakePlayers: {
     enabled: true,
-    idPrefix: "imFaker",
+    idPrefix: "elfbotNG",
     maxFakePlayersInRoom: 2,
     // min/max speed(ms) to type single character -> less = faster
     speeds: [

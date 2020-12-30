@@ -142,9 +142,6 @@ const Online: React.FC = () => {
         dispatch({ type: "SET_TEXT_BY_ID", payload: room.textID });
       }
     });
-    socket.on(SOCKET_EVENTS.UPDATE_TIME_TO_START, (time: number) => {
-      setTimeToStart(time);
-    });
     socket.on(SOCKET_EVENTS.START_MATCH, () => {
       timerRef.current?.start();
     });
@@ -153,7 +150,6 @@ const Online: React.FC = () => {
   const [state, setState] = useState(STATES.INITIAL);
   const [room, setRoom] = useState<Room>();
   const [timeInQue, setTimeInQue] = useState<string>("0:00");
-  const [timeToStart, setTimeToStart] = useState<number>(0);
   const [inQueGifSrc, setInQueGifSrc] = useState<string>(IN_QUE_GIFS[0]);
   const [raceCompleted, setRaceCompleted] = useState<boolean>(false);
   const queStartTSRef = useRef<number>(0);
@@ -188,9 +184,10 @@ const Online: React.FC = () => {
     if (room.state === ROOM_STATES.STARTED) {
       inputRef.current?.focus();
       setTimeInQue("0:00");
-      setTimeToStart(0);
     }
-    if (room.players.length === room.playersThatFinished.length) {
+    if (
+      room.players.length === room.players.filter(p => p.completeTime).length
+    ) {
       timerRef.current?.stop();
     }
   }, [room]);
@@ -206,12 +203,12 @@ const Online: React.FC = () => {
     <>
       <GoOffline to={"/"} onClick={() => dispatch({ type: "RESET" })} />
       <Layout>
-        {!!timeToStart && (
+        {room && !!room.msToStart && (
           <StartRaceCountdown
-            key={timeToStart <= 3 ? timeToStart : null}
-            scaleTime={timeToStart <= 3}
+            key={room.msToStart <= 3000 ? room.msToStart : null}
+            scaleTime={room.msToStart <= 3000}
           >
-            gra startuje za: <span>{timeToStart}</span>
+            gra startuje za: <span>{room.msToStart / 1000}</span>
           </StartRaceCountdown>
         )}
         {state == STATES.INITIAL && (
@@ -256,7 +253,7 @@ const Online: React.FC = () => {
                   dispatch({ type: "RESET" });
                   setRoom(undefined);
                   setRaceCompleted(false);
-                  socket.emit(SOCKET_EVENTS.LEAVE_ROOM, room.id);
+                  socket.emit(SOCKET_EVENTS.LEAVE_ROOM);
                   joinQue();
                 }}
               >
@@ -275,20 +272,10 @@ const Online: React.FC = () => {
                 }}
                 onWordCompleted={() => {
                   dispatch({ type: "PROCEED_TO_NEXT_WORD" });
-                  //TODO: handle incrementing word index on server
-                  socket.emit(
-                    SOCKET_EVENTS.WORD_COMPLETED,
-                    room.id,
-                    wordIndex + 1
-                  );
+                  socket.emit(SOCKET_EVENTS.WORD_COMPLETED);
                 }}
                 onLastWordCompleted={() => {
-                  //TODO: handle incrementing word index on server
-                  socket.emit(
-                    SOCKET_EVENTS.WORD_COMPLETED,
-                    room.id,
-                    wordIndex + 1
-                  );
+                  socket.emit(SOCKET_EVENTS.WORD_COMPLETED);
                   setRaceCompleted(true);
                   dispatch({ type: "RESET" });
                   dispatch({
@@ -304,19 +291,25 @@ const Online: React.FC = () => {
                 disabled={room.state === ROOM_STATES.WAITING}
               />
             )}
-            {room.playersThatFinished.map(player => (
-              <div
-                style={{ display: "flex", alignItems: "center", marginTop: 10 }}
-              >
-                <Image
-                  fluid={cars[player.carIndex].img}
+            {room.players
+              .filter(({ completeTime }) => completeTime)
+              .map(player => (
+                <div
                   style={{
-                    width: 150,
+                    display: "flex",
+                    alignItems: "center",
+                    marginTop: 10,
                   }}
-                />
-                {player.completeTime}s {player.id === socket.id && "(ty)"}
-              </div>
-            ))}
+                >
+                  <Image
+                    fluid={cars[player.carIndex].img}
+                    style={{
+                      width: 150,
+                    }}
+                  />
+                  {player.completeTime}s {player.id === socket.id && "(ty)"}
+                </div>
+              ))}
           </>
         )}
       </Layout>
