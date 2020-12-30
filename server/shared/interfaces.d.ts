@@ -14,7 +14,6 @@ export interface Room {
   state: ROOM_STATES;
   expireTS: number;
   players: Player[];
-  playersThatFinished: Player[];
   textID: string;
   startTS: number;
   msToStart: number;

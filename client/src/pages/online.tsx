@@ -185,7 +185,9 @@ const Online: React.FC = () => {
       inputRef.current?.focus();
       setTimeInQue("0:00");
     }
-    if (room.players.length === room.playersThatFinished.length) {
+    if (
+      room.players.length === room.players.filter(p => p.completeTime).length
+    ) {
       timerRef.current?.stop();
     }
   }, [room]);
@@ -289,19 +291,25 @@ const Online: React.FC = () => {
                 disabled={room.state === ROOM_STATES.WAITING}
               />
             )}
-            {room.playersThatFinished.map(player => (
-              <div
-                style={{ display: "flex", alignItems: "center", marginTop: 10 }}
-              >
-                <Image
-                  fluid={cars[player.carIndex].img}
+            {room.players
+              .filter(({ completeTime }) => completeTime)
+              .map(player => (
+                <div
                   style={{
-                    width: 150,
+                    display: "flex",
+                    alignItems: "center",
+                    marginTop: 10,
                   }}
-                />
-                {player.completeTime}s {player.id === socket.id && "(ty)"}
-              </div>
-            ))}
+                >
+                  <Image
+                    fluid={cars[player.carIndex].img}
+                    style={{
+                      width: 150,
+                    }}
+                  />
+                  {player.completeTime}s {player.id === socket.id && "(ty)"}
+                </div>
+              ))}
           </>
         )}
       </Layout>

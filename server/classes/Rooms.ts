@@ -3,9 +3,8 @@ import { ROOM_STATES } from "../shared/enums";
 import { Room as RoomI } from "../shared/interfaces";
 import { Player } from "./Player";
 
-interface ServerRoom extends Omit<RoomI, "players" | "playersThatFinished"> {
+interface ServerRoom extends Omit<RoomI, "players"> {
   players: Set<Player>;
-  playersThatFinished: Set<Player>;
 }
 
 export class Room implements ServerRoom {
@@ -13,7 +12,6 @@ export class Room implements ServerRoom {
   createTS: number;
   state: ROOM_STATES;
   players: Set<Player>;
-  playersThatFinished: Set<Player>;
   expireTS: number;
   startTS: number;
   textID: string;
@@ -31,7 +29,6 @@ export class Room implements ServerRoom {
     this.createTS = Date.now();
     this.state = ROOM_STATES.WAITING;
     this.players = new Set();
-    this.playersThatFinished = new Set();
     this.expireTS = Date.now() + this.config.room.expireTime;
     this.startTS = 0;
     this.textID = textID;
@@ -62,21 +59,12 @@ export class Room implements ServerRoom {
       id: this.id,
       createTS: this.createTS,
       state: this.state,
-      players: this.prepareToTransport(this.players),
-      playersThatFinished: this.prepareToTransport(this.playersThatFinished),
+      players: [...this.players].map(({ toTransport }) => toTransport),
       expireTS: this.expireTS,
       startTS: this.startTS,
       textID: this.textID,
       msToStart: this.msToStart,
     };
-  }
-
-  private prepareToTransport(set: Set<Player>) {
-    return [...set].map(({ toTransport }) => toTransport);
-  }
-
-  playerFinished(player: Player) {
-    this.playersThatFinished.add(player);
   }
 
   get fakePlayersCount() {

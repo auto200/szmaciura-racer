@@ -79,11 +79,7 @@ io.of("/game").on("connection", (socket) => {
     if (!room || !room.startTS || player.completeTime) {
       return;
     }
-    const progress = player.wordCompleted(
-      parsedTexts[room.textID].length,
-      room.startTS
-    );
-    if (progress === 1) room.playerFinished(player);
+    player.wordCompleted(parsedTexts[room.textID].length, room.startTS);
     updateRoom(room);
   });
 
@@ -132,11 +128,7 @@ io.of("/game").on("connection", (socket) => {
       const wordLength = textArr[fakePlayer.wordIndex].length;
       await sleep(random(minSpeed * wordLength, maxSpeed * wordLength));
 
-      const progress = fakePlayer.wordCompleted(
-        parsedTexts[room.textID].length,
-        room.startTS
-      );
-      if (progress === 1) room.playerFinished(fakePlayer);
+      fakePlayer.wordCompleted(parsedTexts[room.textID].length, room.startTS);
 
       updateRoom(room);
     }

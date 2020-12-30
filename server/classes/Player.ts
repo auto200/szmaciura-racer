@@ -36,7 +36,6 @@ export class Player implements PlayerI {
     if (this.progress >= 1) {
       this.completeTime = getTimePassedInSecAndMs(roomStartTs);
     }
-    return this.progress;
   }
 
   get toTransport(): PlayerI {
