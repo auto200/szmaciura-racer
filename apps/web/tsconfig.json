@@ -26,6 +26,6 @@
         "./src/consts/*"
       ],
     },
-    "noUncheckedIndexedAccess": true
+    "noUncheckedIndexedAccess": true,
   }
 }

@@ -3,13 +3,13 @@ import Layout from "@components/Layout";
 import GoOnline from "@components/Links/GoOnline";
 import OnCompleteModal from "@components/OnCompleteModal";
 import ProgressIndicator from "@components/ProgressIndicator";
-import { ProgressContainer } from "@components/sharedStyledComponents";
 import Text from "@components/Text";
 import Timer, { TimerFunctions } from "@components/Timer";
+import { ProgressContainer } from "@components/sharedStyledComponents";
 import { GAMES_HISTORY_LS_KEY } from "@consts/consts";
-import { useCarsContext } from "@contexts/CarsContext";
 import { useStore } from "@contexts/Store";
 import { useGamesHistory } from "@hooks/useGamesHistory";
+import { useOfflineCarAvatars } from "@hooks/useOfflineCarAvatars";
 import dynamic from "next/dynamic";
 import React, { useEffect, useRef } from "react";
 import styled from "styled-components";
@@ -39,7 +39,8 @@ const IndexPage: React.FC = () => {
     },
     dispatch,
   } = useStore();
-  const { currentCarIndex } = useCarsContext();
+  const { cars, currentCarAvatarSrc, setCurrentCarAvatarSrc } =
+    useOfflineCarAvatars();
   const { gamesHistory, addToGamesHistory } = useGamesHistory(
     GAMES_HISTORY_LS_KEY.offline
   );
@@ -81,7 +82,7 @@ const IndexPage: React.FC = () => {
             players={[
               {
                 id: "player",
-                carIndex: currentCarIndex,
+                carAvatarSrc: currentCarAvatarSrc,
                 progress: wordIndex / text.length,
               },
             ]}
@@ -119,7 +120,12 @@ const IndexPage: React.FC = () => {
         <TopRaces history={currentTextHistory} />
         <History history={currentTextHistory} />
         <Achievements history={currentTextHistory} />
-        <Cars history={currentTextHistory} />
+        <Cars
+          history={currentTextHistory}
+          cars={cars}
+          currentCarAvatarSrc={currentCarAvatarSrc}
+          setCurrentCarAvatarSrc={setCurrentCarAvatarSrc}
+        />
         {onCompleteModalShown && (
           <OnCompleteModal
             onClose={resetEverything}

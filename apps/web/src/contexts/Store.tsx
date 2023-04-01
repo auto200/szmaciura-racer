@@ -17,15 +17,15 @@ export interface State {
   error: boolean;
   onCompleteModalShown: boolean;
 }
-const initialText = Object.values(parsedTexts)[0];
+const initialText = Object.values(parsedTexts)[0]!;
 
 const initialState: State = {
   text: initialText,
-  textID: Object.keys(parsedTexts)[0],
+  textID: Object.keys(parsedTexts)[0]!,
   wordIndex: 0,
   inputLength: 0,
   lastValidCharIndex: -1,
-  inputMaxLength: getInputMaxLength(initialText[0]),
+  inputMaxLength: getInputMaxLength(initialText[0]!),
   error: false,
   onCompleteModalShown: false,
 };
@@ -55,7 +55,7 @@ const reducer = (state: State, action: Action) => {
   switch (action.type) {
     case "SET_TEXT_BY_ID": {
       state.textID = action.payload;
-      state.text = parsedTexts[action.payload];
+      state.text = parsedTexts[action.payload]!;
       return;
     }
     case "RESET": {
@@ -78,7 +78,7 @@ const reducer = (state: State, action: Action) => {
       state.wordIndex = nextWordIndex;
       state.lastValidCharIndex = -1;
       state.inputLength = 0;
-      state.inputMaxLength = getInputMaxLength(state.text[nextWordIndex]);
+      state.inputMaxLength = getInputMaxLength(state.text[nextWordIndex]!);
       return;
     }
     case "INPUT_EMPTY": {

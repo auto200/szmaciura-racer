@@ -6,12 +6,12 @@ import { ProgressContainer } from "@components/sharedStyledComponents";
 import Text from "@components/Text";
 import Timer, { TimerFunctions } from "@components/Timer";
 import { GAMES_HISTORY_LS_KEY } from "@consts/consts";
-import { useCarsContext } from "@contexts/CarsContext";
 import { useStore } from "@contexts/Store";
 import { useGamesHistory } from "@hooks/useGamesHistory";
+import { useOfflineCarAvatars } from "@hooks/useOfflineCarAvatars";
 import { Room, ROOM_STATES, SOCKET_EVENTS } from "@szmaciura/shared";
 import { differenceInMinutes, differenceInSeconds } from "date-fns";
-import random from "lodash/random";
+import sample from "lodash/sample";
 import Image from "next/image";
 import React, { useEffect, useRef, useState } from "react";
 import {
@@ -23,13 +23,13 @@ import {
 import io, { Socket } from "socket.io-client";
 import styled from "styled-components";
 
-const IN_QUE_GIFS: string[] = [
+const IN_QUE_GIFS = [
   "https://thumbs.gfycat.com/DevotedEasygoingAnnashummingbird-size_restricted.gif",
   "https://thumbs.gfycat.com/EsteemedAthleticGerbil-size_restricted.gif",
   "https://thumbs.gfycat.com/ConcernedJovialGrub-size_restricted.gif",
   "https://thumbs.gfycat.com/GleamingPinkGnu-size_restricted.gif",
   "https://thumbs.gfycat.com/DelayedImpartialCalf-size_restricted.gif",
-];
+] as const;
 
 const JoinRace = styled.div`
   font-size: 2.3rem;
@@ -132,7 +132,7 @@ const Online: React.FC = () => {
     },
     dispatch,
   } = useStore();
-  const { cars } = useCarsContext();
+  const { cars } = useOfflineCarAvatars();
 
   const [socket] = useState<Socket>(() => {
     const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL!);
@@ -175,7 +175,7 @@ const Online: React.FC = () => {
 
   useEffect(() => {
     if (state === STATES.IN_QUE) {
-      setInQueGifSrc(IN_QUE_GIFS[random(0, IN_QUE_GIFS.length - 1)]);
+      setInQueGifSrc(sample(IN_QUE_GIFS) || IN_QUE_GIFS[0]);
       queStartTSRef.current = Date.now();
       timerIntervalRef.current = window.setInterval(() => {
         setTimeInQue(getTimeInQue(queStartTSRef.current));
@@ -266,7 +266,7 @@ const Online: React.FC = () => {
             ) : (
               <Input
                 ref={inputRef}
-                word={text[wordIndex]}
+                word={text[wordIndex] || ""}
                 error={error}
                 maxLength={inputMaxLength}
                 isLastWord={wordIndex === text.length - 1}
@@ -306,10 +306,10 @@ const Online: React.FC = () => {
                   }}
                 >
                   <Image
-                    src={cars[player.carIndex].img}
+                    src={player.carAvatarSrc}
                     width={150}
                     height={100}
-                    alt={cars[player.carIndex].description}
+                    alt=""
                   />
                   {player.completeTime}s {player.id === socket.id && "(ty)"}
                 </div>

@@ -1,13 +1,16 @@
-import { getTimePassedInSecAndMs, Player as PlayerI } from "@szmaciura/shared";
-import random from "lodash/random";
-import config from "../config";
+import {
+  CAR_AVATARS_SRC,
+  getTimePassedInSecAndMs,
+  Player as PlayerI,
+} from "@szmaciura/shared";
+import sample from "lodash/sample";
 
 export class Player implements PlayerI {
   id: string;
   roomId: string;
   wordIndex: number;
   progress: number;
-  carIndex: number;
+  carAvatarSrc: string;
   isFake: boolean;
   disconnected?: boolean;
   completeTime?: string;
@@ -15,7 +18,7 @@ export class Player implements PlayerI {
   constructor(id: string, isFake: boolean = false) {
     this.id = id;
     this.progress = 0;
-    this.carIndex = random(0, config.player.carsCount - 1);
+    this.carAvatarSrc = sample(CAR_AVATARS_SRC) || CAR_AVATARS_SRC[0];
     this.wordIndex = 0;
     this.roomId = "";
     this.isFake = isFake;
@@ -23,7 +26,7 @@ export class Player implements PlayerI {
 
   reset() {
     this.progress = 0;
-    this.carIndex = random(0, config.player.carsCount - 1);
+    this.carAvatarSrc = sample(CAR_AVATARS_SRC) || CAR_AVATARS_SRC[0];
     this.wordIndex = 0;
     this.completeTime = "";
   }
@@ -41,7 +44,7 @@ export class Player implements PlayerI {
     return {
       id: this.id,
       progress: this.progress,
-      carIndex: this.carIndex,
+      carAvatarSrc: this.carAvatarSrc,
       completeTime: this.completeTime,
     };
   }

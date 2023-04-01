@@ -1,4 +1,3 @@
-import { useCarsContext } from "@contexts/CarsContext";
 import { Player } from "@szmaciura/shared";
 import isEqual from "lodash/isEqual";
 import NextImage from "next/image";
@@ -72,7 +71,6 @@ interface Props {
 const ProgressIndicator: React.FC<Props> = ({ players, highlightPlayer }) => {
   const progressWrapperRef = useRef<HTMLDivElement>(null);
   const imageRefs = useRef<any>({});
-  const { cars } = useCarsContext();
 
   const getProgressInPx = (playerId: string, progress: number): string => {
     if (!progressWrapperRef.current || !imageRefs?.current[playerId])
@@ -87,7 +85,7 @@ const ProgressIndicator: React.FC<Props> = ({ players, highlightPlayer }) => {
   return (
     <Wrapper ref={progressWrapperRef}>
       <div style={{ width: "20%", height: 150, position: "relative" }}>
-        {players.map(({ id, progress, carIndex }) => (
+        {players.map(({ id, progress, carAvatarSrc }) => (
           <ImageWrapper
             key={id}
             progressInPx={getProgressInPx(id, progress)}
@@ -95,10 +93,11 @@ const ProgressIndicator: React.FC<Props> = ({ players, highlightPlayer }) => {
             highlight={id === highlightPlayer}
           >
             <Image
-              alt={cars[carIndex].description}
-              src={cars[carIndex].img}
+              alt={""}
+              src={carAvatarSrc}
               $highlight={id === highlightPlayer}
-              fill
+              width={150}
+              height={100}
             />
           </ImageWrapper>
         ))}

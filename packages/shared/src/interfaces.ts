@@ -3,7 +3,7 @@ import { ROOM_STATES } from "./enums";
 export interface Player {
   id: string;
   progress: number;
-  carIndex: number;
+  carAvatarSrc: string;
   disconnected?: boolean;
   completeTime?: string;
 }

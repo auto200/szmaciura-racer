@@ -1,5 +1,5 @@
-import { useCarsContext } from "@contexts/CarsContext";
 import { GamesHistoryEntry } from "@hooks/useGamesHistory";
+import { UseOfflineCarAvatarsReturnType } from "@hooks/useOfflineCarAvatars";
 import React, { memo, useEffect, useState } from "react";
 import styled from "styled-components";
 import Car from "./Car";
@@ -12,9 +12,16 @@ const CarsContainer = styled.div`
 
 interface Props {
   history: GamesHistoryEntry[];
+  cars: UseOfflineCarAvatarsReturnType["cars"];
+  currentCarAvatarSrc: UseOfflineCarAvatarsReturnType["currentCarAvatarSrc"];
+  setCurrentCarAvatarSrc: UseOfflineCarAvatarsReturnType["setCurrentCarAvatarSrc"];
 }
-const _Cars: React.FC<Props> = ({ history }) => {
-  const { cars, setCurrentCarIndex, currentCarIndex } = useCarsContext();
+const _Cars: React.FC<Props> = ({
+  history,
+  cars,
+  currentCarAvatarSrc,
+  setCurrentCarAvatarSrc,
+}) => {
   const [bestTime, setBestTime] = useState<number>(0);
 
   useEffect(() => {
@@ -34,12 +41,12 @@ const _Cars: React.FC<Props> = ({ history }) => {
             !car.minSecRequired ||
             !!(bestTime && bestTime <= car.minSecRequired);
           const handleClick = () => {
-            if (available) setCurrentCarIndex(i);
+            if (available) setCurrentCarAvatarSrc(car.img);
           };
           return (
             <Car
               key={i}
-              active={currentCarIndex === i}
+              active={car.img === currentCarAvatarSrc}
               available={available}
               image={car.img}
               onClick={handleClick}
