@@ -10,7 +10,6 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "typescript": "5.0.2",
     "tsconfig": "workspace:*"
   }
 }

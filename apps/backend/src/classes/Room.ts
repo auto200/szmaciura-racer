@@ -1,5 +1,5 @@
-import { Room as RoomI, ROOM_STATES } from "@szmaciura/shared";
-import { RoomConfig } from "../config";
+import { ROOM_STATES, Room as RoomI } from "@szmaciura/shared";
+import { RoomConfig } from "../configs/gameConfig";
 import { Player } from "./Player";
 
 interface ServerRoom extends Omit<RoomI, "players"> {
@@ -71,47 +71,5 @@ export class Room implements ServerRoom {
 
   get isFull() {
     return this.players.size >= this.config.maxPlayers;
-  }
-}
-
-export class PubilcRooms {
-  rooms: Set<Room>;
-
-  constructor() {
-    this.rooms = new Set();
-  }
-
-  get(roomId: string) {
-    return [...this.rooms].find((room) => room.id === roomId);
-  }
-
-  add(room: Room) {
-    this.rooms.add(room);
-  }
-
-  remove(room: Room) {
-    this.rooms.delete(room);
-  }
-
-  playerDisconnected(roomId: string) {
-    const room = this.get(roomId);
-    if (!room) return;
-
-    //delete zombie room
-    if (
-      [...room.players].every(
-        ({ isFake, disconnected }) => isFake || disconnected === true
-      )
-    ) {
-      this.remove(room);
-    }
-  }
-  getFree(): Room | undefined {
-    return [...this.rooms].find(
-      (room) =>
-        room.state === ROOM_STATES.WAITING &&
-        room.players.size < room.config.maxPlayers &&
-        room.msToStart >= room.config.thresholdToJoinBeforeStart
-    );
   }
 }

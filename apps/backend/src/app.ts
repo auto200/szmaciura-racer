@@ -1,39 +1,32 @@
+import { appConfig } from "@configs/appConfig";
+import { gameConfig } from "@configs/gameConfig";
 import {
   parsedTexts,
   ROOM_STATES,
   sleep,
   SOCKET_EVENTS,
 } from "@szmaciura/shared";
-import dotenv from "dotenv";
 import express from "express";
 import { random, sample } from "lodash";
 import { nanoid } from "nanoid";
-import path from "path";
 import { Server as SocketIo } from "socket.io";
 import { Player } from "./classes/Player";
 import { Queue } from "./classes/Queue";
-import { PubilcRooms, Room } from "./classes/Rooms";
-import config from "./config";
-dotenv.config();
+import { Room } from "./classes/Room";
+import { RoomsManager } from "./classes/RoomsManager";
 
 const app = express();
 
-app.use(express.static(path.join(__dirname, "public")));
-
-const IS_DEV = process.env.DEV_PORT !== undefined;
-
-console.log(process.env.DEV_PORT);
-
-const server = app.listen(process.env.DEV_PORT || null, () => {
-  console.log("listening...", "specified port:", process.env.DEV_PORT);
+const server = app.listen(appConfig.PORT, () => {
+  console.log("listening...", "specified port:", appConfig.PORT);
 });
 
 const io = new SocketIo(server, {
-  cors: { origin: process.env.CLIENT_URL },
+  cors: { origin: appConfig.CORS_ORIGIN },
 });
 
-const _publicRooms = new PubilcRooms();
-const _queue = new Queue();
+const roomsManager = new RoomsManager();
+const queue = new Queue();
 
 io.of("/game").on("connection", (socket) => {
   console.log("new client connected");
@@ -42,15 +35,15 @@ io.of("/game").on("connection", (socket) => {
   //cleanup
   socket.on("disconnect", (reason) => {
     //actions based on player.state?
-    _queue.remove(player);
+    queue.remove(player);
     player.disconnected = true;
-    _publicRooms.playerDisconnected(player.roomId);
+    roomsManager.playerDisconnected(player.roomId);
 
     console.log("client disconnected", reason);
   });
 
   socket.on(SOCKET_EVENTS.JOIN_QUE, () => {
-    const room = _publicRooms.getFree();
+    const room = roomsManager.getFree();
     if (room) {
       socket.join(room.id);
       room.add(player);
@@ -59,19 +52,19 @@ io.of("/game").on("connection", (socket) => {
       logRoom(room.id, room);
       return;
     }
-    _queue.add(player);
+    queue.add(player);
     console.log("user added to que");
 
-    if (_queue.length >= config.queue.maxLength) createAndHandleNewRoom();
+    if (queue.length >= gameConfig.queue.maxLength) createAndHandleNewRoom();
 
     console.log(
       "queue:",
-      [..._queue.players].map(({ id }) => id)
+      [...queue.players].map(({ id }) => id)
     );
   });
 
   socket.on(SOCKET_EVENTS.WORD_COMPLETED, () => {
-    const room = _publicRooms.get(player.roomId);
+    const room = roomsManager.get(player.roomId);
     if (!room || !room.startTS || player.completeTime) {
       return;
     }
@@ -87,20 +80,20 @@ io.of("/game").on("connection", (socket) => {
 
 // add fake players
 (async () => {
-  if (config.fakePlayers.enabled) {
+  if (gameConfig.fakePlayers.enabled) {
     while (true) {
       await sleep(random(5000, 8000));
       console.log("trying to create fake player");
       const fakePlayer = new Player(
-        `${config.fakePlayers.idPrefix}${nanoid()}`,
+        `${gameConfig.fakePlayers.idPrefix}${nanoid()}`,
         true
       );
 
-      if (_queue.length) {
-        _queue.add(fakePlayer);
+      if (queue.length) {
+        queue.add(fakePlayer);
         handleFakePlayer(await createAndHandleNewRoom(), fakePlayer);
       } else {
-        const room = _publicRooms.getFree();
+        const room = roomsManager.getFree();
         if (!room || !room.add(fakePlayer)) continue;
         updateRoom(room);
         handleFakePlayer(room, fakePlayer);
@@ -109,7 +102,7 @@ io.of("/game").on("connection", (socket) => {
   }
 
   async function handleFakePlayer(room: Room, fakePlayer: Player) {
-    const [minSpeed, maxSpeed] = sample(config.fakePlayers.speeds)!;
+    const [minSpeed, maxSpeed] = sample(gameConfig.fakePlayers.speeds)!;
 
     while (true) {
       if (fakePlayer.completeTime) {
@@ -135,15 +128,15 @@ io.of("/game").on("connection", (socket) => {
  * @returns new room
  */
 async function createAndHandleNewRoom(): Promise<Room> {
-  const roomId = nanoid(config.room.idLength);
+  const roomId = nanoid(gameConfig.room.idLength);
   // TODO: pass proper textID
   const newRoom = new Room(
     roomId,
-    _queue.takeAll(),
+    queue.takeAll(),
     Object.keys(parsedTexts)[0],
-    config.room
+    gameConfig.room
   );
-  _publicRooms.add(newRoom);
+  roomsManager.add(newRoom);
   const allSockets = await io.of("/game").fetchSockets();
 
   newRoom.players.forEach(async (player) => {
@@ -156,7 +149,7 @@ async function createAndHandleNewRoom(): Promise<Room> {
 
   //countdown
   const interval = setInterval(() => {
-    const room = _publicRooms.get(roomId);
+    const room = roomsManager.get(roomId);
     if (!room) {
       clearInterval(interval);
       return;
@@ -173,17 +166,17 @@ async function createAndHandleNewRoom(): Promise<Room> {
       emit(roomId, SOCKET_EVENTS.START_MATCH);
       //cleanup
       setTimeout(() => {
-        const room = _publicRooms.get(roomId);
+        const room = roomsManager.get(roomId);
         if (room) {
           io.in(room.id).socketsLeave(room.id);
           // room.players.forEach((player) => {
           //   io.of("/game").connected[player.id]?.leave(roomId);
           //   player.roomId = "";
           // });
-          _publicRooms.remove(room);
+          roomsManager.remove(room);
           console.log("Room:", roomId, "expired. Closing...");
         }
-      }, config.room.expireTime);
+      }, gameConfig.room.expireTime);
     }
   }, 1000);
 

@@ -7,7 +7,7 @@ export interface RoomConfig {
   maxFakePlayersIn: number;
 }
 
-export interface Config {
+export interface GameConfig {
   player: {
     carsCount: number;
   };
@@ -22,7 +22,7 @@ export interface Config {
   };
 }
 
-const config: Config = {
+export const gameConfig = {
   player: {
     carsCount: 3,
   },
@@ -49,6 +49,4 @@ const config: Config = {
       [100, 500],
     ],
   },
-};
-
-export default config;
+} satisfies GameConfig;

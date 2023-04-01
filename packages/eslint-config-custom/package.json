@@ -10,9 +10,7 @@
     "eslint-plugin-react": "7.31.8",
     "eslint-config-turbo": "latest"
   },
-  "devDependencies": {
-    "typescript": "5.0.2"
-  },
+  "devDependencies": {},
   "publishConfig": {
     "access": "public"
   }
