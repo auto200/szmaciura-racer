@@ -58,6 +58,7 @@ const Timer: React.ForwardRefRenderFunction<TimerFunctions> = (
     },
     getTime: () => timePassedRef.current,
   }));
+
   return <Container>{timePassed}s</Container>;
 };
 

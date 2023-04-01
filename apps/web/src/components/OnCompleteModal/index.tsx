@@ -28,6 +28,24 @@ interface Props {
 const OnCompleteModal: React.FC<Props> = ({ onClose, time }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [playbackRate, setPlaybackRate] = useState<number>(0);
+
+  const setPlaybackRateOnVideoElement = () => {
+    // we use setTimeout to ensure that video is ready
+    setTimeout(() => {
+      const timeAsNum = Number(time);
+      if (videoRef.current && timeAsNum) {
+        try {
+          const playbackRate = videoRef.current.duration / timeAsNum;
+          videoRef.current.playbackRate = playbackRate;
+
+          setPlaybackRate(playbackRate);
+        } catch (err) {
+          console.log(err);
+        }
+      }
+    }, 0);
+  };
+
   return (
     <Modal
       isOpen={true}
@@ -39,19 +57,10 @@ const OnCompleteModal: React.FC<Props> = ({ onClose, time }) => {
       <div>Twój czas: {time}s</div>
       {playbackRate && playbackRate.toFixed(2) + " prędkości rafonixa"}
       <Video
-        src={"/assets/szmaciura.mp4"}
+        src={"/szmaciura.mp4"}
         ref={videoRef}
         autoPlay
-        onCanPlay={() => {
-          const timeAsNum = Number(time);
-          if (videoRef.current && timeAsNum) {
-            try {
-              const playbackRate = videoRef.current.duration / timeAsNum;
-              videoRef.current.playbackRate = playbackRate;
-              setPlaybackRate(playbackRate);
-            } catch (err) {}
-          }
-        }}
+        onCanPlay={setPlaybackRateOnVideoElement}
       />
     </Modal>
   );
