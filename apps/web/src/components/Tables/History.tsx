@@ -1,11 +1,11 @@
-import { HistoryEntry } from "@contexts/Store";
+import { GamesHistoryEntry } from "@hooks/useGamesHistory";
 import React, { memo } from "react";
 import { Container, Table } from "./styles";
 
 interface Props {
-  history: HistoryEntry[];
+  history: GamesHistoryEntry[];
 }
-const History: React.FC<Props> = ({ history }) => {
+const _History: React.FC<Props> = ({ history }) => {
   return (
     <Container>
       <h1>Ostatnie {history.length <= 1 ? "podejście" : "podejścia"}</h1>
@@ -35,4 +35,4 @@ const History: React.FC<Props> = ({ history }) => {
   );
 };
 
-export default memo(History);
+export const History = memo(_History);

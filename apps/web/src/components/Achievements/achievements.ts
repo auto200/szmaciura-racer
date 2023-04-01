@@ -1,11 +1,11 @@
-import { HistoryEntry } from "@contexts/Store";
+import { GamesHistoryEntry } from "@hooks/useGamesHistory";
 import Achievement, { AchievementData } from "./Achievement.class";
 
 class SzmaciuraAchievement extends Achievement {
   constructor(achievementData: AchievementData) {
     super(achievementData);
   }
-  check(history: HistoryEntry[]) {
+  check(history: GamesHistoryEntry[]) {
     const entryIndex = this.valueToComplete - 1;
     const requiredEntry = history.reverse()[entryIndex];
 

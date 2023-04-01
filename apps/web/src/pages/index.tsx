@@ -1,17 +1,16 @@
-import Achievements from "@components/Achievements";
-import Cars from "@components/Cars";
 import Input from "@components/Input";
 import Layout from "@components/Layout";
 import GoOnline from "@components/Links/GoOnline";
 import OnCompleteModal from "@components/OnCompleteModal";
 import ProgressIndicator from "@components/ProgressIndicator";
 import { ProgressContainer } from "@components/sharedStyledComponents";
-import History from "@components/Tables/History";
-import TopRaces from "@components/Tables/TopRaces";
 import Text from "@components/Text";
 import Timer, { TimerFunctions } from "@components/Timer";
+import { GAMES_HISTORY_LS_KEY } from "@consts/consts";
 import { useCarsContext } from "@contexts/CarsContext";
 import { useStore } from "@contexts/Store";
+import { useGamesHistory } from "@hooks/useGamesHistory";
+import dynamic from "next/dynamic";
 import React, { useEffect, useRef } from "react";
 import styled from "styled-components";
 
@@ -37,14 +36,17 @@ const IndexPage: React.FC = () => {
       inputMaxLength,
       error,
       onCompleteModalShown,
-      history,
     },
     dispatch,
   } = useStore();
-
   const { currentCarIndex } = useCarsContext();
+  const { gamesHistory, addToGamesHistory } = useGamesHistory(
+    GAMES_HISTORY_LS_KEY.offline
+  );
+
   const timerRef = useRef<TimerFunctions>(null);
-  const currentTextHistory = history[textID] || [];
+
+  const currentTextHistory = gamesHistory[textID]?.history || [];
 
   //reset
   const resetEverything = () => {
@@ -94,7 +96,7 @@ const IndexPage: React.FC = () => {
           inputLength={inputLength}
         />
         <Input
-          word={text[wordIndex]}
+          word={text[wordIndex] || ""}
           error={error}
           maxLength={inputMaxLength}
           isLastWord={wordIndex === text.length - 1}
@@ -106,8 +108,8 @@ const IndexPage: React.FC = () => {
             timerRef.current?.stop();
             dispatch({
               type: "RACE_COMPLETED",
-              payload: timerRef.current?.getTime()!,
             });
+            addToGamesHistory(textID, timerRef.current!.getTime());
           }}
           onEmpty={() => dispatch({ type: "INPUT_EMPTY" })}
           onCorrectLetter={() => dispatch({ type: "CORRECT_INPUT_VALUE" })}
@@ -128,5 +130,22 @@ const IndexPage: React.FC = () => {
     </>
   );
 };
+
+const TopRaces = dynamic(
+  import("../components/Tables/TopRaces").then((module) => module.TopRaces),
+  { ssr: false }
+);
+const History = dynamic(
+  import("../components/Tables/History").then((module) => module.History),
+  { ssr: false }
+);
+const Achievements = dynamic(
+  import("../components/Achievements").then((module) => module.Achievements),
+  { ssr: false }
+);
+const Cars = dynamic(
+  import("../components/Cars").then((module) => module.Cars),
+  { ssr: false }
+);
 
 export default IndexPage;

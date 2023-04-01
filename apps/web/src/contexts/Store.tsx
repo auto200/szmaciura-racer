@@ -1,29 +1,10 @@
 import { useImmerReducer } from "@hooks/useImmerReducer";
 import { parsedTexts } from "@szmaciura/shared";
-import React, { createContext, useContext, useEffect, useRef } from "react";
-import { v4 as uuid } from "uuid";
+import React, { createContext, useContext } from "react";
 
 const getInputMaxLength = (activeWord: string): number => {
   const length = activeWord.length * 2;
   return length >= 8 ? length : 8;
-};
-
-const getInitialHistoryObject = () => {
-  const initial: any = {};
-  for (const key in parsedTexts) {
-    initial[key] = [];
-  }
-  return initial as GamesHistory;
-};
-
-type GamesHistory = {
-  [key: string]: HistoryEntry[];
-};
-
-export type HistoryEntry = {
-  id: string;
-  timestamp: number;
-  time: string;
 };
 
 export interface State {
@@ -35,7 +16,6 @@ export interface State {
   inputMaxLength: number;
   error: boolean;
   onCompleteModalShown: boolean;
-  history: GamesHistory;
 }
 const initialText = Object.values(parsedTexts)[0];
 
@@ -48,7 +28,6 @@ const initialState: State = {
   inputMaxLength: getInputMaxLength(initialText[0]),
   error: false,
   onCompleteModalShown: false,
-  history: getInitialHistoryObject(),
 };
 
 const StoreContext = createContext<{
@@ -59,18 +38,18 @@ const StoreContext = createContext<{
   dispatch: () => null,
 });
 export type Action =
-  | { type: "SET_TEXT_BY_ID"; payload: string }
   | {
       type:
         | "RESET"
         | "PROCEED_TO_NEXT_WORD"
         | "INPUT_EMPTY"
-        | "CORRECT_INPUT_VALUE";
+        | "CORRECT_INPUT_VALUE"
+        | "RACE_COMPLETED";
     }
-  | { type: "RACE_COMPLETED"; payload: string }
+  | { type: "SET_TEXT_BY_ID"; payload: string }
   | { type: "SET_INPUT_LENGTH"; payload: number }
-  | { type: "SET_ERROR"; payload: boolean }
-  | { type: "SET_HISTORY_OBJECT"; payload: GamesHistory };
+  | { type: "SET_INPUT_LENGTH"; payload: number }
+  | { type: "SET_ERROR"; payload: boolean };
 
 const reducer = (state: State, action: Action) => {
   switch (action.type) {
@@ -92,13 +71,6 @@ const reducer = (state: State, action: Action) => {
     }
     case "RACE_COMPLETED": {
       state.onCompleteModalShown = true;
-      if (state.history?.[state.textID]) {
-        state.history[state.textID].unshift({
-          id: uuid(),
-          timestamp: Date.now(),
-          time: action.payload,
-        });
-      }
       return;
     }
     case "PROCEED_TO_NEXT_WORD": {
@@ -123,10 +95,6 @@ const reducer = (state: State, action: Action) => {
       state.error = action.payload;
       return;
     }
-    case "SET_HISTORY_OBJECT": {
-      state.history = action.payload;
-      return;
-    }
     default:
       throw new Error("Invalid action type");
   }
@@ -139,26 +107,6 @@ const StoreContextProvider = ({ children }: StoreContextProviderProps) => {
     reducer,
     initialState
   );
-  const initialRednerRef = useRef<boolean>(true);
-
-  useEffect(() => {
-    try {
-      if (initialRednerRef.current) {
-        const storedHistory = window.localStorage.getItem("history");
-        if (storedHistory) {
-          const parsedHistory = JSON.parse(storedHistory);
-          if (typeof parsedHistory === "object" && parsedHistory !== null) {
-            dispatch({ type: "SET_HISTORY_OBJECT", payload: parsedHistory });
-          } else {
-            throw new Error();
-          }
-        }
-      } else {
-        window.localStorage.setItem("history", JSON.stringify(state.history));
-      }
-    } catch (err) {}
-    initialRednerRef.current = false;
-  }, [state.history]);
 
   const values = {
     state,

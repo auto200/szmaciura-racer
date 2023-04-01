@@ -22,6 +22,10 @@
       "@utils/*": [
         "./src/utils/*"
       ],
-    }
+      "@consts/*": [
+        "./src/consts/*"
+      ],
+    },
+    "noUncheckedIndexedAccess": true
   }
 }

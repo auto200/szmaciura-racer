@@ -5,8 +5,10 @@ import ProgressIndicator from "@components/ProgressIndicator";
 import { ProgressContainer } from "@components/sharedStyledComponents";
 import Text from "@components/Text";
 import Timer, { TimerFunctions } from "@components/Timer";
+import { GAMES_HISTORY_LS_KEY } from "@consts/consts";
 import { useCarsContext } from "@contexts/CarsContext";
 import { useStore } from "@contexts/Store";
+import { useGamesHistory } from "@hooks/useGamesHistory";
 import { Room, ROOM_STATES, SOCKET_EVENTS } from "@szmaciura/shared";
 import { differenceInMinutes, differenceInSeconds } from "date-fns";
 import random from "lodash/random";
@@ -151,10 +153,19 @@ const Online: React.FC = () => {
   const [timeInQue, setTimeInQue] = useState<string>("0:00");
   const [inQueGifSrc, setInQueGifSrc] = useState<string>(IN_QUE_GIFS[0]);
   const [raceCompleted, setRaceCompleted] = useState<boolean>(false);
+  const { addToGamesHistory } = useGamesHistory(GAMES_HISTORY_LS_KEY.online);
   const queStartTSRef = useRef<number>(0);
   const timerIntervalRef = useRef<number>(0);
+
   const inputRef = useRef<HTMLInputElement>(null);
   const timerRef = useRef<TimerFunctions>(null);
+
+  const joinQue = () => {
+    if (!socket.connected) socket.connect();
+
+    socket.emit(SOCKET_EVENTS.JOIN_QUE);
+    setState(STATES.IN_QUE);
+  };
 
   useEffect(() => {
     return () => {
@@ -190,13 +201,6 @@ const Online: React.FC = () => {
       timerRef.current?.stop();
     }
   }, [room]);
-
-  const joinQue = () => {
-    if (!socket.connected) socket.connect();
-
-    socket.emit(SOCKET_EVENTS.JOIN_QUE);
-    setState(STATES.IN_QUE);
-  };
 
   return (
     <>
@@ -279,8 +283,8 @@ const Online: React.FC = () => {
                   dispatch({ type: "RESET" });
                   dispatch({
                     type: "RACE_COMPLETED",
-                    payload: timerRef.current?.getTime()!,
                   });
+                  addToGamesHistory(textID, timerRef.current!.getTime());
                 }}
                 onEmpty={() => dispatch({ type: "INPUT_EMPTY" })}
                 onCorrectLetter={() =>

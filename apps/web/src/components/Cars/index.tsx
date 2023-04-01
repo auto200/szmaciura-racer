@@ -1,5 +1,5 @@
 import { useCarsContext } from "@contexts/CarsContext";
-import { HistoryEntry } from "@contexts/Store";
+import { GamesHistoryEntry } from "@hooks/useGamesHistory";
 import React, { memo, useEffect, useState } from "react";
 import styled from "styled-components";
 import Car from "./Car";
@@ -11,16 +11,16 @@ const CarsContainer = styled.div`
 `;
 
 interface Props {
-  history: HistoryEntry[];
+  history: GamesHistoryEntry[];
 }
-const Cars: React.FC<Props> = ({ history }) => {
+const _Cars: React.FC<Props> = ({ history }) => {
   const { cars, setCurrentCarIndex, currentCarIndex } = useCarsContext();
   const [bestTime, setBestTime] = useState<number>(0);
 
   useEffect(() => {
     if (!history.length) return;
     const fastestTime = Number(
-      history.slice().sort((a, b) => Number(a.time) - Number(b.time))[0].time
+      history.slice().sort((a, b) => Number(a.time) - Number(b.time))[0]?.time
     );
     setBestTime(fastestTime);
   }, [history]);
@@ -52,4 +52,4 @@ const Cars: React.FC<Props> = ({ history }) => {
   );
 };
 
-export default memo(Cars);
+export const Cars = memo(_Cars);

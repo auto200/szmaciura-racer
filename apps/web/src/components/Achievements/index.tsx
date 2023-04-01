@@ -1,4 +1,4 @@
-import { HistoryEntry } from "@contexts/Store";
+import { GamesHistoryEntry } from "@hooks/useGamesHistory";
 import Tippy from "@tippyjs/react";
 import NextImage from "next/image";
 import React, { memo } from "react";
@@ -47,12 +47,11 @@ const TooltipContent: React.FC<TooltipContentProps> = ({
   );
 };
 interface Props {
-  history: HistoryEntry[];
+  history: GamesHistoryEntry[];
 }
-//TODO: figure out if i want to have separate achievements for each text or keep them all together or some global and
-//some text specific. The thing is, if i want to use staticquery => gatsby image, i need to fetch images in react
-//component
-const Achievements: React.FC<Props> = ({ history }) => {
+//TODO: figure out if i want to have separate achievements for each text or keep
+//them all together or some global and some text specific.
+const _Achievements: React.FC<Props> = ({ history }) => {
   return (
     <>
       <h1>Osiągnięcia</h1>
@@ -91,4 +90,4 @@ const Achievements: React.FC<Props> = ({ history }) => {
   );
 };
 
-export default memo(Achievements);
+export const Achievements = memo(_Achievements);
