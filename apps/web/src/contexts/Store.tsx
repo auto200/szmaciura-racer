@@ -1,7 +1,7 @@
+import { useImmerReducer } from "@hooks/useImmerReducer";
 import { parsedTexts } from "@szmaciura/shared";
 import React, { createContext, useContext, useEffect, useRef } from "react";
 import { v4 as uuid } from "uuid";
-import { useImmerReducer } from "../utils/hooks/useImmerReducer";
 
 const getInputMaxLength = (activeWord: string): number => {
   const length = activeWord.length * 2;

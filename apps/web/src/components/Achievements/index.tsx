@@ -1,9 +1,9 @@
+import { HistoryEntry } from "@contexts/Store";
 import Tippy from "@tippyjs/react";
 import NextImage from "next/image";
 import React, { memo } from "react";
 import styled from "styled-components";
 import "tippy.js/dist/tippy.css";
-import { HistoryEntry } from "../../contexts/Store";
 import achievements from "./achievements";
 
 const Wrapper = styled.div`

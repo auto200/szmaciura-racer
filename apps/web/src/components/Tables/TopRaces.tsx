@@ -1,6 +1,6 @@
+import { HistoryEntry } from "@contexts/Store";
 import NextImage from "next/image";
 import { memo } from "react";
-import { HistoryEntry } from "../../contexts/Store";
 import { Container, Table } from "./styles";
 
 interface Props {

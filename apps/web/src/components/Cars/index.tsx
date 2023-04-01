@@ -1,7 +1,7 @@
-import React, { useState, useEffect, memo } from "react";
+import { useCarsContext } from "@contexts/CarsContext";
+import { HistoryEntry } from "@contexts/Store";
+import React, { memo, useEffect, useState } from "react";
 import styled from "styled-components";
-import { HistoryEntry } from "../../contexts/Store";
-import { useCarsContext } from "../../contexts/CarsContext";
 import Car from "./Car";
 
 const CarsContainer = styled.div`

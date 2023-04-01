@@ -1,6 +1,15 @@
+import Input from "@components/Input";
+import Layout from "@components/Layout";
+import GoOffline from "@components/Links/GoOffline";
+import ProgressIndicator from "@components/ProgressIndicator";
+import { ProgressContainer } from "@components/sharedStyledComponents";
+import Text from "@components/Text";
+import Timer, { TimerFunctions } from "@components/Timer";
+import { useCarsContext } from "@contexts/CarsContext";
+import { useStore } from "@contexts/Store";
 import { Room, ROOM_STATES, SOCKET_EVENTS } from "@szmaciura/shared";
 import { differenceInMinutes, differenceInSeconds } from "date-fns";
-import { random } from "lodash";
+import random from "lodash/random";
 import Image from "next/image";
 import React, { useEffect, useRef, useState } from "react";
 import {
@@ -11,15 +20,6 @@ import {
 } from "react-icons/im";
 import io, { Socket } from "socket.io-client";
 import styled from "styled-components";
-import Input from "../components/Input";
-import Layout from "../components/Layout";
-import GoOffline from "../components/Links/GoOffline";
-import ProgressIndicator from "../components/ProgressIndicator";
-import { ProgressContainer } from "../components/sharedStyledComponents";
-import Text from "../components/Text";
-import Timer, { TimerFunctions } from "../components/Timer";
-import { useCarsContext } from "../contexts/CarsContext";
-import { useStore } from "../contexts/Store";
 
 const IN_QUE_GIFS: string[] = [
   "https://thumbs.gfycat.com/DevotedEasygoingAnnashummingbird-size_restricted.gif",

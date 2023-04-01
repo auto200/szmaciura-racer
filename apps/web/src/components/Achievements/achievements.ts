@@ -1,4 +1,4 @@
-import { HistoryEntry } from "../../contexts/Store";
+import { HistoryEntry } from "@contexts/Store";
 import Achievement, { AchievementData } from "./Achievement.class";
 
 class SzmaciuraAchievement extends Achievement {

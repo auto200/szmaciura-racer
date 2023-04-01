@@ -1,19 +1,19 @@
+import Achievements from "@components/Achievements";
+import Cars from "@components/Cars";
+import Input from "@components/Input";
+import Layout from "@components/Layout";
+import GoOnline from "@components/Links/GoOnline";
+import OnCompleteModal from "@components/OnCompleteModal";
+import ProgressIndicator from "@components/ProgressIndicator";
+import { ProgressContainer } from "@components/sharedStyledComponents";
+import History from "@components/Tables/History";
+import TopRaces from "@components/Tables/TopRaces";
+import Text from "@components/Text";
+import Timer, { TimerFunctions } from "@components/Timer";
+import { useCarsContext } from "@contexts/CarsContext";
+import { useStore } from "@contexts/Store";
 import React, { useEffect, useRef } from "react";
 import styled from "styled-components";
-import Achievements from "../components/Achievements";
-import Cars from "../components/Cars";
-import Input from "../components/Input";
-import Layout from "../components/Layout";
-import GoOnline from "../components/Links/GoOnline";
-import OnCompleteModal from "../components/OnCompleteModal";
-import ProgressIndicator from "../components/ProgressIndicator";
-import { ProgressContainer } from "../components/sharedStyledComponents";
-import History from "../components/Tables/History";
-import TopRaces from "../components/Tables/TopRaces";
-import Text from "../components/Text";
-import Timer, { TimerFunctions } from "../components/Timer";
-import { useCarsContext } from "../contexts/CarsContext";
-import { useStore } from "../contexts/Store";
 
 const ResetButton = styled.button`
   all: unset;

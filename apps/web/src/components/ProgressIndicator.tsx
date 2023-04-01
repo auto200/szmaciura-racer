@@ -1,9 +1,9 @@
+import { useCarsContext } from "@contexts/CarsContext";
 import { Player } from "@szmaciura/shared";
-import { isEqual } from "lodash";
+import isEqual from "lodash/isEqual";
 import NextImage from "next/image";
 import React, { memo, useRef } from "react";
 import styled, { css } from "styled-components";
-import { useCarsContext } from "../contexts/CarsContext";
 
 const Wrapper = styled.div`
   flex-grow: 1;

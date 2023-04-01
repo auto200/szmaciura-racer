@@ -1,5 +1,5 @@
 import { getTimePassedInSecAndMs, Player as PlayerI } from "@szmaciura/shared";
-import { random } from "lodash";
+import random from "lodash/random";
 import config from "../config";
 
 export class Player implements PlayerI {

@@ -1,5 +1,5 @@
+import { HistoryEntry } from "@contexts/Store";
 import React, { memo } from "react";
-import { HistoryEntry } from "../../contexts/Store";
 import { Container, Table } from "./styles";
 
 interface Props {
