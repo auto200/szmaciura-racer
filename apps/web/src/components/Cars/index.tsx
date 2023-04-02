@@ -16,12 +16,7 @@ interface Props {
   currentCarAvatarSrc: UseOfflineCarAvatarsReturnType["currentCarAvatarSrc"];
   setCurrentCarAvatarSrc: UseOfflineCarAvatarsReturnType["setCurrentCarAvatarSrc"];
 }
-const _Cars: React.FC<Props> = ({
-  history,
-  cars,
-  currentCarAvatarSrc,
-  setCurrentCarAvatarSrc,
-}) => {
+const _Cars: React.FC<Props> = ({ history, cars, currentCarAvatarSrc, setCurrentCarAvatarSrc }) => {
   const [bestTime, setBestTime] = useState<number>(0);
 
   useEffect(() => {
@@ -37,9 +32,7 @@ const _Cars: React.FC<Props> = ({
       <h1>Wybierz sobie furke wariacie</h1>
       <CarsContainer>
         {cars.map((car, i) => {
-          const available =
-            !car.minSecRequired ||
-            !!(bestTime && bestTime <= car.minSecRequired);
+          const available = !car.minSecRequired || !!(bestTime && bestTime <= car.minSecRequired);
           const handleClick = () => {
             if (available) setCurrentCarAvatarSrc(car.img);
           };

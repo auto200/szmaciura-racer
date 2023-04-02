@@ -22,10 +22,7 @@ type UseGamesHistoryReturnType = {
 };
 
 export const useGamesHistory = (key: string): UseGamesHistoryReturnType => {
-  const [gamesHistory, setGamesHistory] = useLocalStorage<GamesHistory>(
-    key,
-    {}
-  );
+  const [gamesHistory, setGamesHistory] = useLocalStorage<GamesHistory>(key, {});
 
   //TODO: store time as number
   const addToGamesHistory = (textId: string, time: string) => {

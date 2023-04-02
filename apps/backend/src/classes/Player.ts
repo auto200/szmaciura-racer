@@ -1,8 +1,4 @@
-import {
-  CAR_AVATARS_SRC,
-  getTimePassedInSecAndMs,
-  Player as PlayerI,
-} from "@szmaciura/shared";
+import { CAR_AVATARS_SRC, getTimePassedInSecAndMs, Player as PlayerI } from "@szmaciura/shared";
 import sample from "lodash/sample";
 
 export class Player implements PlayerI {

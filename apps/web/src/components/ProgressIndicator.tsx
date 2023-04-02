@@ -12,13 +12,12 @@ interface ImageWrapperProps {
   progressInPx: string;
   highlight: boolean;
 }
-//IDEA: can make like a easter egg or something and instead of translating on X axis, use scaleX, transform-origin left
-// style: { transform: `scaleX(${1 + progress * (containerWidth / 250)})` },
-const ImageWrapper = styled.div.attrs<ImageWrapperProps>(
-  ({ progressInPx }) => ({
-    style: { transform: `translateX(${progressInPx})` },
-  })
-)<ImageWrapperProps>`
+// IDEA: can make like a easter egg or something and instead of translating on X
+// axis, use scaleX, transform-origin left style: { transform: `scaleX(${1 +
+// progress * (containerWidth / 250)})` },
+const ImageWrapper = styled.div.attrs<ImageWrapperProps>(({ progressInPx }) => ({
+  style: { transform: `translateX(${progressInPx})` },
+}))<ImageWrapperProps>`
   position: absolute;
   left: 0;
   bottom: 0;
@@ -73,8 +72,7 @@ const ProgressIndicator: React.FC<Props> = ({ players, highlightPlayer }) => {
   const imageRefs = useRef<any>({});
 
   const getProgressInPx = (playerId: string, progress: number): string => {
-    if (!progressWrapperRef.current || !imageRefs?.current[playerId])
-      return "0px";
+    if (!progressWrapperRef.current || !imageRefs?.current[playerId]) return "0px";
 
     const containerWidth = progressWrapperRef.current.clientWidth;
     const imageWidth = imageRefs.current[playerId].clientWidth;

@@ -22,12 +22,7 @@ interface Props {
 const GoOffline: React.FC<Props> = ({ to, onClick }) => {
   return (
     <Wrapper href={to} onClick={onClick}>
-      <NextImage
-        src="/rafonix_offline.jpg"
-        alt="go offline"
-        width={350}
-        height={230}
-      />
+      <NextImage src="/rafonix_offline.jpg" alt="go offline" width={350} height={230} />
       <div>Powrót do zabawy solo</div>
     </Wrapper>
   );

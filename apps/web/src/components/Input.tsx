@@ -6,8 +6,7 @@ const StyledInput = styled.input<{ error: boolean }>`
   height: 30px;
   font-size: 25px;
   color: white;
-  background-color: ${({ theme, error }) =>
-    error ? theme.colors.error : "transparent"};
+  background-color: ${({ theme, error }) => (error ? theme.colors.error : "transparent")};
 `;
 interface InputProps {
   word: string;

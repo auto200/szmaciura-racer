@@ -17,12 +17,7 @@ export class Room implements ServerRoom {
   msToStart: number;
   config: RoomConfig;
 
-  constructor(
-    id: string,
-    players: Set<Player>,
-    textID: string,
-    config: RoomConfig
-  ) {
+  constructor(id: string, players: Set<Player>, textID: string, config: RoomConfig) {
     this.config = config;
     this.id = id;
     this.createTS = Date.now();
@@ -40,10 +35,7 @@ export class Room implements ServerRoom {
    * @returns succeeded
    */
   add(player: Player): boolean {
-    if (
-      this.isFull ||
-      (player.isFake && this.fakePlayersCount >= this.config.maxFakePlayersIn)
-    ) {
+    if (this.isFull || (player.isFake && this.fakePlayersCount >= this.config.maxFakePlayersIn)) {
       return false;
     }
     this.players.add(player);

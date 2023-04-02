@@ -15,12 +15,7 @@ interface Props {
   title?: string;
 }
 
-const SEO: React.FC<Props> = ({
-  description = "",
-  lang = "pl",
-  meta = [],
-  title = "",
-}) => {
+const SEO: React.FC<Props> = ({ description = "", lang = "pl", meta = [], title = "" }) => {
   const metaDescription = description || "szmaciura";
 
   return (

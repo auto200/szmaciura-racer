@@ -1,11 +1,6 @@
 import { appConfig } from "@configs/appConfig";
 import { gameConfig } from "@configs/gameConfig";
-import {
-  parsedTexts,
-  ROOM_STATES,
-  sleep,
-  SOCKET_EVENTS,
-} from "@szmaciura/shared";
+import { parsedTexts, ROOM_STATES, sleep, SOCKET_EVENTS } from "@szmaciura/shared";
 import express from "express";
 import { random, sample } from "lodash";
 import { nanoid } from "nanoid";
@@ -84,10 +79,7 @@ io.of("/game").on("connection", (socket) => {
     while (true) {
       await sleep(random(5000, 8000));
       console.log("trying to create fake player");
-      const fakePlayer = new Player(
-        `${gameConfig.fakePlayers.idPrefix}${nanoid()}`,
-        true
-      );
+      const fakePlayer = new Player(`${gameConfig.fakePlayers.idPrefix}${nanoid()}`, true);
 
       if (queue.length) {
         queue.add(fakePlayer);
@@ -117,10 +109,7 @@ io.of("/game").on("connection", (socket) => {
       const wordLength = textArr[fakePlayer.wordIndex]?.length || 0;
       await sleep(random(minSpeed * wordLength, maxSpeed * wordLength));
 
-      fakePlayer.wordCompleted(
-        parsedTexts[room.textID]?.length || 0,
-        room.startTS
-      );
+      fakePlayer.wordCompleted(parsedTexts[room.textID]?.length || 0, room.startTS);
 
       updateRoom(room);
     }

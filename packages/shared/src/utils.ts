@@ -14,10 +14,7 @@ export const sleep = (ms: number) => {
   return new Promise((resolve) => setTimeout(resolve, ms));
 };
 
-export const getTimePassedInSecAndMs = (
-  startTS: number,
-  digits: number = 2
-): string => {
+export const getTimePassedInSecAndMs = (startTS: number, digits: number = 2): string => {
   const msPassed = Date.now() - startTS;
   const seconds = msPassed / 1000;
   return seconds.toFixed(digits);

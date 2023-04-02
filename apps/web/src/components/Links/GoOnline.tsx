@@ -40,12 +40,7 @@ const GoOnline: React.FC<Props> = ({ to, onClick }) => {
   return (
     <Link href={to} legacyBehavior>
       <Wrapper onClick={onClick}>
-        <NextImage
-          src={"/rafonix_online.jpg"}
-          width={350}
-          height={230}
-          alt="go online"
-        />
+        <NextImage src={"/rafonix_online.jpg"} width={350} height={230} alt="go online" />
         <GoOnlineText>Wypróbuj tryb online!</GoOnlineText>
       </Wrapper>
     </Link>

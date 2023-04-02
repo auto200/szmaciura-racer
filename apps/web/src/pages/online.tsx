@@ -14,12 +14,7 @@ import { differenceInMinutes, differenceInSeconds } from "date-fns";
 import sample from "lodash/sample";
 import Image from "next/image";
 import React, { useEffect, useRef, useState } from "react";
-import {
-  ImArrowLeft,
-  ImArrowUp2,
-  ImArrowUpLeft2,
-  ImArrowUpRight2,
-} from "react-icons/im";
+import { ImArrowLeft, ImArrowUp2, ImArrowUpLeft2, ImArrowUpRight2 } from "react-icons/im";
 import io, { Socket } from "socket.io-client";
 import styled from "styled-components";
 
@@ -113,23 +108,13 @@ enum STATES {
 }
 const getTimeInQue = (startTime: number): string => {
   const minutes = differenceInMinutes(Date.now(), startTime);
-  const seconds = (differenceInSeconds(Date.now(), startTime) % 60)
-    .toString()
-    .padStart(2, "0");
+  const seconds = (differenceInSeconds(Date.now(), startTime) % 60).toString().padStart(2, "0");
   return `${minutes}:${seconds}`;
 };
 
 const Online: React.FC = () => {
   const {
-    state: {
-      text,
-      textID,
-      wordIndex,
-      inputLength,
-      lastValidCharIndex,
-      inputMaxLength,
-      error,
-    },
+    state: { text, textID, wordIndex, inputLength, lastValidCharIndex, inputMaxLength, error },
     dispatch,
   } = useStore();
   const { cars } = useOfflineCarAvatars();
@@ -195,9 +180,7 @@ const Online: React.FC = () => {
       inputRef.current?.focus();
       setTimeInQue("0:00");
     }
-    if (
-      room.players.length === room.players.filter((p) => p.completeTime).length
-    ) {
+    if (room.players.length === room.players.filter((p) => p.completeTime).length) {
       timerRef.current?.stop();
     }
   }, [room]);
@@ -216,9 +199,7 @@ const Online: React.FC = () => {
         )}
         {state == STATES.INITIAL && (
           <>
-            <JoinRace onClick={joinQue}>
-              Weź udział w wyścigu o złote galoty
-            </JoinRace>
+            <JoinRace onClick={joinQue}>Weź udział w wyścigu o złote galoty</JoinRace>
             <Arrows>
               <ImArrowUpRight2 />
               <ImArrowUp2 />
@@ -238,10 +219,7 @@ const Online: React.FC = () => {
         {state === STATES.IN_ROOM && room && (
           <>
             <ProgressContainer>
-              <ProgressIndicator
-                players={room.players}
-                highlightPlayer={socket.id}
-              />
+              <ProgressIndicator players={room.players} highlightPlayer={socket.id} />
               <Timer ref={timerRef} />
             </ProgressContainer>
             <Text
@@ -261,8 +239,7 @@ const Online: React.FC = () => {
                   joinQue();
                 }}
               >
-                Dobra robota wariacie, pierdolnij se jeszcze rundkę{" "}
-                <ImArrowLeft />
+                Dobra robota wariacie, pierdolnij se jeszcze rundkę <ImArrowLeft />
               </PlayAgainButton>
             ) : (
               <Input
@@ -288,9 +265,7 @@ const Online: React.FC = () => {
                   addToGamesHistory(textID, timerRef.current!.getTime());
                 }}
                 onEmpty={() => dispatch({ type: "INPUT_EMPTY" })}
-                onCorrectLetter={() =>
-                  dispatch({ type: "CORRECT_INPUT_VALUE" })
-                }
+                onCorrectLetter={() => dispatch({ type: "CORRECT_INPUT_VALUE" })}
                 onError={() => dispatch({ type: "SET_ERROR", payload: true })}
                 disabled={room.state === ROOM_STATES.WAITING}
               />
@@ -306,12 +281,7 @@ const Online: React.FC = () => {
                     marginTop: 10,
                   }}
                 >
-                  <Image
-                    src={player.carAvatarSrc}
-                    width={150}
-                    height={100}
-                    alt=""
-                  />
+                  <Image src={player.carAvatarSrc} width={150} height={100} alt="" />
                   {player.completeTime}s {player.id === socket.id && "(ty)"}
                 </div>
               ))}

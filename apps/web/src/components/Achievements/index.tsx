@@ -33,11 +33,7 @@ interface TooltipContentProps {
   description: string;
   timestamp?: number;
 }
-const TooltipContent: React.FC<TooltipContentProps> = ({
-  name,
-  description,
-  timestamp,
-}) => {
+const TooltipContent: React.FC<TooltipContentProps> = ({ name, description, timestamp }) => {
   return (
     <div>
       <h3>{name}</h3>
@@ -58,18 +54,15 @@ const _Achievements: React.FC<Props> = ({ history }) => {
       <Wrapper>
         {achievements.map((achiv) => {
           const { name, description, image, valueToComplete } = achiv;
-          const { currentTimesCompleted, completeTimestamp: timestamp } =
-            achiv.check(history.slice());
+          const { currentTimesCompleted, completeTimestamp: timestamp } = achiv.check(
+            history.slice()
+          );
 
           return (
             <Tooltip
               key={name}
               content={
-                <TooltipContent
-                  name={name}
-                  description={description}
-                  timestamp={timestamp}
-                />
+                <TooltipContent name={name} description={description} timestamp={timestamp} />
               }
             >
               <div>

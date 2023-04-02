@@ -45,12 +45,7 @@ const _TopRaces = ({ history }: TopRacesProps) => {
           {top3.map(({ id, timestamp, time, imageSrc }, i) => (
             <tr key={id}>
               <td>
-                <NextImage
-                  src={imageSrc}
-                  alt={`miejsce ${i + 1}`}
-                  width={200}
-                  height={200}
-                />
+                <NextImage src={imageSrc} alt={`miejsce ${i + 1}`} width={200} height={200} />
               </td>
               <td>{new Date(timestamp).toLocaleString("pl")}</td>
               <td>{time}s</td>

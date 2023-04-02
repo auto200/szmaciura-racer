@@ -22,14 +22,11 @@ interface ImageProps {
 }
 const Image = styled(NextImage)<ImageProps>`
   filter: brightness(
-    ${({ $available, $active }) =>
-      $available && $active ? 1 : $available ? 0.5 : 0.1}
+    ${({ $available, $active }) => ($available && $active ? 1 : $available ? 0.5 : 0.1)}
   );
   transition: filter 0.3s ease;
   :hover {
-    filter: brightness(
-      ${({ $available, $active }) => $available && !$active && "0.8"}
-    );
+    filter: brightness(${({ $available, $active }) => $available && !$active && "0.8"});
     cursor: ${({ $available }) => ($available ? "pointer" : "not-allowed")};
   }
 `;
@@ -41,13 +38,7 @@ interface Props {
   onClick: () => void;
   description: string;
 }
-const Car: React.FC<Props> = ({
-  active,
-  available,
-  image,
-  onClick,
-  description,
-}) => {
+const Car: React.FC<Props> = ({ active, available, image, onClick, description }) => {
   return (
     <Tooltip content={<h2>{description}</h2>}>
       <ImageWrapper onClick={onClick} active={active}>

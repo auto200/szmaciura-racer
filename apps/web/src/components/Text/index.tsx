@@ -14,13 +14,7 @@ interface Props {
   inputLength: number;
 }
 
-const Text: React.FC<Props> = ({
-  text,
-  wordIndex,
-  error,
-  lastValidCharIndex,
-  inputLength,
-}) => {
+const Text: React.FC<Props> = ({ text, wordIndex, error, lastValidCharIndex, inputLength }) => {
   return (
     <TextWrapper>
       {text.map((word, i) => {

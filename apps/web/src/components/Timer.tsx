@@ -15,10 +15,7 @@ export interface TimerFunctions {
   stop: () => void;
 }
 
-const Timer: React.ForwardRefRenderFunction<TimerFunctions> = (
-  _,
-  forwardedRef
-) => {
+const Timer: React.ForwardRefRenderFunction<TimerFunctions> = (_, forwardedRef) => {
   const [timePassed, setTimePassed] = useState<string>("0");
   const startTimestampRef = useRef<number>();
   const timerAnimationFrameRef = useRef<number>();

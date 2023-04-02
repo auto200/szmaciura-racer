@@ -103,19 +103,14 @@ const reducer = (state: State, action: Action) => {
 type StoreContextProviderProps = { children: React.ReactNode };
 
 const StoreContextProvider = ({ children }: StoreContextProviderProps) => {
-  const [state, dispatch] = useImmerReducer<State, Action>(
-    reducer,
-    initialState
-  );
+  const [state, dispatch] = useImmerReducer<State, Action>(reducer, initialState);
 
   const values = {
     state,
     dispatch,
   };
 
-  return (
-    <StoreContext.Provider value={values}>{children}</StoreContext.Provider>
-  );
+  return <StoreContext.Provider value={values}>{children}</StoreContext.Provider>;
 };
 
 export default StoreContextProvider;

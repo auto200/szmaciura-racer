@@ -39,11 +39,8 @@ const IndexPage: React.FC = () => {
     },
     dispatch,
   } = useStore();
-  const { cars, currentCarAvatarSrc, setCurrentCarAvatarSrc } =
-    useOfflineCarAvatars();
-  const { gamesHistory, addToGamesHistory } = useGamesHistory(
-    GAMES_HISTORY_LS_KEY.offline
-  );
+  const { cars, currentCarAvatarSrc, setCurrentCarAvatarSrc } = useOfflineCarAvatars();
+  const { gamesHistory, addToGamesHistory } = useGamesHistory(GAMES_HISTORY_LS_KEY.offline);
 
   const timerRef = useRef<TimerFunctions>(null);
 
@@ -126,10 +123,7 @@ const IndexPage: React.FC = () => {
           setCurrentCarAvatarSrc={setCurrentCarAvatarSrc}
         />
         {onCompleteModalShown && (
-          <OnCompleteModal
-            onClose={resetEverything}
-            time={timerRef.current?.getTime()!}
-          />
+          <OnCompleteModal onClose={resetEverything} time={timerRef.current?.getTime()!} />
         )}
       </Layout>
     </>

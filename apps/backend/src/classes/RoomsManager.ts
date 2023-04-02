@@ -21,11 +21,7 @@ export class RoomsManager {
     if (!room) return;
 
     //delete zombie room
-    if (
-      [...room.players].every(
-        ({ isFake, disconnected }) => isFake || disconnected === true
-      )
-    ) {
+    if ([...room.players].every(({ isFake, disconnected }) => isFake || disconnected === true)) {
       this.remove(room);
     }
   }

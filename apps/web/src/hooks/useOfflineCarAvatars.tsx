@@ -17,11 +17,10 @@ export type UseOfflineCarAvatarsReturnType = {
 };
 
 export const useOfflineCarAvatars = (): UseOfflineCarAvatarsReturnType => {
-  const [currentCarAvatarSrc, setCurrentCarAvatarSrc] =
-    useLocalStorage<CarAvatarSrc>(
-      "currentOfflineCarAvatar",
-      CAR_AVATARS_SRC[0]
-    );
+  const [currentCarAvatarSrc, setCurrentCarAvatarSrc] = useLocalStorage<CarAvatarSrc>(
+    "currentOfflineCarAvatar",
+    CAR_AVATARS_SRC[0]
+  );
 
   const cars: Car[] = [
     {
