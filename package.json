@@ -8,6 +8,7 @@
   ],
   "scripts": {
     "build": "turbo run build",
+    "build:backend": "turbo run build --filter=backend",
     "build:web": "turbo run build --filter=web",
     "dev": "turbo run dev",
     "lint": "turbo run lint",
@@ -23,7 +24,10 @@
     "node": ">=18.0.0"
   },
   "dependencies": {
-    "nanoid": "3.3.6"
+    "nanoid": "3.3.6",
+    "zod": "3.21.4",
+    "lodash": "4.17.20",
+    "date-fns": "2.29.3"
   },
   "packageManager": "pnpm@7.28.0"
 }

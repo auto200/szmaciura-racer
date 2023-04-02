@@ -11,7 +11,7 @@ import { useStore } from "@contexts/Store";
 import { useGamesHistory } from "@hooks/useGamesHistory";
 import { useOfflineCarAvatars } from "@hooks/useOfflineCarAvatars";
 import dynamic from "next/dynamic";
-import React, { useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import styled from "styled-components";
 
 const ResetButton = styled.button`
@@ -49,11 +49,10 @@ const IndexPage: React.FC = () => {
 
   const currentTextHistory = gamesHistory[textID]?.history || [];
 
-  //reset
-  const resetEverything = () => {
+  const resetEverything = useCallback(() => {
     dispatch({ type: "RESET" });
     timerRef.current?.reset();
-  };
+  }, [dispatch]);
 
   useEffect(() => {
     //cleanup
@@ -70,7 +69,7 @@ const IndexPage: React.FC = () => {
     if (wordIndex === 0 && inputLength === 1) {
       timerRef.current?.start();
     }
-  }, [wordIndex, inputLength]);
+  }, [wordIndex, inputLength, resetEverything]);
 
   return (
     <>

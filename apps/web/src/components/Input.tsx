@@ -22,7 +22,7 @@ interface InputProps {
   onWordCompleted: () => void;
   onLastWordCompleted: () => void;
   onChange: (value: string) => void;
-  onMaxLenghtReached?: () => void;
+  onMaxLengthReached?: () => void;
 }
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
   (
@@ -39,11 +39,24 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       onWordCompleted = () => {},
       onLastWordCompleted = () => {},
       onChange = () => {},
-      onMaxLenghtReached = () => {},
+      onMaxLengthReached = () => {},
     },
     ref
   ) => {
     const [value, setValue] = useState<string>("");
+
+    const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+      if (disabled) return;
+      const val = e.target.value.toLowerCase();
+      if (val.length - 1 >= maxLength) {
+        //TODO add alert later on with instructions to user how to play
+        onMaxLengthReached();
+        return;
+      }
+      onChange(val);
+      setValue(val);
+    };
+
     useEffect(() => {
       if (isLastWord && value === word) {
         onLastWordCompleted();
@@ -65,19 +78,9 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         return;
       }
       onError();
+      // for now we just care if the input value has changed
+      /* eslint-disable-next-line react-hooks/exhaustive-deps*/
     }, [value]);
-
-    const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-      if (disabled) return;
-      const val = e.target.value.toLowerCase();
-      if (val.length - 1 >= maxLength) {
-        //TODO add alert later on with instructions to user how to play
-        onMaxLenghtReached();
-        return;
-      }
-      onChange(val);
-      setValue(val);
-    };
 
     return (
       <StyledInput

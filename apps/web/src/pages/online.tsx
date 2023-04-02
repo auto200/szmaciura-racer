@@ -228,7 +228,8 @@ const Online: React.FC = () => {
         )}
         {state === STATES.IN_QUE && (
           <>
-            <img src={inQueGifSrc} />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={inQueGifSrc} alt="rafon" />
             <InQueTimer>
               Czekanie na oponenta <span>{timeInQue}</span>
             </InQueTimer>

@@ -68,7 +68,7 @@ io.of("/game").on("connection", (socket) => {
     if (!room || !room.startTS || player.completeTime) {
       return;
     }
-    player.wordCompleted(parsedTexts[room.textID].length, room.startTS);
+    player.wordCompleted(parsedTexts[room.textID]?.length || 0, room.startTS);
     updateRoom(room);
   });
 
@@ -113,11 +113,14 @@ io.of("/game").on("connection", (socket) => {
         await sleep(1000);
         continue;
       }
-      const textArr = parsedTexts[room.textID];
-      const wordLength = textArr[fakePlayer.wordIndex].length;
+      const textArr = parsedTexts[room.textID] || [];
+      const wordLength = textArr[fakePlayer.wordIndex]?.length || 0;
       await sleep(random(minSpeed * wordLength, maxSpeed * wordLength));
 
-      fakePlayer.wordCompleted(parsedTexts[room.textID].length, room.startTS);
+      fakePlayer.wordCompleted(
+        parsedTexts[room.textID]?.length || 0,
+        room.startTS
+      );
 
       updateRoom(room);
     }
@@ -133,7 +136,7 @@ async function createAndHandleNewRoom(): Promise<Room> {
   const newRoom = new Room(
     roomId,
     queue.takeAll(),
-    Object.keys(parsedTexts)[0],
+    Object.keys(parsedTexts)[0] || "",
     gameConfig.room
   );
   roomsManager.add(newRoom);

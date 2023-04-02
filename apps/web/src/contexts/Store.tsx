@@ -17,15 +17,15 @@ export interface State {
   error: boolean;
   onCompleteModalShown: boolean;
 }
-const initialText = Object.values(parsedTexts)[0]!;
+const initialText = Object.values(parsedTexts)[0] || [];
 
 const initialState: State = {
   text: initialText,
-  textID: Object.keys(parsedTexts)[0]!,
+  textID: Object.keys(parsedTexts)[0] || "",
   wordIndex: 0,
   inputLength: 0,
   lastValidCharIndex: -1,
-  inputMaxLength: getInputMaxLength(initialText[0]!),
+  inputMaxLength: getInputMaxLength(initialText[0] || ""),
   error: false,
   onCompleteModalShown: false,
 };

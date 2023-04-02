@@ -24,8 +24,8 @@
       ],
       "@consts/*": [
         "./src/consts/*"
-      ],
+      ]
     },
-    "noUncheckedIndexedAccess": true,
+    "incremental": true
   }
 }
