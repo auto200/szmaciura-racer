@@ -4,7 +4,7 @@ const nextConfig = {
   compiler: {
     styledComponents: true,
   },
-  transpilePackages: ["shared"],
+  transpilePackages: ["@szmaciura/shared"],
 };
 
 export default nextConfig;

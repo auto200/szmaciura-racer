@@ -1,0 +1,18 @@
+version: "3.8"
+
+services:
+  backend:
+    container_name: backend
+    build:
+      context: .
+      dockerfile: ./apps/backend/Dockerfile
+    environment:
+      - PORT=3001
+      - CORS_ORIGIN=http://does_not_matter_in_dev
+      - NODE_ENV=development
+    ports:
+      - 3001:3001
+    volumes:
+      - ./apps/backend:/app/apps/backend
+      # exclude node_modules
+      - /app/apps/backend/node_modules

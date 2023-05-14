@@ -1,4 +1,4 @@
-import { appConfig } from "@configs/appConfig";
+import { appConfig, AppEnvironment } from "@configs/appConfig";
 import { gameConfig } from "@configs/gameConfig";
 import { parsedTexts, ROOM_STATES, sleep, SOCKET_EVENTS } from "@szmaciura/shared";
 import express from "express";
@@ -17,7 +17,9 @@ const server = app.listen(appConfig.PORT, () => {
 });
 
 const io = new SocketIo(server, {
-  cors: { origin: appConfig.CORS_ORIGIN },
+  cors: {
+    origin: appConfig.NODE_ENV === AppEnvironment.DEVELOPMENT ? true : appConfig.CORS_ORIGIN,
+  },
 });
 
 const roomsManager = new RoomsManager();
