@@ -8,8 +8,8 @@ importers:
         specifier: 2.29.3
         version: 2.29.3
       lodash:
-        specifier: 4.17.20
-        version: 4.17.20
+        specifier: 4.17.21
+        version: 4.17.21
       nanoid:
         specifier: 3.3.6
         version: 3.3.6
@@ -153,7 +153,7 @@ importers:
         version: 8.3.0(eslint@7.23.0)
       eslint-config-turbo:
         specifier: latest
-        version: 1.9.4(eslint@7.23.0)
+        version: 1.10.12(eslint@7.23.0)
       eslint-plugin-react:
         specifier: 7.31.8
         version: 7.31.8(eslint@7.23.0)
@@ -1635,13 +1635,13 @@ packages:
       eslint: 7.23.0
     dev: false
 
-  /eslint-config-turbo@1.9.4(eslint@7.23.0):
-    resolution: {integrity: sha512-pB9Jg1Zn0Qo25LLxmvcMgjBmw8sEt6rwJO8oTKjO4DEQVUAMoNHcR7bdQCdIszHV3c1tYUjbJgm0L1B9qU81nw==}
+  /eslint-config-turbo@1.10.12(eslint@7.23.0):
+    resolution: {integrity: sha512-z3jfh+D7UGYlzMWGh+Kqz++hf8LOE96q3o5R8X4HTjmxaBWlLAWG+0Ounr38h+JLR2TJno0hU9zfzoPNkR9BdA==}
     peerDependencies:
       eslint: '>6.6.0'
     dependencies:
       eslint: 7.23.0
-      eslint-plugin-turbo: 1.9.4(eslint@7.23.0)
+      eslint-plugin-turbo: 1.10.12(eslint@7.23.0)
     dev: false
 
   /eslint-import-resolver-node@0.3.7:
@@ -1792,11 +1792,12 @@ packages:
       string.prototype.matchall: 4.0.8
     dev: false
 
-  /eslint-plugin-turbo@1.9.4(eslint@7.23.0):
-    resolution: {integrity: sha512-ySDJl63nIWa+j9WOAnblBWKDyaCTfGCYhSNSMCe0N5Jk01YWMEowFr2bGw31Zg0dOijioYo9ewwfLLKbJYOUmQ==}
+  /eslint-plugin-turbo@1.10.12(eslint@7.23.0):
+    resolution: {integrity: sha512-uNbdj+ohZaYo4tFJ6dStRXu2FZigwulR1b3URPXe0Q8YaE7thuekKNP+54CHtZPH9Zey9dmDx5btAQl9mfzGOw==}
     peerDependencies:
       eslint: '>6.6.0'
     dependencies:
+      dotenv: 16.0.3
       eslint: 7.23.0
     dev: false
 
