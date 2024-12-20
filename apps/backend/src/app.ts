@@ -9,8 +9,15 @@ import { Player } from "./classes/Player";
 import { Queue } from "./classes/Queue";
 import { Room } from "./classes/Room";
 import { RoomsManager } from "./classes/RoomsManager";
+import cors from "cors";
 
 const app = express();
+
+app.use(
+  cors({
+    origin: appConfig.CORS_ORIGIN,
+  })
+);
 
 app.get("/ping", (_req, res) => res.send("pong"));
 
