@@ -10,7 +10,7 @@ export enum AppEnvironment {
 const appConfigSchema = z.object({
   PORT: z.preprocess((port) => Number.parseInt(String(port)), z.number().positive()),
   NODE_ENV: z.nativeEnum(AppEnvironment),
-  CORS_ORIGIN: z.string().url(),
+  CORS_ORIGIN: z.string(),
 });
 
 export const appConfig = appConfigSchema.parse(process.env);

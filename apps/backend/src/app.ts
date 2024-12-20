@@ -12,6 +12,8 @@ import { RoomsManager } from "./classes/RoomsManager";
 
 const app = express();
 
+app.get("/ping", (_req, res) => res.send("pong"));
+
 const server = app.listen(appConfig.PORT, () => {
   console.log("listening...", "specified port:", appConfig.PORT);
 });
